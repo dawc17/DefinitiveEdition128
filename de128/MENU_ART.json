@@ -1,5 +1,7 @@
 {
   "core_targets": [
+    "core:textures/logos/logo.left",
+    "core:textures/logos/logo.right",
     "core:ui/atlases/menubuttons.btn_disciple",
     "core:ui/atlases/menubuttons.btn_punching_bag",
     "core:ui/atlases/menubuttons.dojo_active",
@@ -13,6 +15,12 @@
     "core:ui/atlases/menubuttons.settings_normal",
     "core:ui/atlases/menubuttons.shop_active",
     "core:ui/atlases/menubuttons.shop_normal",
+    "core:ui/fullscreen/loading_left.img",
+    "core:ui/fullscreen/loading_right.img",
+    "core:ui/fullscreen/menu_loading_left.img",
+    "core:ui/fullscreen/menu_loading_right.img",
+    "core:ui/fullscreen/startloading_left.img",
+    "core:ui/fullscreen/startloading_right.img",
     "core:ui/fullscreen/vs_fon_left.img",
     "core:ui/fullscreen/vs_fon_right.img"
   ],
@@ -30,7 +38,9 @@
     "MenuButtons.Shop_normal.png",
     "MenuButtons.btn_disciple.png",
     "MenuButtons.btn_punching_bag.png",
-    "VS_Fon.png"
+    "Preloader.png",
+    "VS_Fon.png",
+    "bg.png"
   ],
   "unused_images": [
     "MenuButtons.Dojo_pushed.png",
@@ -39,6 +49,9 @@
     "MenuButtons.Map_pushed.png",
     "MenuButtons.Profile_pushed.png",
     "MenuButtons.Shop_pushed.png",
-    "Preloader.png"
+    "MiscSprites.eclipse.png",
+    "MiscSprites.sun_icon.png",
+    "checkbox_off.png",
+    "checkbox_on.png"
   ]
 }

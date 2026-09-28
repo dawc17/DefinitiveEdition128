@@ -1,5 +1,14 @@
 # DE128 - Definitive Edition
 
+The current working version uses a 150-second timed-battle policy, including
+Underworld rounds. Training and untimed fights remain unchanged. It requires an
+Eclipse build supporting `sf2.timers.set` with `subsystem = "battle"`.
+The fight loader uses the supplied brown `bg.png`; switches between the dojo,
+shop, profile and map, and entering a save, use `Output/Preloader.png` (through
+Eclipse's `menu_loading_*` loader panels). Replaced loading art covers the screen
+at its own aspect ratio instead of being stretched. Both are installed through normal sprite replacements
+and can be reproduced with Eclipse's `Tools/ImportDE128MenuArt.py`.
+
 The owner-supplied archive is now the source of truth for DE content. See
 [SOURCE_CORPUS.md](SOURCE_CORPUS.md) for acquisition status and reconciliation requirements.
 The designated 1.6 GB download is still blocked by Google Drive quota. A
@@ -659,6 +668,10 @@ bag icons. The VS background uses two descriptor crops of VS_Fon.png so the
 existing panels still animate separately; the enemies screen shares these assets.
 Run `py -3.12 Tools/ImportDE128MenuArt.py --check` to verify the copied files.
 This requires a rebuilt Eclipse player with loose UI sprite replacement support.
-MENU_ART.json records the exact targets. Exit and pushed images have no matching
-core sprite/state in the current scroll; Preloader.png is outside this change.
-Unity/player visual verification is pending.
+MENU_ART.json records the 23 exact targets. The fight-loader and module-loader
+backgrounds use the supplied bg.png and Preloader.png. Both recovered logo halves
+are replaced by a transparent sprite because the supplied splash already includes
+the full logo. This also requires an Eclipse build with loose logo replacement
+support. Exit and pushed images have no matching core sprite/state in the current
+scroll. Native Unity verification resolves both transparent logo replacements;
+full transition timing still needs a game playtest.
