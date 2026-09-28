@@ -39,6 +39,9 @@ archived older recordings in the existing campaign: the Zone 1 and Zone 3
 intermission tournaments, Hermit's intermission fight, and the Zone 6
 burning-town quest fight. The 18 affected fights use mod-owned audio handles;
 their identities, opponents, rewards and progression remain the core versions.
+Version `0.44.1` renders 14 Underworld raid themes from the owner's lossless
+soundtrack FLACs (Eclipse's `Tools/ImportSoundtrackFlacs.py`, fingerprint-matched);
+the Challenger themes and two more raid themes were already identical PCM.
 Version `0.44.0` moves the dojo changer to Eclipse's native, animated
 `sf2.locations.dojo_picker` (large medallion with a gliding strip); the ten
 choices, their order and art are unchanged. Version `0.39.0` adds the
