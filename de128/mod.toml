@@ -1,6 +1,6 @@
 schema = 1
 id = "de128"
-name = "DE128 - Definitive Edition"
+name = "Definitive Edition 128"
 version = "0.43.3"
 authors = ["Dawid Czaplicki"]
 entrypoint = "scripts/main.lua"
