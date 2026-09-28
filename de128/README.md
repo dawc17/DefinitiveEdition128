@@ -39,7 +39,9 @@ archived older recordings in the existing campaign: the Zone 1 and Zone 3
 intermission tournaments, Hermit's intermission fight, and the Zone 6
 burning-town quest fight. The 18 affected fights use mod-owned audio handles;
 their identities, opponents, rewards and progression remain the core versions.
-Version `0.39.0` adds the
+Version `0.44.0` moves the dojo changer to Eclipse's native, animated
+`sf2.locations.dojo_picker` (large medallion with a gliding strip); the ten
+choices, their order and art are unchanged. Version `0.39.0` adds the
 archived map dojo changer with ten selectable, art-backed locations and its
 mod-owned map icon. It uses the public map-button, UI and saved dojo APIs;
 native map selection and save/restart checks pass. The two remaining archive
