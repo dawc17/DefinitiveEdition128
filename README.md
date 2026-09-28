@@ -1,3 +1,6 @@
 # DefinitiveEdition128
-A mod for Project Eclipse
-hello
+
+A remaster of the mobile fighting game Shadow Fight 2
+
+test
+
