@@ -1,8 +1,9 @@
 # DE128 - Definitive Edition
 
-The current working version uses a 150-second timed-battle policy, including
-Underworld rounds. Training and untimed fights remain unchanged. It requires an
-Eclipse build supporting `sf2.timers.set` with `subsystem = "battle"`.
+The current working version uses 999-second raid rounds, including normal and
+Power Mode Underworld fights, and 150 seconds for other timed battles. Training
+and untimed fights remain unchanged. It requires an Eclipse build supporting
+`sf2.timers.set` with both `subsystem = "battle"` and `subsystem = "raid"`.
 The fight loader uses the supplied brown `bg.png`; switches between the dojo,
 shop, profile and map, and entering a save, use `Output/Preloader.png` (through
 Eclipse's `menu_loading_*` loader panels). Replaced loading art covers the screen
