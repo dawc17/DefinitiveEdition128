@@ -1,4 +1,5 @@
 local sf2 = require("sf2")
+local abilities = require("content.boss_abilities")
 
 -- The four archived Wasp Fly ranges replace the old core Super-button moves.
 -- All animation bytes are copied unchanged from recovered Resources. DE128
@@ -61,6 +62,7 @@ for _, variant in ipairs(variants) do
         conditions = {
             { keys = { "RaidCharge" } },
             { not_mod = "WaspFlyRecharge" },
+            abilities.ready("wasp_fly"),
             { distance = "X", min = variant.wall_min, max = variant.wall_max, from = { wall = "Back", player = "Me" }, to = { node = "NHeel_1", player = "Me" } },
             { not_interval = "SemiUninterrupt" },
             { not_mod = "CurseBomb", player = "Enemy" },
@@ -73,7 +75,7 @@ for _, variant in ipairs(variants) do
             { not_animation = "Physical" },
         },
         locks = {
-            { perk = sf2.perks.get("core:perks/PERK_WASPFLY") },
+            abilities.lock("wasp_fly"),
             { item = "Skeleton", subtype = "Skeleton" },
         },
         intervals = {

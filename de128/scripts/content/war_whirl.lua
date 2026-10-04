@@ -1,4 +1,5 @@
 local sf2 = require("sf2")
+local abilities = require("content.boss_abilities")
 
 -- The archived War boss replaces the older Super-button whirlwind with a
 -- RaidCharge cast. Its animation is copied unchanged from packaged core data.
@@ -25,11 +26,11 @@ local move = sf2.moves.register {
 
     conditions = {
         { key = "RaidCharge" },
-        { not_mod = "WarRecharge" }, { not_mod = "Concussion" }, { not_mod = "Stun" },
+        { not_mod = "WarRecharge" }, abilities.ready("war_whirl"), { not_mod = "Concussion" }, { not_mod = "Stun" },
         { controllable = true },
     },
     locks = {
-        { perk = sf2.perks.get("core:perks/PERK_WAR_WHIRL") },
+        abilities.lock("war_whirl"),
         { item = "Skeleton", subtype = "Skeleton" },
     },
     tactic_conditions = {

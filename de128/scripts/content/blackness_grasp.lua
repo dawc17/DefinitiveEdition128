@@ -1,9 +1,9 @@
 local sf2 = require("sf2")
+local abilities = require("content.boss_abilities")
 
 -- The archived Grasp casts a hidden BlackHand, then tells that same child to
 -- enter its attacking phase eight frames later. Keep the full native graph.
 
-local grasp_perk = sf2.perks.get("core:perks/PERK_GRASP_OF_DARKNESS")
 local hand_item = sf2.items.get("core:items/magic/MAGIC_ACID_CLOUD")
 -- Spawned Eclipse actors carry the two hidden items but not parent perk slots;
 -- BlackHand's actor name and hidden item still keep both phases exclusive.
@@ -69,7 +69,7 @@ local cast = sf2.moves.register {
     core_templates = { "1key", "BossAbility", "Controlled", "SoundStrike" },
     type = "ATTACK", mid_frames = 2, first_frame = 2, priority = 200,
     mirror_node = "NHeel_1", no_wall_repulsion = true,
-    locks = { { perk = grasp_perk },
+    locks = { abilities.lock("grasp_of_darkness"),
         { item = "Skeleton", subtype = "Skeleton" } },
     direction = { from = { node = "NPivot", player = "Me" }, to = { node = "NPivot", player = "Enemy" } },
     align = { axes = { "X", "Z" }, pivot = { node = "NHeel_2" },
@@ -79,6 +79,7 @@ local cast = sf2.moves.register {
         { not_interval = "SemiUninterrupt" },
         { keys = { "RaidCharge" } },
         { not_mod = "GraspOfDarknessCD" },
+        abilities.ready("grasp_of_darkness"),
         { not_interval = "Uninterrupt" },
         { stage = "Fight" },
         { not_all = {

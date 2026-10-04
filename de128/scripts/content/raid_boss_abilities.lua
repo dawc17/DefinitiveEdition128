@@ -1,4 +1,5 @@
 local sf2 = require("sf2")
+local abilities = require("content.boss_abilities")
 
 -- Core's two hidden Root Potion items fall back to generic magic geometry.
 -- Their archived attack edges live in these reviewed owner models.
@@ -36,16 +37,29 @@ sf2.moves.patch {
     input = { expected = "Up", value = "RaidCharge" },
     animation = { expected = "rats_wave.bytes",
         value = sf2.assets.binary("animations/magic_water_wave_player") },
-    conditions = { { not_mod = "Stun" } },
+    conditions = { { not_mod = "Stun" }, abilities.ready("rat_wave") },
 }
+abilities.extend_lock("rat_wave", "RatWavePlayer")
 sf2.moves.patch {
     move = "PerkFearRayPlayer",
     input = { expected = "Super", value = "RaidCharge" },
     animation = { expected = "boss_fear_ability.bytes",
         value = sf2.assets.binary("animations/chest_laser_ray_player") },
     remove_interval = { name = "Evade", type = "Invulnerable", start = 0, ["end"] = 47 },
-    conditions = { { not_mod = "Stun" } },
+    conditions = { { not_mod = "Stun" }, abilities.ready("fear_ray") },
 }
+abilities.extend_lock("fear_ray", "PerkFearRayPlayer")
+
+-- Shogun's four Call to Arms casts: DE moves.xml binds them to RaidCharge.
+for _, move in ipairs({ "AssistantLongKatanaPlayer", "AssistantBigNaginataPlayer",
+    "AssistantBigMagariYariPlayer", "AssistantUniqGlaivePlayer" }) do
+    sf2.moves.patch {
+        move = move,
+        input = { expected = "Super", value = "RaidCharge" },
+        conditions = { abilities.ready("assistants") },
+    }
+    abilities.extend_lock("assistants", move)
+end
 
 local function tactic(id, moves, initial, cooldown, advance_for_range)
     return sf2.tactics.name(sf2.tactics.register {

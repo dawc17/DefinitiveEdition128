@@ -1,10 +1,10 @@
 local sf2 = require("sf2")
+local abilities = require("content.boss_abilities")
 
 -- Reviewed owner moves.xml: WidowTeleportationStart/End. Keep their native
 -- identities so the perk trigger and the start-to-end transition still work.
 -- This is typed content; DE128 never loads XML while the game runs.
 
-local teleport_perk = sf2.perks.get("core:perks/PERK_TELEPORTATION")
 local excluded_enemy_moves = {
     "WallRunUp", "WallJump_50", "WallJump_100", "WallJump_200", "WallJump_250",
     "WallHit", "WallHitFall", "WaspFly_150", "WaspFly_200", "WaspFly_300", "WaspFly_370",
@@ -25,6 +25,7 @@ local hits = { "snd_hit1", "snd_hit2", "snd_hit3", "snd_hit4", "snd_hit5", "snd_
 local start_conditions = enemy_exclusions {
     { keys = { { "RaidCharge", press = "Tap" } } },
     { not_mod = "TeleportationRecharge" },
+    abilities.ready("teleportation"),
 }
 start_conditions[#start_conditions + 1] = { direction = "Enemy", from = { node = "NPivot", player = "Enemy" }, to = { node = "NPivot", player = "Me" } }
 start_conditions[#start_conditions + 1] = { not_interval = "SemiUninterrupt" }
@@ -46,7 +47,7 @@ local start = sf2.moves.replace {
     align = { axes = { "X", "Z" }, pivot = { node = "NHeel_1" },
         position = { pivot = "Me" } },
     conditions = start_conditions,
-    locks = { { perk = teleport_perk } },
+    locks = { abilities.lock("teleportation") },
     intervals = {
         { name = "Uninterrupt", to = 13 },
         { type = "Block", from = 14 },
@@ -80,7 +81,7 @@ local finish = sf2.moves.replace {
         pivot = { node = "NHeel_1" }, position = { pivot = "Enemy", x = 100 } },
     events = { "animation_end" },
     conditions = end_conditions,
-    locks = { { perk = teleport_perk } },
+    locks = { abilities.lock("teleportation") },
     intervals = {
         { name = "Uninterrupt", to = 19 },
         { type = "Block", from = 20 },

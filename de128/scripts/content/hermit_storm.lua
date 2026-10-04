@@ -1,10 +1,10 @@
 local sf2 = require("sf2")
+local abilities = require("content.boss_abilities")
 
 -- The archived storm keeps the native child actor's four unchanged moves, but
 -- changes the caster, idle continuation and victory transition.
 
 local storm_item = sf2.items.get("core:items/magic/HERMIT_STORM")
-local storm_perk = sf2.perks.get("core:perks/PERK_HERMITSTORM")
 
 sf2.moves.patch { move = "HermitStormPlayer", disable = true }
 sf2.moves.patch { move = "HermitStormPlayerIdle", disable = true }
@@ -48,7 +48,7 @@ local idle = sf2.moves.register {
     align = { axes = { "X", "Z" }, pivot = { node = "NHeel_2" }, position = { pivot = "Me" } },
     events = { "animation_end" },
     conditions = { { any = { { animation = "de128:moves/hermit_storm_player" }, { animation = "de128:moves/hermit_storm_idle" }, { animation = "de128:moves/hermit_storm_win" } } } },
-    locks = { { perk = storm_perk } },
+    locks = { abilities.lock("hermit_storm") },
     intervals = { { name = "Unstable" }, { name = "SemiUninterrupt", from = 36 },
         { name = "Uninterrupt", to = 35 } },
     timeline = idle_actions,
@@ -77,6 +77,7 @@ local player = sf2.moves.register {
     conditions = {
         { keys = { "RaidCharge" } },
         { not_mod = "HermitStormRecharge" },
+        abilities.ready("hermit_storm"),
         { not_interval = "SemiUninterrupt" },
         { not_interval = "Uninterrupt" },
         { stage = "Fight" },
@@ -86,7 +87,7 @@ local player = sf2.moves.register {
         } },
         { not_animation = "Physical" },
     },
-    locks = { { perk = storm_perk },
+    locks = { abilities.lock("hermit_storm"),
         { item = "Skeleton", subtype = "Skeleton" } },
     intervals = { { name = "Unstable" }, { name = "Uninterrupt", to = 36 },
         { name = "SemiUninterrupt", from = 36 },

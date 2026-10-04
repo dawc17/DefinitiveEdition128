@@ -1,10 +1,10 @@
 local sf2 = require("sf2")
+local abilities = require("content.boss_abilities")
 
 -- The archived raid-charge Earthquake graph uses the hidden native earthquake
 -- item as its child actor's weapon. Its animation bytes are unchanged core data.
 
 local earthquake_item = sf2.items.get("core:items/magic/MAGIC_BUTCHER_EARTHQUAKE")
-local earthquake_perk = sf2.perks.get("core:perks/PERK_EARTHQUAKE")
 
 sf2.moves.patch { move = "ButcherEarthquakePlayer", disable = true }
 sf2.moves.patch { move = "ButcherEarthquakeStart", disable = true }
@@ -54,6 +54,7 @@ local player = sf2.moves.register {
     conditions = {
         { keys = { "RaidCharge" } },
         { not_mod = "EarthquakeRecharge" },
+        abilities.ready("earthquake"),
         { not_interval = "SemiUninterrupt" },
         { not_interval = "Uninterrupt" },
         { stage = "Fight" },
@@ -63,7 +64,7 @@ local player = sf2.moves.register {
         } },
         { not_animation = "Physical" },
     },
-    locks = { { perk = earthquake_perk } },
+    locks = { abilities.lock("earthquake") },
     intervals = {
         { name = "Unstable", to = 24 },
         { name = "Uninterrupt", to = 32 },

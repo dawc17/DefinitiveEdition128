@@ -1,10 +1,10 @@
 local sf2 = require("sf2")
+local abilities = require("content.boss_abilities")
 
 -- Restore the archived RaidCharge cast and its hidden power-field actor.
 -- Both animations are byte-identical copies of the packaged native data.
 
 local aura_item = sf2.items.get("core:items/magic/MAGIC_FIRE_AURA")
-local field_perk = sf2.perks.get("core:perks/PERK_POWER_FIELD")
 
 sf2.moves.patch { move = "GateKeeperPowerField", disable = true }
 sf2.moves.patch { move = "AbilityGateKeeperPowerField", disable = true }
@@ -61,6 +61,7 @@ local cast = sf2.moves.register {
     conditions = {
         { keys = { "RaidCharge" } },
         { not_mod = "GateKeeperPowerFieldCD" },
+        abilities.ready("power_field"),
         { not_interval = "SemiUninterrupt" },
         { not_interval = "Uninterrupt" },
         { stage = "Fight" },
@@ -70,7 +71,7 @@ local cast = sf2.moves.register {
         } },
         { not_animation = "Physical" },
     },
-    locks = { { perk = field_perk } },
+    locks = { abilities.lock("power_field") },
     intervals = { { name = "Uninterrupt", to = 26 }, { type = "Block", from = 26 } },
     timeline = {
         [13] = { effect = {

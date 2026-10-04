@@ -1,4 +1,5 @@
 local sf2 = require("sf2")
+local abilities = require("content.boss_abilities")
 
 -- Preserve the core caster identity: its CreatePlayer action and five linked
 -- native chain phases already match the reviewed DE graph.
@@ -7,7 +8,9 @@ sf2.moves.patch {
     input = { expected = "Super", value = "RaidCharge" },
     priority = { expected = 9000, value = 200 },
     interval_start = { name = "Uninterrupt", expected = 9, value = 0 },
+    conditions = { abilities.ready("lightning_chain") },
 }
+abilities.extend_lock("lightning_chain", "LightingChainPlayer")
 
 -- Eclipse's spawned magic actor has its hidden HERMIT_STORM item but no parent
 -- perk slot. Keep the five linked native phases exclusive to LightningChain.
