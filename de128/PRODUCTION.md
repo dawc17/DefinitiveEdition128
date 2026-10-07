@@ -655,7 +655,7 @@ Assets/vanillaXml/list.xml  147AFCF311C2145E1A90140597D71370088192B067D84C2548D1
 ```
 
 The timer investigation also confirmed that the current base `ListSF` purchase
-path already sets new delivery to zero and `UserItems.DINFNDFAJMB` settles saved
+path already sets new delivery to zero and `UserItems.ProcessDeliveries` settles saved
 purchase/upgrade delivery on its next tick. A configurable non-forge timer API is
 still absent; this absence alone does not prove DE currently waits for those
 orders. No timing behavior was changed in this step.
@@ -2366,7 +2366,7 @@ Dependency diagnosis from current C# and historical quests:
   response to thirteen named perk activation/deactivation events, and reset by
   four set-chest purchase quests. It is not simply an inventory/charge-count test.
 - Quest event enum/parser/manager support exists, but searches found no C# writer
-  for QuestParameters.NJDDPMPFCGB and no activation/deactivation event producer.
+  for QuestParameters.perkName and no activation/deactivation event producer.
   A subscription binding alone would therefore not supply the missing behavior.
   Recovery must establish the real lifecycle, then expose safe typed Lua hooks;
   the ignored legacy conditional wrapper remains unsuitable for this port.
@@ -2846,7 +2846,7 @@ DE 1.0.6 export and the owner's asset drop define neither. Evidence used:
 - Native `ListSF` resolves a warrior's `Template` and, when it is missing, parses
   the warrior over a **blank** `ModelParameters` (no Default skeleton, fists,
   attributes, perks or alignment). Template and warrior attributes go through
-  the same layered parser (`IAOBIMJFBMH`), so a template adding only `Voice` is
+  the same layered parser (`ListSF.ParseWarriorParameters`), so a template adding only `Voice` is
   equivalent to a warrior on its parent template with that `Voice`.
 - Every comparable story-character template (Man_Haunted_Prince,
   Boss_Lynx_Young, Boss_Wasp_Young, Boss_Widow_Young, Lynx_Claws) is
@@ -2876,7 +2876,7 @@ Neo Wanderer pieces are equipped, re-reading the profile each round rather than
 latching. Set-chest purchase resets are not modelled. PERK_SHADOW_CLOAK is
 DE-only and absent from core, so it is matched by ID without a registration
 lookup. Native evidence also shows the RaidCharge button is only presented in
-raid fights holding a charge (`Fight.cs` `FELJFJOEJNC`), so in story fights the
+raid fights holding a charge (`Fight.cs` `UpdateRaidChargeButtonVisibility`), so in story fights the
 conditional rule mainly preserves archived parity.
 
 ### Generic API
@@ -2943,7 +2943,7 @@ profile's wins. Story 606, victory 660 and foundation 2756 checks pass.
 Owner playtest: the Sensei cards used a custom `sf2.ui.open` panel instead of the
 game's dialog popup. The archive uses quest `<Dialog Type="Regular">` for every
 Sensei card, which `QuestActionDialog` opens through
-`DialogsOpener.EHMEIJCOOKP` → `DialogsManager` (`DialogType.DialogStory`,
+`DialogsOpener.OpenStoryDialog` → `DialogsManager` (`DialogType.DialogStory`,
 native `StoryDialog`).
 
 ### Generic API: `sf2.ui.story_dialog`
@@ -2959,7 +2959,7 @@ Back) → `on_complete`, or closed by scene/profile change, restart, title scree
 script disposal or external destruction → `on_cancel`. Native dialogs live on a
 `DontDestroyOnLoad` canvas, so the presenter closes them itself on those events.
 One dialog per script; busy/refused requests return false and are not queued.
-`StoryDialog.HPGFNENGBFI` kept only the basename of the image path; it now keeps a
+`StoryDialog.SetupPortrait` kept only the basename of the image path; it now keeps a
 qualified `owner:path` sprite ID intact so shipped mod portraits resolve.
 
 ### Lua
@@ -3096,7 +3096,7 @@ Owner playtest: Volcano one-shot a level-4 player who did no damage, and
   `Factor 0.86 / Shift +266 / Priority 1` pair (the last `Survival_7_3` group
   warrior) outranked the archived rows and made the hit multiplier
   player→boss ×1.7e-8 and boss→player ×7.5e7, against raw stats that favour the
-  player (weapon 112 vs boss defense 56). Cause: `ListSF.CNMFNFDIOOK` clones a
+  player (weapon 112 vs boss defense 56). Cause: `ListSF.CreateParametersFromTemplate` clones a
   template's `ModelParameters`, whose clone shares `Node`, then `MergeUserXML`
   rewrites that node in place, so parsing group warriors at load left their
   attributes and `AttributesAlign` on `Default`'s cached node. Vanilla never
