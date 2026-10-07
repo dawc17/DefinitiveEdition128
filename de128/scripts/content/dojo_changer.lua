@@ -4,7 +4,6 @@ local sf2 = require("sf2")
 -- order of the choices whose location dependencies have been audited.
 local choices = {
     { location = "dojo", label = "DefaultDojo" },
-    { location = "new_year_24_china_dojo", label = "DojoChinese24" },
     { location = "dojo_indian_event", label = "DojoIndia" },
     { location = "dojo_indian_event_22", label = "DojoIndia22" },
     { location = "dojo_india24", label = "DojoIndia24" },
@@ -23,7 +22,8 @@ end
 -- button in the dojo menu, below the disciple toggle's slot.
 sf2.locations.dojo_picker {
     id = "dojo_changer",
-    button = sf2.assets.sprite("sprites/dojo_changer/credits"),
+    button = sf2.assets.sprite("sprites/dojo_changer/button"),
+    button_pressed = sf2.assets.sprite("sprites/dojo_changer/button_pressed"),
     title = sf2.localization.key("dojo.DojoChangerTitle"),
     choices = (function()
         local list = {}
