@@ -107,7 +107,7 @@ local finish = sf2.moves.replace {
 }
 
 local function tactic(id, initial, cooldown)
-    return sf2.tactics.name(sf2.tactics.register {
+    return abilities.pace(sf2.tactics.name(sf2.tactics.register {
         id = id, template = "Aggressive",
         on_decide = function(memory, event)
             local ready = event.frame >= initial and event.frame >= (memory.next_teleport_frame or 0)
@@ -128,7 +128,7 @@ local function tactic(id, initial, cooldown)
             end
             return retreat or "wait"
         end,
-    })
+    }), "teleportation", initial, cooldown, { "WidowTeleportationStart" })
 end
 
 return {

@@ -89,13 +89,15 @@ local player = sf2.moves.register {
     direction = { from = { node = "NPivot", player = "Me" }, to = { node = "NPivot", player = "Enemy" } },
 }
 
+-- Seconds between earthquakes; recorded as the boss's pacing for its HUD icon.
+local QUAKE_EVERY = 6
 local tactic = sf2.tactics.register {
     id = "butcher_earthquake", template = "Aggressive",
     on_decide = function(memory, event)
         if event.seconds < (memory.next_quake or 0) then return nil end
         for _, action in ipairs(event.actions) do
             if action.name == "de128:moves/butcher_earthquake_player" then
-                memory.next_quake = event.seconds + 6
+                memory.next_quake = event.seconds + QUAKE_EVERY
                 return action
             end
         end
@@ -103,4 +105,6 @@ local tactic = sf2.tactics.register {
     end,
 }
 
-return { player = player, start = start, tactic = sf2.tactics.name(tactic) }
+return { player = player, start = start,
+    tactic = abilities.pace(sf2.tactics.name(tactic), "earthquake", 0, QUAKE_EVERY * 60,
+        { "de128:moves/butcher_earthquake_player" }) }

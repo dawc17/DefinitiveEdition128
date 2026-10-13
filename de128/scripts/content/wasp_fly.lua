@@ -99,14 +99,16 @@ end
 -- wave. Keep its normal decisions, but choose an eligible archived Fly move once
 -- the boss has fought for two seconds. Native cooldown and distance conditions
 -- still decide whether the move appears in event.actions.
+-- Opening wait and seconds between flights; recorded as the boss's pacing for its HUD icon.
+local FLY_DELAY, FLY_EVERY = 2, 5
 local tactic = sf2.tactics.register {
     id = "wasp_fly",
     template = "Aggressive",
     on_decide = function(memory, event)
-        if event.seconds < 2 or event.seconds < (memory.next_fly or 0) then return nil end
+        if event.seconds < FLY_DELAY or event.seconds < (memory.next_fly or 0) then return nil end
         for _, action in ipairs(event.actions) do
             if action.name:sub(1, 21) == "de128:moves/wasp_fly_" then
-                memory.next_fly = event.seconds + 5
+                memory.next_fly = event.seconds + FLY_EVERY
                 return action
             end
         end
@@ -114,4 +116,7 @@ local tactic = sf2.tactics.register {
     end,
 }
 
-return { moves = moves, tactic = sf2.tactics.name(tactic) }
+local fly_moves = {}
+for _, range in ipairs({ "150", "200", "300", "370" }) do fly_moves[#fly_moves + 1] = "de128:moves/wasp_fly_" .. range end
+return { moves = moves,
+    tactic = abilities.pace(sf2.tactics.name(tactic), "wasp_fly", FLY_DELAY * 60, FLY_EVERY * 60, fly_moves) }

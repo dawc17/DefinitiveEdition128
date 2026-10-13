@@ -1,17 +1,26 @@
 local sf2 = require("sf2")
 
--- The remaining archived choices need missing installed art or params. Keep the
--- order of the choices whose location dependencies have been audited.
+-- Archived choices keep the DE order; every installed location whose params
+-- declare Dojo="1" is offered too, next to its series. new_year_china_dojo
+-- replaces the archive's removed new_year_24_china_dojo under the same label.
 local choices = {
     { location = "dojo", label = "DefaultDojo" },
+    { location = "new_year_china_dojo", label = "DojoChinese24" },
     { location = "dojo_indian_event", label = "DojoIndia" },
     { location = "dojo_indian_event_22", label = "DojoIndia22" },
     { location = "dojo_india24", label = "DojoIndia24" },
+    { location = "dojo_india25", label = "DojoIndia25" },
     { location = "haloween_dojo", label = "DojoHalloween" },
     { location = "haloween_dojo_2019", label = "DojoHalloween19" },
     { location = "dojo_hw21", label = "DojoHalloween21" },
+    { location = "whisper_raid", label = "DojoWhisper" },
+    { location = "dojo_american_event", label = "DojoAmerican" },
     { location = "dojo_american_event_22", label = "DojoAmerican22" },
+    { location = "dojo_american_event_26", label = "DojoAmerican26" },
+    { location = "dojo_new_year_22", label = "DojoNewYear22" },
     { location = "dojo_hw22", label = "DojoStudio" },
+    { location = "dojo_8_march", label = "Dojo8March" },
+    { location = "ritual_battle_raid", label = "DojoRitual" },
 }
 
 for _, choice in ipairs(choices) do

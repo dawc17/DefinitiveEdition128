@@ -569,6 +569,14 @@ dojo.DojoHalloween21 = "Хеллоуинское Додзё III"
 dojo.DojoAmerican22 = "Американское додзё II"
 dojo.DojoStudio = "Додзё-студия"
 dojo.BACK = "НАЗАД"
+dojo.Dojo8March = "Мартовское додзё"
+dojo.DojoAmerican = "Американское додзё I"
+dojo.DojoNewYear22 = "Лесное Додзё"
+# Choices the DE archive does not name (2026-10-12)
+dojo.DojoAmerican26 = "Американское додзё III"
+dojo.DojoIndia25 = "Индийское Додзё IV"
+dojo.DojoWhisper = "Додзё Шёпота"
+dojo.DojoRitual = "Ритуальное додзё"
 # END Dojo changer
 
 # BEGIN GENERATED Unarmed move names (Tools/GenerateDE128MoveNames.py)

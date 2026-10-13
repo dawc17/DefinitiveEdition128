@@ -1,0 +1,3 @@
+type=sprite
+texture=textures/abilities/hermit_storm.png
+pixels_per_unit=50

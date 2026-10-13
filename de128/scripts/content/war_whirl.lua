@@ -60,13 +60,15 @@ local move = sf2.moves.register {
     },
 }
 
+-- Opening wait and seconds between whirls; recorded as the boss's pacing for its HUD icon.
+local WHIRL_DELAY, WHIRL_EVERY = 2, 6
 local tactic = sf2.tactics.register {
     id = "war_whirl", template = "Aggressive",
     on_decide = function(memory, event)
-        if event.seconds < 2 or event.seconds < (memory.next_whirl or 0) then return nil end
+        if event.seconds < WHIRL_DELAY or event.seconds < (memory.next_whirl or 0) then return nil end
         for _, action in ipairs(event.actions) do
             if action.name == "de128:moves/war_whirl_player" then
-                memory.next_whirl = event.seconds + 6
+                memory.next_whirl = event.seconds + WHIRL_EVERY
                 return action
             end
         end
@@ -74,4 +76,6 @@ local tactic = sf2.tactics.register {
     end,
 }
 
-return { move = move, tactic = sf2.tactics.name(tactic) }
+return { move = move,
+    tactic = abilities.pace(sf2.tactics.name(tactic), "war_whirl", WHIRL_DELAY * 60, WHIRL_EVERY * 60,
+        { "de128:moves/war_whirl_player" }) }

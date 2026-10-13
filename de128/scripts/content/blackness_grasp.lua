@@ -133,5 +133,7 @@ local function register_tactic(id, cooldown)
 end
 
 return { cast = cast, hand_start = hand_start, hand_attack = hand_attack,
-    tactic = sf2.tactics.name(register_tactic("blackness_grasp", 800)),
-    power_tactic = sf2.tactics.name(register_tactic("blackness_grasp_power", 700)) }
+    tactic = abilities.pace(sf2.tactics.name(register_tactic("blackness_grasp", 800)),
+        "grasp_of_darkness", 800, 800, { "de128:moves/blackness_grasp_player" }),
+    power_tactic = abilities.pace(sf2.tactics.name(register_tactic("blackness_grasp_power", 700)),
+        "grasp_of_darkness", 700, 700, { "de128:moves/blackness_grasp_player" }) }

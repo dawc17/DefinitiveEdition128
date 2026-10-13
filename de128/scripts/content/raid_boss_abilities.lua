@@ -110,6 +110,8 @@ return {
     hunter = tactic("hunter_fly", hunter_moves, 900, 900, true),
     hunter_power = tactic("hunter_fly_power", hunter_moves, 800, 800, true),
     berstuuk = tactic("berstuuk_root_potion", { AbilityRootPotionPlayer = true }, 300, 600),
-    arkhos = tactic("arkhos_rat_wave", { RatWavePlayer = true }, 600, 600),
-    tenebris = tactic("tenebris_fear_ray", { PerkFearRayPlayer = true }, 600, 600),
+    arkhos = abilities.pace(tactic("arkhos_rat_wave", { RatWavePlayer = true }, 600, 600),
+        "rat_wave", 600, 600, { "RatWavePlayer" }),
+    tenebris = abilities.pace(tactic("tenebris_fear_ray", { PerkFearRayPlayer = true }, 600, 600),
+        "fear_ray", 600, 600, { "PerkFearRayPlayer" }),
 }

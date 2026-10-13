@@ -1,4 +1,4 @@
 type=sprite
-texture=textures/dojo_changer/new_year_24_china_dojo.png
+texture=textures/dojo_changer/dojo_american_event_26.png
 rect=[198, 208, 617, 617]
 pixels_per_unit=100

@@ -1,6 +1,6 @@
 # DE128 production record
 
-Current manifest: **0.43.3**. Menu, disciple/punching-bag and VS art now use DENew/Output; see MENU_ART.json. Upscaled map buttons use the DENew drop (0.43.2); see MAP_BUTTONS.json for coverage. Act 6 map placements are corrected (0.43.1); the seven post-Titan Challenger duels are active (0.43.0). Front Kick's axe-kick cancel window is 0-2 (0.42.3; the archive's 0-4 in 0.42.2). The restored double-kick moves cancel their starters at once and the AI uses the restored moves (0.42.1); the archived default unarmed moves return (0.42.0). The dojo chooser button moves into the dojo menu (0.41.0) after its restyle (0.40.3). Step 74 restores four archived campaign recordings across 18 existing fights. Step 73 adds the ten-choice dojo changer. Step 72 packages the 29 music ids used by every archived Underworld battle so those encounters no longer request base-game substitute tracks. Step 71 restores the archived Complex forge pool split and Simple aspect deviation without changing shared prices. A post-0.36.0 review (below Step 70) corrects Blackness's Grasp tactic timing, wall-pinned retreats, Widow's Wasp Fly gate and native move-table bookkeeping; Step 70 restores Widow's native Teleportation start and end moves; Step 69 restores Arkhos's Rat Wave and Tenebris's Fear Ray on their original native casters; Step 68 restores Hoaxen's, Hunter's and Berstuuk's complete native raid abilities in normal and Power Mode, with six fights verified through repeated casts and map return; Step 67 restores Dandy's complete native Lightning Chain and verifies two casts in normal and Power Mode; Step 66 restores Saturn's linked Blaster graph, including two native casts in normal and Power Mode; Step 65 restores Blackness's complete Grasp cast and hand attack in both Underworld modes; Step 64 restores Gatekeeper's full Power Field and native node-attached effects in both Underworld modes; Step 63 restores War's full Whirl cast and verifies normal and Power Mode native combat; Step 62 restores Hermit's complete Storm sequence and verifies both its cast and victory branch natively; Step 61 restores Butcher's Earthquake and reaches Girl Fan in native survival combat; Step 60 restores Wasp's Fly move family and observes it in the live Demon survival wave; Step 59 restores two raid spotlights and three hidden stage equipment identities. Step 58 reconciles the reviewed local owner raid source and art, with 29 changed fights verified natively. Step 57 completes the five-item final Eclipse Titan reward with native grant, reload, equipped-fight and real victory-screen acceptance. Step 56 restores Berstuuk's archived rig and verifies all 76 native Underworld encounters. Step 55 repairs inherited boss alignments and verifies a native Underworld encounter through map return. Steps 52–54 restore all 221 archived normal-shop listings, with native purchase/save, equip, upgrade and shop-scene acceptance. Step 51 ports the Underworld; Step 49 activates the Sensei story; earlier activated content is recorded in Step 31;
+Current manifest: **0.45.0**. The dojo picker offers every location whose params declare `Dojo="1"` (17 choices) and every fighter's boss abilities show the owner's icon when ready and a greyed icon while recharging, for the player and for bosses (0.45.0). Menu, disciple/punching-bag and VS art now use DENew/Output; see MENU_ART.json. Upscaled map buttons use the DENew drop (0.43.2); see MAP_BUTTONS.json for coverage. Act 6 map placements are corrected (0.43.1); the seven post-Titan Challenger duels are active (0.43.0). Front Kick's axe-kick cancel window is 0-2 (0.42.3; the archive's 0-4 in 0.42.2). The restored double-kick moves cancel their starters at once and the AI uses the restored moves (0.42.1); the archived default unarmed moves return (0.42.0). The dojo chooser button moves into the dojo menu (0.41.0) after its restyle (0.40.3). Step 74 restores four archived campaign recordings across 18 existing fights. Step 73 adds the ten-choice dojo changer. Step 72 packages the 29 music ids used by every archived Underworld battle so those encounters no longer request base-game substitute tracks. Step 71 restores the archived Complex forge pool split and Simple aspect deviation without changing shared prices. A post-0.36.0 review (below Step 70) corrects Blackness's Grasp tactic timing, wall-pinned retreats, Widow's Wasp Fly gate and native move-table bookkeeping; Step 70 restores Widow's native Teleportation start and end moves; Step 69 restores Arkhos's Rat Wave and Tenebris's Fear Ray on their original native casters; Step 68 restores Hoaxen's, Hunter's and Berstuuk's complete native raid abilities in normal and Power Mode, with six fights verified through repeated casts and map return; Step 67 restores Dandy's complete native Lightning Chain and verifies two casts in normal and Power Mode; Step 66 restores Saturn's linked Blaster graph, including two native casts in normal and Power Mode; Step 65 restores Blackness's complete Grasp cast and hand attack in both Underworld modes; Step 64 restores Gatekeeper's full Power Field and native node-attached effects in both Underworld modes; Step 63 restores War's full Whirl cast and verifies normal and Power Mode native combat; Step 62 restores Hermit's complete Storm sequence and verifies both its cast and victory branch natively; Step 61 restores Butcher's Earthquake and reaches Girl Fan in native survival combat; Step 60 restores Wasp's Fly move family and observes it in the live Demon survival wave; Step 59 restores two raid spotlights and three hidden stage equipment identities. Step 58 reconciles the reviewed local owner raid source and art, with 29 changed fights verified natively. Step 57 completes the five-item final Eclipse Titan reward with native grant, reload, equipped-fight and real victory-screen acceptance. Step 56 restores Berstuuk's archived rig and verifies all 76 native Underworld encounters. Step 55 repairs inherited boss alignments and verifies a native Underworld encounter through map return. Steps 52–54 restore all 221 archived normal-shop listings, with native purchase/save, equip, upgrade and shop-scene acceptance. Step 51 ports the Underworld; Step 49 activates the Sensei story; earlier activated content is recorded in Step 31;
 Steps 32–48 add encounter perk settings, reward economy, saved fight queries,
 map/notification support, rule enforcement, pending Sensei Story assembly and owned Sensei art.
 The following overview describes earlier milestones. Step 12 activates both ChineseSwords moves, ten lock
@@ -4564,3 +4564,47 @@ patches, the capability and cross-mod conflict rollback (16,155 checks). The
 fight-patch suite, managed compilation, editor generate/check/test and the wiki
 build passed. The native map projection has been compiled but not run. No Unity
 run or in-game playtest was done.
+
+### Declared dojos and boss-ability icons (0.45.0, 2026-10-12)
+
+The owner's location layouts (Eclipse `Tools/Recovery/InstallLocationLayouts2026.py`) mark 16
+locations with a root `Dojo="1"` attribute. The dojo picker keeps its previous nine choices and
+adds the other eight, each next to its series: `new_year_china_dojo` (the archive's
+`DojoChinese24` label, succeeding the removed `new_year_24_china_dojo`; its medallion asset was
+renamed with it), `dojo_india25`, `whisper_raid`, `dojo_american_event`,
+`dojo_american_event_26`, `dojo_new_year_22`, `dojo_8_march` and `ritual_battle_raid`. The
+archived choices stay in DE order; `dojo_hw21` stays although its new layout carries no flag.
+
+Labels: `Dojo8March`, `DojoAmerican` and `DojoNewYear22` are copied from the archived XML in all
+fourteen languages. `DojoAmerican26` and `DojoIndia25` extend the archived numbering (III, IV).
+`DojoWhisper` ("Whisper Dojo") and `DojoRitual` ("Ritual Dojo") are new names; their
+translations are unreviewed.
+
+Medallions (Eclipse `Tools/Recovery/BuildDE128DojoMedallions.py`): five are the base game's
+`UI/Users` medallions, which share the owner medallions' disc layout byte for byte. dojo_india25,
+whisper_raid and ritual_battle_raid have no medallion anywhere; each is rendered from its own
+installed layout at the stage centre inside the ring of India I, Halloween I and Halloween II
+respectively.
+
+Boss-ability icons (Eclipse `Tools/Recovery/ImportDE128AbilityIcons.py`): the eleven recharge
+abilities and Titan's Shield use the owner's icons (`sprites/abilities/<key>`) and generated
+greyed `<key>_cooldown` icons instead of borrowed native perk icons. They use 50 pixels per unit
+(owner-chosen), slightly larger than native perk icons; the former `titan_shield_*` assets were
+removed. Shadow Cloak's icon is not installed because the ability is not ported.
+
+Readiness is shown for every fighter through Eclipse's `sf2.perks.recharge_indicator`: the
+ready icon while the ability can be used, the greyed icon with the native remaining-time sweep
+while it recharges. The player's recharge (and Titan's Shield "down" state) is now a timed flag
+(`fighter:set_flag(key, frames)`) instead of a Lua countdown plus a separate status icon; move
+gating is unchanged. Bosses are indicated on their core perk (PERK_HERMITSTORM and so on) from
+its native recharge flag, which covers campaign, Sensei and Underworld bosses. DE128's own boss
+tactics pace their casts in tactic memory, which no flag shows, so each paced Underworld/raid
+boss also carries a hidden `boss_pace_<ability>_<initial>_<frames>` perk: a timed flag that
+mirrors its tactic's opening wait and cadence (each tactic module records them next to its own
+constants with `abilities.pace`). No move checks the pacing flag, so boss behaviour is unchanged.
+Hoaxen, Hunter, Berstuuk and Saturn have no icon in the owner set and are not indicated.
+
+Verification: Lua syntax checks, a dependency audit resolving every picture of all 17 choices
+(`Tools/Audits/AuditDE128DojoLocations.py`) and the medallion/icon tools' `--check` modes. The
+foundation test expectations were updated but not run (its runner does not compile at the
+current API independently of this change). No Unity run or in-game playtest was done.

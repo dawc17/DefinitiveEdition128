@@ -21,11 +21,14 @@ for _, name in ipairs({ "LightingChainStart", "LightingChain50", "LightingChain1
     sf2.moves.patch { move = name, conditions = { { actor = "LightningChain" } } }
 end
 
+-- Opening wait in frames; the tactic and the boss's HUD pacing share it.
+local CHAIN_DELAY = 300
+
 local function register_tactic(id, cooldown)
     return sf2.tactics.register {
         id = id, template = "Aggressive",
         on_decide = function(memory, event)
-            local ready = event.frame >= 300 and event.frame >= (memory.next_chain_frame or 0)
+            local ready = event.frame >= CHAIN_DELAY and event.frame >= (memory.next_chain_frame or 0)
             local retreat, attacks = nil, {}
             for _, action in ipairs(event.actions) do
                 if ready and action.name == "LightingChainPlayer" then
@@ -53,6 +56,8 @@ local function register_tactic(id, cooldown)
 end
 
 return {
-    tactic = sf2.tactics.name(register_tactic("dandy_lightning_chain", 600)),
-    power_tactic = sf2.tactics.name(register_tactic("dandy_lightning_chain_power", 500)),
+    tactic = abilities.pace(sf2.tactics.name(register_tactic("dandy_lightning_chain", 600)),
+        "lightning_chain", CHAIN_DELAY, 600, { "LightingChainPlayer" }),
+    power_tactic = abilities.pace(sf2.tactics.name(register_tactic("dandy_lightning_chain_power", 500)),
+        "lightning_chain", CHAIN_DELAY, 500, { "LightingChainPlayer" }),
 }

@@ -91,13 +91,15 @@ local cast = sf2.moves.register {
     direction = { from = { node = "NPivot", player = "Me" }, to = { node = "NPivot", player = "Enemy" } },
 }
 
+-- Seconds between fields; recorded as the boss's pacing for its HUD icon.
+local FIELD_EVERY = 6
 local tactic = sf2.tactics.register {
     id = "gatekeeper_power_field", template = "Aggressive",
     on_decide = function(memory, event)
         if event.seconds < (memory.next_field or 0) then return nil end
         for _, action in ipairs(event.actions) do
             if action.name == "de128:moves/gatekeeper_power_field" then
-                memory.next_field = event.seconds + 6
+                memory.next_field = event.seconds + FIELD_EVERY
                 return action
             end
         end
@@ -105,4 +107,6 @@ local tactic = sf2.tactics.register {
     end,
 }
 
-return { cast = cast, surge = surge, tactic = sf2.tactics.name(tactic) }
+return { cast = cast, surge = surge,
+    tactic = abilities.pace(sf2.tactics.name(tactic), "power_field", 0, FIELD_EVERY * 60,
+        { "de128:moves/gatekeeper_power_field" }) }

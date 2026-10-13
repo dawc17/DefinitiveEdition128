@@ -14,6 +14,7 @@ local saturn_blaster = require("content.saturn_blaster")
 local dandy_lightning_chain = require("content.dandy_lightning_chain")
 local raid_boss_abilities = require("content.raid_boss_abilities")
 local widow_teleportation = require("content.widow_teleportation")
+local boss_abilities = require("content.boss_abilities")
 
 -- Event-raid map buttons absent from core art ship as DE128 sprites.
 -- Every archived Underworld battle music id is supplied by DE128, including
@@ -265,10 +266,17 @@ local function install(raid_charge_rule)
                     if w.template == "Man_Arkhos" then tactic = raid_boss_abilities.arkhos end
                     if w.template == "Man_Tenebris" then tactic = raid_boss_abilities.tenebris end
                     tactic = teleport_tactic(w) or tactic
+                    -- A DE128 boss tactic's cadence drives the boss's ability icon.
+                    local perks = perk_rows(w.perks)
+                    local pace = boss_abilities.pace_perk_for(tactic)
+                    if pace then
+                        perks = perks or {}
+                        perks[#perks + 1] = pace
+                    end
                     warriors[index] = sf2.warriors.register {
                         id = prefix .. "_w" .. index, template = template(w.template), tactic = tactic,
                         avatar = avatar(w.avatar), health_bars = w.health_bars, attributes = w.attributes,
-                        attribute_alignments = w.alignments, perks = perk_rows(w.perks),
+                        attribute_alignments = w.alignments, perks = perks,
                         items = item_list(w.items), skeleton = w.skeleton,
                     }
                 end

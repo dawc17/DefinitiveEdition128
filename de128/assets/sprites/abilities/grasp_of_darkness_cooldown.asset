@@ -1,0 +1,3 @@
+type=sprite
+texture=textures/abilities/grasp_of_darkness_cooldown.png
+pixels_per_unit=50
