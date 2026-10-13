@@ -1,7 +1,7 @@
 local sf2 = require("sf2")
 
 -- Boss-ability enchantments granted by DE's Special Recipes I-III.
--- Authority: Assets/DExml/perks.xml PERK_HERMITSTORM .. PERK_TITANS_SHIELD
+-- Authority: Assets/DExml/perks.xml PERK_SHADOW_CLOAK .. PERK_TITANS_SHIELD
 -- (PerkType="Combo", Button="RaidCharge"), list.xml's single-item SpecialRecipe
 -- sets (name = perk Alias, description = set Brief) and forge.xml's Abilities
 -- recipes. The archive is research input only; this module executes no XML.
@@ -11,8 +11,8 @@ local sf2 = require("sf2")
 -- versions. A combo perk only takes effect while all five equipped pieces carry
 -- it, so at most one of them is active at a time.
 --
--- Not ported: PERK_SHADOW_CLOAK (Special Recipe I). Its cloak needs a model
--- transparency and an "opponent cannot block" capability that the API lacks.
+-- PERK_SHADOW_CLOAK has no core boss perk (Lynx's PERK_INVISIBILITY is a different,
+-- Super-button ability), so it is registered below on its own; see shadow_cloak.
 --
 -- Readiness on the HUD: every fighter carrying one of these abilities shows its icon
 -- while it can be used and the greyed icon (with the remaining-time sweep) while it
@@ -184,6 +184,87 @@ perks.titans_shield = sf2.perks.register {
     parameters = { cooldown = 600 },
 }
 
+-- PERK_SHADOW_CLOAK (alias LynxAbil_invisibility, "Smoke Bomb"):
+-- <Set Frames="600" InvisibilityFrames="650" InitialFrames="300">.
+-- * RoundStageStart Fight: recharge for InitialFrames.
+-- * Frame 13 of ShadowCloakPlayer, while neither cloaked nor recharging: cloak the
+--   model and make the player's hits unblockable for InvisibilityFrames. The archive
+--   tints the model #FFFFFF80; DE128 draws Eclipse's glass cloak instead (owner's call,
+--   2026-10-13: per-part alpha on the rig showed every overlap).
+--   (The archive also runs <DisableInterval Uninterrupt> there; the move's own
+--   Uninterrupt interval ends at that frame.)
+-- * HitPreCrit on the enemy with Block=1 while unblockable: <SetHit Block="0">.
+-- * When the cloak's timeout expires: recharge for Frames.
+-- The archive's HitPostCrit trigger needs the cloak present after its timeout flag has
+-- gone, which the timeout's own expiry trigger prevents, so being hit does not end it.
+local cloak_behavior_id = "shadow_cloak"
+local function cloak_flag(key)
+    return sf2.mod.id .. ":behaviors/" .. cloak_behavior_id .. ":" .. key
+end
+local cloak_move = sf2.mod.id .. ":moves/shadow_cloak_player"
+local cloak_buff = sf2.assets.sprite("core:ui/skills/IconInvisibility_Blue")
+
+local function cloak_recharge(fighter, frames)
+    fighter:clear_flag("recharge")
+    fighter:set_flag("recharge", frames)
+    fighter:set_button_cooldown("raid_charge", frames)
+end
+
+local cloak_behavior = sf2.behaviors.register {
+    id = cloak_behavior_id,
+    parameters = {
+        frames = sf2.behaviors.INTEGER,
+        invisibility_frames = sf2.behaviors.INTEGER,
+        initial_frames = sf2.behaviors.INTEGER,
+    },
+    state = { lifetime = "round", fields = {
+        started = { type = sf2.behaviors.BOOLEAN, default = false },
+        cloaked = { type = sf2.behaviors.BOOLEAN, default = false },
+    } },
+    on_tick = function(self, fighter)
+        if not self.state.started then
+            self.state.started = true
+            cloak_recharge(fighter, self.params.initial_frames)
+            fighter:set_control_visible("raid_charge", true)
+            return
+        end
+        if self.state.cloaked then
+            -- InvisibilityTimeout_flag expired.
+            if not fighter:has_flag("active") then
+                self.state.cloaked = false
+                cloak_recharge(fighter, self.params.frames)
+            end
+            return
+        end
+        if fighter:has_flag("recharge") then return end
+        local snapshot = fighter:snapshot()
+        local animation = snapshot and snapshot.self and snapshot.self.animation
+        if animation and animation.name == cloak_move and animation.frame == 13 then
+            local frames = self.params.invisibility_frames
+            fighter:set_cloak(frames)
+            fighter:show_status_icon("cloak", cloak_buff, frames)
+            fighter:set_flag("active", frames)
+            self.state.cloaked = true
+        end
+    end,
+    on_hit_pre_crit = function(self, fighter, event)
+        if event.target == "opponent" and event.blocked and fighter:has_flag("active") then
+            fighter:set_hit_blocked(false)
+        end
+    end,
+}
+
+perks.shadow_cloak = sf2.perks.register {
+    id = "shadow_cloak",
+    display_name = sf2.localization.key("ability.shadow_cloak.name"),
+    description = sf2.localization.key("ability.shadow_cloak.description"),
+    icon = icon("shadow_cloak"),
+    kind = sf2.perks.COMBO,
+    behavior = cloak_behavior,
+    parameters = { frames = 600, invisibility_frames = 650, initial_frames = 300 },
+}
+flags.shadow_cloak = cloak_flag("recharge")
+
 -- DE128's boss tactics pace their casts themselves (memory.next_* in each tactic).
 -- A pacing perk on such a boss mirrors that cadence in a timed flag no move checks,
 -- so the boss's icon is greyed exactly while its tactic waits. Its first-round
@@ -259,6 +340,9 @@ for _, key in ipairs(order) do
 end
 sf2.perks.recharge_indicator { perk = perks.titans_shield, flags = { sf2.mod.id .. ":behaviors/titans_shield:down" },
     ready = icon("titans_shield"), cooldown = cooldown_icon("titans_shield") }
+-- Greyed while cloaked too: the move cannot be cast again until the recharge ends.
+sf2.perks.recharge_indicator { perk = perks.shadow_cloak, flags = { cloak_flag("recharge"), cloak_flag("active") },
+    ready = icon("shadow_cloak"), cooldown = cooldown_icon("shadow_cloak") }
 
 -- Locks for de128-registered ability moves: the core boss perk (opponents) or
 -- the player's enchantment.
@@ -269,6 +353,11 @@ end
 -- Move condition: the player's recharge for this ability has finished.
 local function ready(key)
     return { not_mod = flags[key] }
+end
+
+-- Move condition: the Shadow Cloak is not active (the archive's UnblockableActive).
+local function uncloaked()
+    return { not_mod = cloak_flag("active") }
 end
 
 -- Native moves keep their core perk lock and gain the enchantment as an alternative.
@@ -282,6 +371,7 @@ return {
     core_perks = core_perks,
     lock = lock,
     ready = ready,
+    uncloaked = uncloaked,
     extend_lock = extend_lock,
     pace = pace,
     pace_perk_for = pace_perk_for,

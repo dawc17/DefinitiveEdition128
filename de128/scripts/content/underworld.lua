@@ -205,6 +205,8 @@ local function install(raid_charge_rule)
         return owned_music[name]
     end
     local zones, battles, fights = {}, {}, {}
+    -- Every registered warrior by archive template name (content.forge_choice reads the bosses).
+    local by_template = {}
     -- by_battle[archive battle][archive fight] = { handle, id } for story hooks.
     local by_battle = {}
     -- Generated Power Mode rows contain only differences from the normal fight.
@@ -279,6 +281,8 @@ local function install(raid_charge_rule)
                         attribute_alignments = w.alignments, perks = perks,
                         items = item_list(w.items), skeleton = w.skeleton,
                     }
+                    by_template[w.template] = by_template[w.template] or {}
+                    table.insert(by_template[w.template], warriors[index])
                 end
                 local rewards = {}
                 for index, r in ipairs(fight_spec.rewards) do
@@ -299,7 +303,8 @@ local function install(raid_charge_rule)
             end
         end
     end
-    return { zones = zones, battles = battles, fights = fights, templates = templates, by_battle = by_battle }
+    return { zones = zones, battles = battles, fights = fights, templates = templates, by_battle = by_battle,
+        warriors_by_template = by_template }
 end
 
 return { install = install }

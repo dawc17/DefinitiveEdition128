@@ -21,6 +21,9 @@ local pools = {
     } },
 }
 
+-- Handles of the recipes registered here, for content.forge_choice.
+local registered = {}
+
 for _, pool in ipairs(pools) do
     local items, candidates = {}, {}
     for _, category in ipairs(equipment) do
@@ -31,7 +34,7 @@ for _, pool in ipairs(pools) do
             candidates[#candidates + 1] = { perk = perk, equipment = category }
         end
     end
-    sf2.forge.register_recipe {
+    registered[pool.id] = sf2.forge.register_recipe {
         id = pool.id, alias = sf2.mod.id .. ":localization/" .. pool.text,
         economic_profile = complex, items = items, candidates = candidates,
     }
@@ -39,7 +42,6 @@ end
 
 -- forge.xml Abilities* recipes: one enchantment per category, BarScale
 -- "Enchantment", no deviation, no variation conditions, in archived order.
--- PERK_SHADOW_CLOAK (Special Recipe I) is not ported; see content.boss_abilities.
 local abilities = require("content.boss_abilities").perks
 local price_rows = require("content.special_recipe_prices")
 local prices = {}
@@ -52,7 +54,7 @@ for _, category in ipairs(equipment) do
 end
 local special = sf2.forge.register_profile { id = "special_recipes", prices = prices }
 local special_recipes = {
-    { id = "abilities_1", text = "forge.abilities_1", perks = { "hermit_storm", "earthquake", "wasp_fly" } },
+    { id = "abilities_1", text = "forge.abilities_1", perks = { "shadow_cloak", "hermit_storm", "earthquake", "wasp_fly" } },
     { id = "abilities_2", text = "forge.abilities_2", perks = { "teleportation", "assistants", "rat_wave", "war_whirl" } },
     { id = "abilities_3", text = "forge.abilities_3",
         perks = { "lightning_chain", "fear_ray", "power_field", "grasp_of_darkness", "titans_shield" } },
@@ -65,7 +67,7 @@ for _, recipe in ipairs(special_recipes) do
             candidates[#candidates + 1] = { perk = abilities[key], equipment = category }
         end
     end
-    sf2.forge.register_recipe {
+    registered[recipe.id] = sf2.forge.register_recipe {
         id = recipe.id, alias = sf2.mod.id .. ":localization/" .. recipe.text,
         economic_profile = special, items = items, candidates = candidates,
     }
@@ -78,3 +80,5 @@ for _, category in ipairs(equipment) do
         profile = simple, equipment = category, minimum = 15, maximum = 75,
     }
 end
+
+return registered

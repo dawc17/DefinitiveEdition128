@@ -23,6 +23,7 @@ require("content.mind_throw")
 require("content.restored_equipment")
 require("content.shared_moves")
 require("content.unarmed_moves")
+require("content.shadow_cloak")
 require("content.wasp_fly")
 require("content.butcher_earthquake")
 require("content.hermit_storm")
@@ -49,6 +50,8 @@ local underworld = require("content.underworld").install(raid_charge)
 require("content.underworld_story").install(underworld)
 -- Challengers: seven post-Titan duels whose first win grants the opponent's weapon.
 require("content.challengers").install(raid_charge)
+-- Deterministic forge: choose-mode recipes; reads the bosses registered above.
+require("content.forge_choice").install(underworld)
 -- Disabled at the owner's request. Keep the prototype out of the active mod.
 -- require("content.ascension")
 

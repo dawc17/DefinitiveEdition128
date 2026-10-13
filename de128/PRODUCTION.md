@@ -2874,8 +2874,7 @@ NEO_WANDERER set bonus. `sensei_raid_charge_state.lua` reports availability when
 an owned equipped item carries one of the twelve enchantments or all five
 Neo Wanderer pieces are equipped, re-reading the profile each round rather than
 latching. Set-chest purchase resets are not modelled. PERK_SHADOW_CLOAK is
-DE-only and absent from core, so it is matched by ID without a registration
-lookup. Native evidence also shows the RaidCharge button is only presented in
+DE-only and absent from core; it is DE128's own `shadow_cloak` enchantment (0.46.0). Native evidence also shows the RaidCharge button is only presented in
 raid fights holding a charge (`Fight.cs` `UpdateRaidChargeButtonVisibility`), so in story fights the
 conditional rule mainly preserves archived parity.
 
@@ -4590,7 +4589,7 @@ Boss-ability icons (Eclipse `Tools/Recovery/ImportDE128AbilityIcons.py`): the el
 abilities and Titan's Shield use the owner's icons (`sprites/abilities/<key>`) and generated
 greyed `<key>_cooldown` icons instead of borrowed native perk icons. They use 50 pixels per unit
 (owner-chosen), slightly larger than native perk icons; the former `titan_shield_*` assets were
-removed. Shadow Cloak's icon is not installed because the ability is not ported.
+removed. Shadow Cloak's icon was installed with the ability in 0.46.0.
 
 Readiness is shown for every fighter through Eclipse's `sf2.perks.recharge_indicator`: the
 ready icon while the ability can be used, the greyed icon with the native remaining-time sweep
@@ -4608,3 +4607,77 @@ Verification: Lua syntax checks, a dependency audit resolving every picture of a
 (`Tools/Audits/AuditDE128DojoLocations.py`) and the medallion/icon tools' `--check` modes. The
 foundation test expectations were updated but not run (its runner does not compile at the
 current API independently of this change). No Unity run or in-game playtest was done.
+
+### Shadow Cloak, Special Recipe I's fourth ability (0.46.0, 2026-10-13)
+
+Special Recipe I (`abilities_1`) now offers all four archived enchantments in forge.xml order:
+Shadow Cloak, Storm, Earthquake and Wall Jump. Shadow Cloak is `PERK_SHADOW_CLOAK` (alias
+`LynxAbil_invisibility`, shown as "Smoke Bomb" with `InvisibilityDesc`; strings from the
+archived localizations for all 14 languages).
+
+* Move `shadow_cloak_player` (`content.shadow_cloak`) is DE's `ShadowCloakPlayer`: a RaidCharge
+  cast of Lynx's smoke bomb (`smoke_bomb.bytes`, unchanged core data copied into the mod) with
+  the archived conditions, lock, effects, sounds, Uninterrupt window and AI conditions.
+* The perk's behavior (`content.boss_abilities`) follows the archived triggers. It recharges
+  for 300 frames at fight start. On frame 13 of the cast it tints the model `#FFFFFF80` for 650
+  frames, shows `IconInvisibility_Blue` and makes the player's blocked hits unblockable
+  (`<HitPreCrit Block="1" Player="Enemy">` + `<SetHit Block="0">`). When the 650 frames end it
+  recharges for 600 frames.
+* The archive's `<DisableInterval Uninterrupt>` at frame 13 is not repeated: the move's own
+  Uninterrupt interval ends on that frame. The archive's `HitPostCrit` trigger cannot fire
+  (it needs the cloak present after its timeout flag has gone, and the timeout's own expiry
+  trigger clears it first), so taking a hit does not end the cloak.
+* HUD: the owner's `IconShadowCloak.png` icon (installed by `ImportDE128AbilityIcons.py`), greyed
+  while cloaked or recharging.
+* RaidCharge availability now includes the enchantment.
+
+Requires Eclipse's `on_hit_pre_crit` / `fighter:set_hit_blocked`, `fighter:set_model_color` and the
+snapshot's `animation.frame`.
+
+Verification: Eclipse managed compile, Eclipse VS Code analyzer on the changed modules, and the
+icon tool's `--check`. No Unity run or in-game playtest was done.
+
+### Deterministic forge (0.47.0, 2026-10-13)
+
+Every forge recipe DE128 ships or uses now works in Eclipse's "choose" mode: the player picks the
+exact enchantment and a strength tier, with no random roll (`content.forge_choice`, plan in
+Eclipse `Docs/Engineering/Modding/DETERMINISTIC_FORGE_PLAN.md`).
+
+* Recipes: core Simple, Medium and Complex, plus DE128's Complex II, Complex III and Special
+  Recipes I-III (`content.forge` now returns their handles).
+* Tiers (`forge.tier.low/mid/high`, translated in all 14 locales): Low is the minimum of the
+  item's aspect range at 0.5x price, Mid the midpoint at 1x, High the maximum at 2x.
+* Enchantment price scales: normal enchantments 1x, boss abilities (all twelve in Special
+  Recipes I-III) 1.5x, the twelve mythical set enchantments (`DefaultComboPerk` of each
+  `ItemSet` in list.xml; four in core Complex, four each in Complex II and III) 2x. A set
+  enchantment is offered once every piece of its set is owned (Eclipse's readiness rule).
+* Boss unlocks: a boss ability unlocks after any win against its boss. Boss per ability, from
+  the archived perk aliases (`DExml/perks.xml`) and the warriors that carry the matching core
+  boss perk: Shadow Cloak (`LynxAbil_invisibility`) Lynx; Storm (`HermitAbil_storm`) Hermit;
+  Earthquake (`ButcherAbil_earthquake`) Butcher; Wasp Fly (`WaspAbil_flight`) Wasp; Teleportation
+  (`HuntressAbil_teleportation`) Widow; Assistants (`ShogunAbil_calltoarms`) Shogun; Rat Wave
+  (`RatAbil`) Arkhos, the only warrior carrying `PERK_RAT_WAVE`; War Whirl (`WarAbil`)
+  Drakaina; Lightning Chain (`LightningAbil`) Dandy; Fear Ray (`FearAbil`) Tenebris; Power
+  Field (`PowerFieldAbil`) Gatekeeper; Grasp of Darkness (`BlacknessHugAbility`) Blackness. Each
+  lists the DE128 Sensei's Story boss (normal and Eclipse) and Underworld "young" or raid boss
+  warriors registered by this mod (`content.underworld` now returns `warriors_by_template`).
+* The six story bosses and Titan (Titan's Shield) are also listed by their core warrior template
+  (`lynx_claws`, `hermit_swords`, `butcher_backswords`, `wasp_naginata`, `huntress_fan`,
+  `shogun_katana`, `man_z7_titan`; vanillaXml `stages.xml`). Eclipse records wins by template and
+  counts completed story boss fights already in a save.
+
+Unverified: core raid bosses all use the generic `Default` template, so raid wins from before
+this version do not identify a boss. Faradeya (also casts Grasp of Darkness) and other raid
+bosses that borrow an ability are not counted as its boss. The Rat Wave, War Whirl, Lightning
+Chain, Fear Ray, Power Field and Grasp bosses come from the perk alias plus carrier evidence,
+not from a named boss in the alias. Written against the contract before the Eclipse API
+existed. No Unity run or in-game playtest was done.
+
+### Shadow Cloak glass look (0.47.0, 2026-10-13)
+
+Smoke Bomb's cloak uses Eclipse's `fighter:set_cloak` instead of the archived `#FFFFFF80`
+model tint (owner's call): the tint turned the black silhouette white and per-part alpha
+showed every overlapping body part and joint. The glass cloak draws the stage through the
+fighter, blurred and refracted, with a rim, an entry flash, a flash on landed hits and a short
+white flash as it ends. Timing, unblockable hits and the recharge are unchanged. No Unity run
+or in-game playtest was done.
