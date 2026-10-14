@@ -58,7 +58,7 @@ local zone = sf2.zones.register { id = "ascension", file = "Map1.2", start = fal
 local battle = sf2.battles.register {
     id = "ascension", zone = zone, type = sf2.battles.STORY, x = -374, y = 50,
     alias = title, title = title, description = overview, icon = "ascension",
-    preview = "preview_main.statue", location = "statue", music = "halls_of_the_dead_heroes",
+    preview = "preview_main.statue", location = "core:locations/statue", music = "halls_of_the_dead_heroes",
 }
 local loss_reward = sf2.rewards.register { id = "ascension_preview_loss", items = {} }
 local win_reward = sf2.rewards.register { id = "ascension_preview_win", items = {} }
@@ -71,7 +71,7 @@ for step = 1, 5 do
     end
     fights[step] = sf2.fights.register {
         id = "ascension_trial_" .. step, battle = battle, power = 0,
-        rounds = 1, round_time = 150, replays = 1, location = "statue", music = "halls_of_the_dead_heroes",
+        rounds = 1, round_time = 150, replays = 1, location = "core:locations/statue", music = "halls_of_the_dead_heroes",
         description = overview, warriors = { opponents[step][1] },
         rules = trial.base, rewards = { loss_reward, win_reward },
     }

@@ -26,7 +26,7 @@ for _, row in ipairs(definitions) do
         model = sf2.assets.model("core:gamedata/models/" .. row[4]), subtype = row[5],
         initial_stats = row[11],
     }
-    sf2.shop.addItem { section = sf2.shop.WEAPONS, item = item, level = row[6], price = sf2.price.gems(row[7]) }
+    sf2.shop.add_item { section = sf2.shop.WEAPONS, item = item, level = row[6], price = sf2.price.gems(row[7]) }
     sf2.shop.set_availability { item = item, required_group = row[8], minimum_level = row[6] }
     sf2.items.set_default_enchantments {
         item = item,

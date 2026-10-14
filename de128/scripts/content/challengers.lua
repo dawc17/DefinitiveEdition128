@@ -9,7 +9,7 @@ local CHALLENGERS = {
     {
         key = "trickster", zone = "zone_1", battle = "challenger_trickster", x = 160, y = -45,
         alias = "characterTrickster", title = "TRICKSTER_Title", description = "descTrickster",
-        location = "mountain", music = "samurai_spirit", experience = 0,
+        location = "core:locations/mountain", music = "samurai_spirit", experience = 0,
         first_name = "NAME_TRICKSTER", avatar = "man_nunchaku_new", voice = "Male",
         items = { "weapon/WEAPON_NUNCHAKU", "armor/ARMOR_RONIN", "helm/HELM_CONICAL_HAT" }, skeleton = "Skeleton",
         perk = "PERK_ITEM_SPECIAL_OVERHEAT_WEAPON",
@@ -19,7 +19,7 @@ local CHALLENGERS = {
     {
         key = "hawk", zone = "zone_2", battle = "challenger_hawk", x = 5, y = 155,
         alias = "NAME_HAWK", title = "HAWK_Title", description = "descHawk",
-        location = "sakura", music = "blade_dance", experience = 1,
+        location = "core:locations/sakura", music = "blade_dance", experience = 1,
         first_name = "NAME_HAWK", avatar = "man_ninja_naginata_new", voice = "Male",
         items = { "weapon/WEAPON_NAGINATA", "armor/ARMOR_GREEN", "helm/HELM_GREEN_MASK" }, skeleton = "Skeleton",
         perk = "PERK_ITEM_SPECIAL_BLOODRAGE_WEAPON",
@@ -32,7 +32,7 @@ local CHALLENGERS = {
     {
         key = "rose", zone = "zone_3", battle = "challenger_rose", x = 65, y = -180,
         alias = "NAME_ROSE", title = "ROSE_Title", description = "descRose",
-        location = "pink_lake", music = "ronin", experience = 1,
+        location = "core:locations/pink_lake", music = "ronin", experience = 1,
         first_name = "NAME_ROSE", avatar = "girl_katana_new", voice = "Female",
         items = { "weapon/WEAPON_KATANA", "armor/ARMOR_WOMAN_GREEN", "helm/HELM_STEEL", "ranged/RANGED_HUNTERS_KNIVES" },
         skeleton = "Skeleton",
@@ -43,7 +43,7 @@ local CHALLENGERS = {
     {
         key = "fisher", zone = "zone_4", battle = "challenger_fisher", x = 90, y = -130,
         alias = "NAME_FISHER", title = "FISHER_Title", description = "descFisher",
-        location = "heaven", music = "heavenly_clouds", experience = 1,
+        location = "core:locations/heaven", music = "heavenly_clouds", experience = 1,
         first_name = "NAME_FISHER", avatar = "man_cool_staff_new", voice = "Male",
         items = { "weapon/WEAPON_WANDERER_STAFF", "armor/ARMOR_DRAGON", "helm/HELM_SILVER",
             "ranged/RANGED_HEAVY_SHURIKENS", "magic/MAGIC_BOMB" },
@@ -55,7 +55,7 @@ local CHALLENGERS = {
     {
         key = "outcast", zone = "zone_5", battle = "challenger_outcast", x = -90, y = 120,
         alias = "NAME_OUTCAST", title = "OUTCAST_Title", description = "descOutcast",
-        location = "snowy_peak", music = "fuji", experience = 1,
+        location = "core:locations/snowy_peak", music = "fuji", experience = 1,
         first_name = "NAME_OUTCAST", avatar = "man_heavy_kusarigama_new", voice = "Male",
         items = { "weapon/WEAPON_HEAVY_KUSARIGAMA", "armor/ARMOR_GILDED", "helm/HELM_TWO_FACED",
             "ranged/RANGED_GHOST_KUNAI", "magic/MAGIC_LIGHTNING_ARROW" },
@@ -69,7 +69,7 @@ local CHALLENGERS = {
         -- (-505, 100) and (295, -220) differ from the shipped game's map (owner screenshot).
         key = "ronin", zone = "zone_6", battle = "challenger_ronin", x = -455, y = 130,
         alias = "NAME_RONIN", title = "RONIN_Title", description = "descRonin",
-        location = "waterfall", music = "sky_isles", experience = 1,
+        location = "core:locations/waterfall", music = "sky_isles", experience = 1,
         first_name = "NAME_RONIN", avatar = "man_dadao_janissary_new", voice = "Male",
         items = { "weapon/WEAPON_DADAO_JANISSARY", "armor/ARMOR_BIG_QUILTED", "helm/HELM_TWO_FACED",
             "ranged/RANGED_KUNAI_OF_WIND", "magic/MAGIC_WATER_BALL" },
@@ -83,7 +83,7 @@ local CHALLENGERS = {
     {
         key = "nova", zone = "zone_6", battle = "challenger_nova", x = -225, y = -245,
         alias = "NAME_IM_STRANGER", title = "NOVA_Title", description = "descNova",
-        location = "road", music = "the_monastery", experience = 1,
+        location = "core:locations/road", music = "the_monastery", experience = 1,
         first_name = "NAME_IM_STRANGER", avatar = "girl_im_knuckles_new", voice = "Female",
         items = { "weapon/WEAPON_STRANGER_KNUCKLES", "armor/ARMOR_WOMAN_GREEN", "helm/HELM_ASSASSIN",
             "ranged/RANGED_THROWING_AXE", "magic/MAGIC_FIRE_SPLASH" },

@@ -36,7 +36,7 @@ for _, row in ipairs(definitions) do
     }
     if row[6] then definition.subtype = row[6] end
     local item = category[1](definition)
-    sf2.shop.addItem { section = category[2], item = item, level = row[7], price = sf2.price.gems(row[8]) }
+    sf2.shop.add_item { section = category[2], item = item, level = row[7], price = sf2.price.gems(row[8]) }
     sf2.shop.set_availability { item = item, required_group = row[9], minimum_level = row[7] }
     sf2.items.set_default_enchantments {
         item = item, entries = { { perk = sf2.perks.get("core:perks/" .. row[10]), aspect = row[11] } },

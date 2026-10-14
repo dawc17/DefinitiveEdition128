@@ -84,7 +84,7 @@ return {
                     preview = "preview_raid_base.vulcan_raid",
                     x = -10,
                     y = -180,
-                    location = "vulcan_raid",
+                    location = "core:locations/vulcan_raid",
                     music = "vulcan",
                     power_mode = "normal",
                     fights = {
@@ -117,7 +117,7 @@ return {
                     preview = "preview_raid_base.vulcan_raid",
                     x = -10,
                     y = -180,
-                    location = "vulcan_raid",
+                    location = "core:locations/vulcan_raid",
                     music = "vulcan",
                     power_mode = "power",
                     fights = {
@@ -180,7 +180,7 @@ return {
                     preview = "preview_ChineseNewYear26.son_of_the_sun_preview",
                     x = -175,
                     y = -230,
-                    location = "new_year_china_dojo",
+                    location = "core:locations/new_year_china_dojo",
                     music = "ninja_in_the_night_old",
                     power_mode = "normal",
                     fights = {
@@ -214,7 +214,7 @@ return {
                     preview = "preview_ChineseNewYear26.son_of_the_sun_preview",
                     x = -175,
                     y = -230,
-                    location = "new_year_china_dojo",
+                    location = "core:locations/new_year_china_dojo",
                     music = "ninja_in_the_night_old",
                     power_mode = "power",
                     fights = {
@@ -262,7 +262,7 @@ return {
                     preview = "preview_raid_base.megalith_raid",
                     x = -370,
                     y = -180,
-                    location = "megalith_raid",
+                    location = "core:locations/megalith_raid",
                     music = "crystal",
                     power_mode = "normal",
                     fights = {
@@ -295,7 +295,7 @@ return {
                     preview = "preview_raid_base.megalith_raid",
                     x = -370,
                     y = -180,
-                    location = "megalith_raid",
+                    location = "core:locations/megalith_raid",
                     music = "crystal",
                     power_mode = "power",
                     fights = {
@@ -345,7 +345,7 @@ return {
                     preview = "preview_main.statue",
                     x = -405,
                     y = -40,
-                    location = "statue",
+                    location = "core:locations/statue",
                     music = "halls_of_the_dead_heroes",
                     power_mode = "normal",
                     fights = {
@@ -379,7 +379,7 @@ return {
                     preview = "preview_main.statue",
                     x = -405,
                     y = -40,
-                    location = "statue",
+                    location = "core:locations/statue",
                     music = "halls_of_the_dead_heroes",
                     power_mode = "power",
                     fights = {
@@ -427,7 +427,7 @@ return {
                     preview = "preview_raid_base.fungus_raid",
                     x = -180,
                     y = -60,
-                    location = "fungus_raid",
+                    location = "core:locations/fungus_raid",
                     music = "fungus",
                     power_mode = "normal",
                     fights = {
@@ -460,7 +460,7 @@ return {
                     preview = "preview_raid_base.fungus_raid",
                     x = -180,
                     y = -60,
-                    location = "fungus_raid",
+                    location = "core:locations/fungus_raid",
                     music = "fungus",
                     power_mode = "power",
                     fights = {
@@ -520,7 +520,7 @@ return {
                     preview = "preview_raid_ritual_vulcan.ritual_vulcan_raid",
                     x = -10,
                     y = -10,
-                    location = "ritual_vulcan_raid",
+                    location = "core:locations/ritual_vulcan_raid",
                     music = "dark_ritual",
                     power_mode = "normal",
                     fights = {
@@ -554,7 +554,7 @@ return {
                     preview = "preview_raid_ritual_vulcan.ritual_vulcan_raid",
                     x = -10,
                     y = -10,
-                    location = "ritual_vulcan_raid",
+                    location = "core:locations/ritual_vulcan_raid",
                     music = "dark_ritual",
                     power_mode = "power",
                     fights = {
@@ -603,7 +603,7 @@ return {
                     preview = "preview_raid_base.vortex_raid",
                     x = -260,
                     y = 123,
-                    location = "vortex_raid",
+                    location = "core:locations/vortex_raid",
                     music = "vortex",
                     power_mode = "normal",
                     fights = {
@@ -636,7 +636,7 @@ return {
                     preview = "preview_raid_base.vortex_raid",
                     x = -260,
                     y = 123,
-                    location = "vortex_raid",
+                    location = "core:locations/vortex_raid",
                     music = "vortex",
                     power_mode = "power",
                     fights = {
@@ -690,7 +690,7 @@ return {
                     preview = "preview_raid_base.fatum_raid",
                     x = -60,
                     y = 15,
-                    location = "fatum_raid",
+                    location = "core:locations/fatum_raid",
                     music = "fatum",
                     power_mode = "normal",
                     fights = {
@@ -723,7 +723,7 @@ return {
                     preview = "preview_raid_base.fatum_raid",
                     x = -60,
                     y = 15,
-                    location = "fatum_raid",
+                    location = "core:locations/fatum_raid",
                     music = "fatum",
                     power_mode = "power",
                     fights = {
@@ -772,7 +772,7 @@ return {
                     preview = "preview_raid_ritual_fungus.ritual_fungus_raid",
                     x = 150,
                     y = 0,
-                    location = "ritual_fungus_raid",
+                    location = "core:locations/ritual_fungus_raid",
                     music = "dark_ritual",
                     power_mode = "normal",
                     fights = {
@@ -806,7 +806,7 @@ return {
                     preview = "preview_raid_ritual_fungus.ritual_fungus_raid",
                     x = 150,
                     y = 0,
-                    location = "ritual_fungus_raid",
+                    location = "core:locations/ritual_fungus_raid",
                     music = "dark_ritual",
                     power_mode = "power",
                     fights = {
@@ -855,7 +855,7 @@ return {
                     preview = "preview_raid_events_wind_wolf_raid_new",
                     x = -430,
                     y = 65,
-                    location = "american_event_24",
+                    location = "core:locations/american_event_24",
                     music = "fight_independence_day",
                     power_mode = "normal",
                     fights = {
@@ -889,7 +889,7 @@ return {
                     preview = "preview_raid_events_wind_wolf_raid_new",
                     x = -430,
                     y = 65,
-                    location = "american_event_24",
+                    location = "core:locations/american_event_24",
                     music = "fight_independence_day",
                     power_mode = "power",
                     fights = {
@@ -951,7 +951,7 @@ return {
                     preview = "preview_raid_base.arkhos_raid",
                     x = -290,
                     y = -70,
-                    location = "arkhos_raid",
+                    location = "core:locations/arkhos_raid",
                     music = "holyman7",
                     power_mode = "normal",
                     fights = {
@@ -984,7 +984,7 @@ return {
                     preview = "preview_raid_base.arkhos_raid",
                     x = -290,
                     y = -70,
-                    location = "arkhos_raid",
+                    location = "core:locations/arkhos_raid",
                     music = "holyman7",
                     power_mode = "power",
                     fights = {
@@ -1032,7 +1032,7 @@ return {
                     preview = "preview_raid_base.hoaxen_raid",
                     x = -60,
                     y = -230,
-                    location = "hoaxen_raid",
+                    location = "core:locations/hoaxen_raid",
                     music = "holyman8",
                     power_mode = "normal",
                     fights = {
@@ -1066,7 +1066,7 @@ return {
                     preview = "preview_raid_base.hoaxen_raid",
                     x = -60,
                     y = -230,
-                    location = "hoaxen_raid",
+                    location = "core:locations/hoaxen_raid",
                     music = "holyman8",
                     power_mode = "power",
                     fights = {
@@ -1121,7 +1121,7 @@ return {
                     preview = "preview_raid_base.hunger_raid",
                     x = -223,
                     y = -180,
-                    location = "hunger_raid",
+                    location = "core:locations/hunger_raid",
                     music = "hunger",
                     power_mode = "normal",
                     fights = {
@@ -1154,7 +1154,7 @@ return {
                     preview = "preview_raid_base.hunger_raid",
                     x = -223,
                     y = -180,
-                    location = "hunger_raid",
+                    location = "core:locations/hunger_raid",
                     music = "hunger",
                     power_mode = "power",
                     fights = {
@@ -1203,7 +1203,7 @@ return {
                     preview = "preview_raid_ritual_hunger.ritual_hunger_raid",
                     x = -420,
                     y = -195,
-                    location = "ritual_hunger_raid",
+                    location = "core:locations/ritual_hunger_raid",
                     music = "dark_ritual",
                     power_mode = "normal",
                     fights = {
@@ -1237,7 +1237,7 @@ return {
                     preview = "preview_raid_ritual_hunger.ritual_hunger_raid",
                     x = -420,
                     y = -195,
-                    location = "ritual_hunger_raid",
+                    location = "core:locations/ritual_hunger_raid",
                     music = "dark_ritual",
                     power_mode = "power",
                     fights = {
@@ -1296,7 +1296,7 @@ return {
                     preview = "preview_raid_base.war_raid",
                     x = 29,
                     y = -104,
-                    location = "war_raid",
+                    location = "core:locations/war_raid",
                     music = "drakaina",
                     power_mode = "normal",
                     fights = {
@@ -1329,7 +1329,7 @@ return {
                     preview = "preview_raid_base.war_raid",
                     x = 29,
                     y = -104,
-                    location = "war_raid",
+                    location = "core:locations/war_raid",
                     music = "drakaina",
                     power_mode = "power",
                     fights = {
@@ -1389,7 +1389,7 @@ return {
                     preview = "preview_halloween_morgana_ghost",
                     x = 200,
                     y = -135,
-                    location = "haloween_dojo_2019",
+                    location = "core:locations/haloween_dojo_2019",
                     music = "fight_halloween2019",
                     power_mode = "normal",
                     fights = {
@@ -1423,7 +1423,7 @@ return {
                     preview = "preview_halloween_morgana_ghost",
                     x = 200,
                     y = -135,
-                    location = "haloween_dojo_2019",
+                    location = "core:locations/haloween_dojo_2019",
                     music = "fight_halloween2019",
                     power_mode = "power",
                     fights = {
@@ -1471,7 +1471,7 @@ return {
                     preview = "preview_raid_base.tenebris_raid",
                     x = -189,
                     y = 38,
-                    location = "fear_raid",
+                    location = "core:locations/fear_raid",
                     music = "fear",
                     power_mode = "normal",
                     fights = {
@@ -1504,7 +1504,7 @@ return {
                     preview = "preview_raid_base.tenebris_raid",
                     x = -189,
                     y = 38,
-                    location = "fear_raid",
+                    location = "core:locations/fear_raid",
                     music = "fear",
                     power_mode = "power",
                     fights = {
@@ -1558,7 +1558,7 @@ return {
                     preview = "preview_summerFest25.preview_raid_events_summerFest25Arch",
                     x = -390,
                     y = 75,
-                    location = "dock",
+                    location = "core:locations/dock",
                     music = "dark_ritual",
                     power_mode = "normal",
                     fights = {
@@ -1592,7 +1592,7 @@ return {
                     preview = "preview_summerFest25.preview_raid_events_summerFest25Arch",
                     x = -390,
                     y = 75,
-                    location = "dock",
+                    location = "core:locations/dock",
                     music = "dark_ritual",
                     power_mode = "power",
                     fights = {
@@ -1646,7 +1646,7 @@ return {
                     preview = "preview_raid_base.gatekeeper_raid",
                     x = -30,
                     y = 35,
-                    location = "gatekeeper_raid",
+                    location = "core:locations/gatekeeper_raid",
                     music = "raids_gatekeeper",
                     power_mode = "normal",
                     fights = {
@@ -1680,7 +1680,7 @@ return {
                     preview = "preview_raid_base.gatekeeper_raid",
                     x = -30,
                     y = 35,
-                    location = "gatekeeper_raid",
+                    location = "core:locations/gatekeeper_raid",
                     music = "raids_gatekeeper",
                     power_mode = "power",
                     fights = {
@@ -1730,7 +1730,7 @@ return {
                     preview = "preview_raid_events_architect_raid",
                     x = -120,
                     y = -210,
-                    location = "dojo_hw22",
+                    location = "core:locations/dojo_hw22",
                     music = "fight_halloween2022",
                     power_mode = "normal",
                     fights = {
@@ -1764,7 +1764,7 @@ return {
                     preview = "preview_raid_events_architect_raid",
                     x = -120,
                     y = -210,
-                    location = "dojo_hw22",
+                    location = "core:locations/dojo_hw22",
                     music = "fight_halloween2022",
                     power_mode = "power",
                     fights = {
@@ -1812,7 +1812,7 @@ return {
                     preview = "preview_raid_base.saturn_raid",
                     x = 60,
                     y = -85,
-                    location = "saturn_raid",
+                    location = "core:locations/saturn_raid",
                     music = "raids_saturn",
                     power_mode = "normal",
                     fights = {
@@ -1845,7 +1845,7 @@ return {
                     preview = "preview_raid_base.saturn_raid",
                     x = 60,
                     y = -85,
-                    location = "saturn_raid",
+                    location = "core:locations/saturn_raid",
                     music = "raids_saturn",
                     power_mode = "power",
                     fights = {
@@ -1893,7 +1893,7 @@ return {
                     preview = "preview_raid_base.blackness_raid",
                     x = -430,
                     y = 85,
-                    location = "blackness_raid",
+                    location = "core:locations/blackness_raid",
                     music = "raids_blackness",
                     power_mode = "normal",
                     fights = {
@@ -1926,7 +1926,7 @@ return {
                     preview = "preview_raid_base.blackness_raid",
                     x = -430,
                     y = 85,
-                    location = "blackness_raid",
+                    location = "core:locations/blackness_raid",
                     music = "raids_blackness",
                     power_mode = "power",
                     fights = {
@@ -1974,7 +1974,7 @@ return {
                     preview = "preview_raid_base.hunter_raid",
                     x = -190,
                     y = -45,
-                    location = "hunter_raid",
+                    location = "core:locations/hunter_raid",
                     music = "raids_hunter",
                     power_mode = "normal",
                     fights = {
@@ -2007,7 +2007,7 @@ return {
                     preview = "preview_raid_base.hunter_raid",
                     x = -190,
                     y = -45,
-                    location = "hunter_raid",
+                    location = "core:locations/hunter_raid",
                     music = "raids_hunter",
                     power_mode = "power",
                     fights = {
@@ -2073,7 +2073,7 @@ return {
                     preview = "halloween25preview.whisper",
                     x = -10,
                     y = -180,
-                    location = "hw24_ancient_temple",
+                    location = "core:locations/hw24_ancient_temple",
                     music = "raid_hw24",
                     power_mode = "normal",
                     fights = {
@@ -2107,7 +2107,7 @@ return {
                     preview = "halloween25preview.whisper",
                     x = -10,
                     y = -180,
-                    location = "hw24_ancient_temple",
+                    location = "core:locations/hw24_ancient_temple",
                     music = "raid_hw24",
                     power_mode = "power",
                     fights = {
@@ -2162,7 +2162,7 @@ return {
                     preview = "preview_raid_events_CNY25.son_of_the_sun",
                     x = -175,
                     y = -230,
-                    location = "dojo_cny25",
+                    location = "core:locations/dojo_cny25",
                     music = "raid_newyear18",
                     power_mode = "normal",
                     fights = {
@@ -2196,7 +2196,7 @@ return {
                     preview = "preview_raid_events_CNY25.son_of_the_sun",
                     x = -175,
                     y = -230,
-                    location = "dojo_cny25",
+                    location = "core:locations/dojo_cny25",
                     music = "raid_newyear18",
                     power_mode = "power",
                     fights = {
@@ -2245,7 +2245,7 @@ return {
                     preview = "preview_raid_ravana_raid",
                     x = -370,
                     y = -180,
-                    location = "dojo_indian_event",
+                    location = "core:locations/dojo_indian_event",
                     music = "fight43_bihu_india",
                     power_mode = "normal",
                     fights = {
@@ -2279,7 +2279,7 @@ return {
                     preview = "preview_raid_ravana_raid",
                     x = -370,
                     y = -180,
-                    location = "dojo_indian_event",
+                    location = "core:locations/dojo_indian_event",
                     music = "fight43_bihu_india",
                     power_mode = "power",
                     fights = {
@@ -2328,7 +2328,7 @@ return {
                     preview = "preview_raid_events_bison_raid",
                     x = -405,
                     y = -40,
-                    location = "dojo_american_event_22",
+                    location = "core:locations/dojo_american_event_22",
                     music = "fight_independence_day",
                     power_mode = "normal",
                     fights = {
@@ -2362,7 +2362,7 @@ return {
                     preview = "preview_raid_events_bison_raid",
                     x = -405,
                     y = -40,
-                    location = "dojo_american_event_22",
+                    location = "core:locations/dojo_american_event_22",
                     music = "fight_independence_day",
                     power_mode = "power",
                     fights = {
@@ -2425,7 +2425,7 @@ return {
                     preview = "preview_halloween_morgana_old",
                     x = -180,
                     y = -60,
-                    location = "haloween_dojo_2019",
+                    location = "core:locations/haloween_dojo_2019",
                     music = "fight_halloween2019",
                     power_mode = "normal",
                     fights = {
@@ -2459,7 +2459,7 @@ return {
                     preview = "preview_halloween_morgana_old",
                     x = -180,
                     y = -60,
-                    location = "haloween_dojo_2019",
+                    location = "core:locations/haloween_dojo_2019",
                     music = "fight_halloween2019",
                     power_mode = "power",
                     fights = {
@@ -2514,7 +2514,7 @@ return {
                     preview = "preview_raid_events_morgana_raid_old",
                     x = -60,
                     y = 15,
-                    location = "haloween_dojo",
+                    location = "core:locations/haloween_dojo",
                     music = "fatum",
                     power_mode = "normal",
                     fights = {
@@ -2548,7 +2548,7 @@ return {
                     preview = "preview_raid_events_morgana_raid_old",
                     x = -60,
                     y = 15,
-                    location = "haloween_dojo",
+                    location = "core:locations/haloween_dojo",
                     music = "fatum",
                     power_mode = "power",
                     fights = {
@@ -2598,7 +2598,7 @@ return {
                     preview = "preview_raid_events_lamb_raid",
                     x = 150,
                     y = 0,
-                    location = "ritual_battle_raid",
+                    location = "core:locations/ritual_battle_raid",
                     music = "dark_ritual",
                     power_mode = "normal",
                     fights = {
@@ -2632,7 +2632,7 @@ return {
                     preview = "preview_raid_events_lamb_raid",
                     x = 150,
                     y = 0,
-                    location = "ritual_battle_raid",
+                    location = "core:locations/ritual_battle_raid",
                     music = "dark_ritual",
                     power_mode = "power",
                     fights = {
@@ -2695,7 +2695,7 @@ return {
                     preview = "preview_raid_rakshasa",
                     x = -430,
                     y = 60,
-                    location = "dojo_indian_event_22",
+                    location = "core:locations/dojo_indian_event_22",
                     music = "fight43_bihu_india",
                     power_mode = "normal",
                     fights = {
@@ -2729,7 +2729,7 @@ return {
                     preview = "preview_raid_rakshasa",
                     x = -430,
                     y = 60,
-                    location = "dojo_indian_event_22",
+                    location = "core:locations/dojo_indian_event_22",
                     music = "fight43_bihu_india",
                     power_mode = "power",
                     fights = {
@@ -2779,7 +2779,7 @@ return {
                     preview = "preview_raid_puppeteer_raid",
                     x = -290,
                     y = -70,
-                    location = "dojo_hw21",
+                    location = "core:locations/dojo_hw21",
                     music = "fight_halloween2019",
                     power_mode = "normal",
                     fights = {
@@ -2813,7 +2813,7 @@ return {
                     preview = "preview_raid_puppeteer_raid",
                     x = -290,
                     y = -70,
-                    location = "dojo_hw21",
+                    location = "core:locations/dojo_hw21",
                     music = "fight_halloween2019",
                     power_mode = "power",
                     fights = {
@@ -2868,7 +2868,7 @@ return {
                     preview = "preview_raid_events_india_24",
                     x = -223,
                     y = -180,
-                    location = "dojo_india25",
+                    location = "core:locations/dojo_india25",
                     music = "fight43_bihu_india",
                     power_mode = "normal",
                     fights = {
@@ -2920,7 +2920,7 @@ return {
                     preview = "preview_raid_events_india_24",
                     x = -223,
                     y = -180,
-                    location = "dojo_india25",
+                    location = "core:locations/dojo_india25",
                     music = "fight43_bihu_india",
                     power_mode = "power",
                     fights = {
@@ -2985,7 +2985,7 @@ return {
                     preview = "preview_berstuuk_events.berstuuk_raid",
                     x = -420,
                     y = -195,
-                    location = "fall_event_24",
+                    location = "core:locations/fall_event_24",
                     music = "raids_berstuuk",
                     power_mode = "normal",
                     fights = {
@@ -3019,7 +3019,7 @@ return {
                     preview = "preview_berstuuk_events.berstuuk_raid",
                     x = -420,
                     y = -195,
-                    location = "fall_event_24",
+                    location = "core:locations/fall_event_24",
                     music = "raids_berstuuk",
                     power_mode = "power",
                     fights = {
@@ -3068,7 +3068,7 @@ return {
                     preview = "preview_raid_events_india_24",
                     x = 29,
                     y = -104,
-                    location = "dojo_india25",
+                    location = "core:locations/dojo_india25",
                     music = "fight43_bihu_india",
                     power_mode = "normal",
                     fights = {
@@ -3102,7 +3102,7 @@ return {
                     preview = "preview_raid_events_india_24",
                     x = 29,
                     y = -104,
-                    location = "dojo_india25",
+                    location = "core:locations/dojo_india25",
                     music = "fight43_bihu_india",
                     power_mode = "power",
                     fights = {
@@ -3156,7 +3156,7 @@ return {
                     preview = "preview_raid_events_ny_25",
                     x = -189,
                     y = 38,
-                    location = "mountains_ny_25",
+                    location = "core:locations/mountains_ny_25",
                     music = "raids_shurale",
                     power_mode = "normal",
                     fights = {
@@ -3190,7 +3190,7 @@ return {
                     preview = "preview_raid_events_ny_25",
                     x = -189,
                     y = 38,
-                    location = "mountains_ny_25",
+                    location = "core:locations/mountains_ny_25",
                     music = "raids_shurale",
                     power_mode = "power",
                     fights = {
@@ -3245,7 +3245,7 @@ return {
                     preview = "preview_invisible",
                     x = -200,
                     y = -230,
-                    location = "fuji",
+                    location = "core:locations/fuji",
                     music = "raids_freeze",
                     fights = {
                         {
@@ -3278,7 +3278,7 @@ return {
                     preview = "preview_pvp_magic_rocks",
                     x = 75,
                     y = -180,
-                    location = "magic_rocks",
+                    location = "core:locations/magic_rocks",
                     music = "flying_rocks",
                     fights = {
                         {
@@ -3308,7 +3308,7 @@ return {
                     preview = "preview_pvp_burning_town",
                     x = -450,
                     y = -30,
-                    location = "burning_town",
+                    location = "core:locations/burning_town",
                     music = "burning_town_old",
                     fights = {
                         {
@@ -3519,7 +3519,7 @@ return {
                     preview = "preview_pvp_flooded_village",
                     x = -165,
                     y = 50,
-                    location = "flooded_village",
+                    location = "core:locations/flooded_village",
                     music = "fight38_sakura_forest",
                     fights = {
                         {

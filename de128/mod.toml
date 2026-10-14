@@ -8,4 +8,4 @@ capabilities = ["policy.services", "policy.timers", "content.register", "content
 
 [[dependencies]]
 id = "core"
-version = ">=1.0 <2.0"
+version = ">=2.0 <3.0"
