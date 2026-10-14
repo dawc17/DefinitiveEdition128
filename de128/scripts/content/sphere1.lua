@@ -101,7 +101,7 @@ register("sphere1_start", {
 register("sphere1_middle", {
     animation = "animations/fireball_middle", inherit = { "MagicMissileFly", "MagicMissile", family },
     first_sample = 1, priority = 500, no_magic_recharge = true, velocity = { x = 30 },
-    events = { "animation_end" },
+    events = { "finish" },
     align = { axes = { "x", "y", "z" }, pivot = { node = "Magic-Node2_1" }, position = SPHERE_NODE },
     when = {
         any = { { animation = "de128:moves/sphere1_start" }, { animation = "de128:moves/sphere1_middle" } },
@@ -149,7 +149,7 @@ for _, shop in ipairs({
     register(shop.id, {
         animation = "animations/fireball_player", inherit = { shop.template, "StanceShop", "StageStance", "Stance" },
         first_sample = 2, priority = 1, no_interpolation_frames = true, ends_stage = true,
-        events = { { round_stage_start = shop.stage } }, face = "enemy",
+        events = { { round_stage = shop.stage } }, face = "enemy",
         align = { axes = { "x", "z" }, pivot = { node = "right_heel" }, position = { pivot = "self", x = -80 } },
         only_for = only_for(true, true),
         on = { [0] = spawn(shop.start) },
@@ -172,7 +172,7 @@ register("shop_magic_try_on_sphere1_start", {
 register("shop_magic_try_on_sphere1_end", {
     animation = "animations/fireball_middle", inherit = { "MagicMissileEnd", "MagicMissileFly", "MagicMissile", family },
     first_sample = 1, priority = 500, no_magic_recharge = true, velocity = { x = 30 },
-    events = { "animation_end" },
+    events = { "finish" },
     align = { axes = { "x", "y", "z" }, pivot = { node = "Magic-Node2_1" }, position = SPHERE_NODE },
     when = { animation = "de128:moves/shop_magic_try_on_sphere1_start", actor = "Sphere1" },
     only_for = only_for(false),

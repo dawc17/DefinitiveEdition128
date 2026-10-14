@@ -86,7 +86,7 @@ for _, phase in ipairs({ "start", "middle" }) do
         align = startup and { axes = { "x", "z" }, pivot = { animation = true }, position = { animation = "parent" } }
             or { axes = { "x", "y", "z" }, pivot = { node = "Magic-Node2_1" }, position = { node = "Magic-Node2_1", of = "self" } },
         face = startup and "with_parent" or nil,
-        events = { startup and "birth" or "animation_end" },
+        events = { startup and "birth" or "finish" },
         when = startup and { parent = { not_animation = "StanceShop" }, actor = "MindThrowNormal" }
             or { any = { { animation = name("start") }, { animation = name("middle") } }, actor = "MindThrowNormal" },
         only_for = only_for(false),

@@ -30,7 +30,7 @@ local preview = sf2.moves.register {
     no_wall_repulsion = data.preview.no_wall_repulsion,
     no_interpolation_frames = data.preview.no_interpolation_frames,
     only_for = data.preview.only_for, align = data.preview.align, face = data.face,
-    on = data.preview.on, events = { { round_stage_start = "try_on" } },
+    on = data.preview.on, events = { { round_stage = "try_on" } },
 }
 sf2.items.set_subtype {
     item = sf2.items.get("core:items/weapon/WEAPON_CHNY21_JIAN"), subtype = "ChineseSwords",

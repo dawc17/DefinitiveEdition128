@@ -63,7 +63,7 @@ register("sphere3_middle", {
     animation = animation.middle, inherit = { "MagicMissile", "MagicMissileFly", family },
     frames_per_sample = 4, first_sample = 9, priority = 600, no_magic_recharge = true,
     align = { axes = { "x", "z" }, pivot = { node = "Magic-Node2_1" }, position = { node = "Magic-Node2_1", of = "self" } },
-    events = { "animation_end" }, attacks = { {
+    events = { "finish" }, attacks = { {
         from = 56,
         -- Repeated edges are present in the archive and retain its ordering.
         edges = { "Magic-Edge4_1", "Magic-Edge1_1", "Magic-Edge2_1", "Magic-Edge1_1", "Magic-Edge2_1" },
@@ -98,7 +98,7 @@ for _, row in ipairs({ { "shop_magic_sphere3_player", "ShopPeacefulStart", "peac
     } },
         [63] = { sound = { "snd_bigsphere_end" } },
         finish = { try_on_end = true },
-    }, events = { { round_stage_start = row[3] } }, face = "enemy",
+    }, events = { { round_stage = row[3] } }, face = "enemy",
     })
 end
 return moves

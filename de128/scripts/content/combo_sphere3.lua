@@ -90,7 +90,7 @@ for _, row in ipairs({ { "shop_magic_combo_sphere3_player", "ShopPeacefulStart",
     } } },
         [30] = { sound = { "snd_bigsphere_end" } },
         finish = { try_on_end = true },
-    }, events = { { round_stage_start = row[3] } }, face = "enemy",
+    }, events = { { round_stage = row[3] } }, face = "enemy",
     })
 end
 return moves

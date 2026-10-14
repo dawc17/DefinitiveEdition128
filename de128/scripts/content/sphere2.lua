@@ -94,7 +94,7 @@ register("sphere2_middle", {
     animation = animation.middle, inherit = { "MagicMissileFly", "MagicMissile", family },
     first_sample = 1, priority = 500, no_magic_recharge = true, velocity = { x = 30 },
     align = { axes = { "x", "y", "z" }, pivot = { node = "Magic-Node2_1" }, position = { node = "Magic-Node2_1", of = "self" } },
-    events = { "animation_end" }, when = { any = {
+    events = { "finish" }, when = { any = {
         { animation = name("sphere2_start") }, { animation = name("sphere2_middle") },
     }, actor = "Sphere2" }, attacks = { attack(nil, true) }, on = {
         strike = { { sound = { "snd_midsphere_end" } }, { delete_actor = "self" }, { effect = {
@@ -144,7 +144,7 @@ for _, row in ipairs({ { "shop_magic_sphere2_player", "ShopPeacefulStart", "peac
         [0] = { projectile = {
         name = "Sphere2", core_skeleton = "SkeletonMagic", copy_parent_type = "magic", start = row[4],
     } },
-    }, events = { { round_stage_start = row[3] } }, face = "enemy",
+    }, events = { { round_stage = row[3] } }, face = "enemy",
     })
 end
 register("shop_magic_try_on_sphere2_start", {
@@ -171,7 +171,7 @@ register("shop_magic_try_on_sphere2_end", {
     animation = animation.middle, inherit = { "MagicMissileEnd", "MagicMissileFly", "MagicMissile", family },
     first_sample = 1, priority = 500, no_magic_recharge = true, velocity = { x = 30 },
     align = { axes = { "x", "y", "z" }, pivot = { node = "Magic-Node2_1" }, position = { node = "Magic-Node2_1", of = "self" } },
-    events = { "animation_end" }, when = { animation = name("shop_magic_try_on_sphere2_start"), actor = "Sphere2" },
+    events = { "finish" }, when = { animation = name("shop_magic_try_on_sphere2_start"), actor = "Sphere2" },
     on = {
         [6] = { { stop_effect = "EnergyballMiddle" }, { effect = {
             name = "EnergyballEnd", core_sequence = ("mgc_magic_mid_sphere1_end"),

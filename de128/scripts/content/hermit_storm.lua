@@ -27,8 +27,8 @@ local win = sf2.moves.register {
         stage = "end_stance",
     },
     windows = { uninterruptible = true, block = true, throwable = true },
-    events = { { round_stage_start = "end_stance" },
-        { interval_end = "uninterruptible" }, "animation_end" },
+    events = { { round_stage = "end_stance" },
+        { interval_end = "uninterruptible" }, "finish" },
     face = "enemy",
 }
 
@@ -50,7 +50,7 @@ local idle = sf2.moves.register {
     -- No rig requirement here (the ability lock only), so the left-heel default does not apply.
     mirror = "left_heel", tactic_equivalent = "StanceIdle", ends_stage = true,
     align = "right_heel",
-    events = { "animation_end" },
+    events = { "finish" },
     when = { any = { { animation = "de128:moves/hermit_storm_player" }, { animation = "de128:moves/hermit_storm_idle" }, { animation = "de128:moves/hermit_storm_win" } } },
     only_for = { any = abilities.lock("hermit_storm") },
     windows = { unstable = true, semi_uninterruptible = { from = 102 }, uninterruptible = { to = 101 } },

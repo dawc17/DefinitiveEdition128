@@ -143,7 +143,7 @@ register("throw_leg_push_v", {
     first_sample = 7, priority = 9999, no_wall_repulsion = true,
     face = "with_enemy",
     align = { axes = { "x", "z" }, pivot = { animation = true }, position = { animation = "enemy" } },
-    events = { { animation_start = name("throw_leg_push"), of = "enemy" } },
+    events = { { start = name("throw_leg_push"), of = "enemy" } },
     on = { [9] = { sound = { "snd_bodyfall1" } } },
     when = { not_actor = "Assistant", any = { { not_animation = "Throw" }, { player_number = 2 } },
         not_mod = "MOD_TITAN", not_animation = name("throw_leg_push_v") },
@@ -195,7 +195,7 @@ register("standup_after_leg_fall", {
     when = { not_round_result = "defeat" },
     windows = { uninterruptible = { to = 35 }, block = { from = 36 }, invulnerable = { name = "Recovery", to = 35 } },
     -- The archive matches the victim through its "LegFall" template tag; naming the move is equivalent.
-    events = { { animation_end = name("throw_leg_push_v") } },
+    events = { { finish = name("throw_leg_push_v") } },
 })
 
 -- Profile screen preview: the throw performed on a spawned practice fighter.

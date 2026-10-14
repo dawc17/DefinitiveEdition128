@@ -64,7 +64,7 @@ local finish = sf2.moves.replace {
     face = "opposite_enemy",
     align = { axes = { "x", "z" }, shift_model_node = "pelvis",
         pivot = { node = "left_heel" }, position = { pivot = "enemy", x = 100 } },
-    events = { "animation_end" },
+    events = { "finish" },
     when = { animation = "WidowTeleportationStart", enemy = { not_animation = excluded_enemy_moves } },
     only_for = { any = abilities.lock("teleportation") },
     windows = {
