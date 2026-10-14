@@ -16,37 +16,39 @@ sf2.items.set_presentation {
 -- RaidCharge button, and Hunter's four wall-range variants have lower priority.
 sf2.moves.patch {
     move = "HoaxenSpikeStrikePlayer",
-    input = { expected = "Super", value = "RaidCharge" },
+    input = { expected = "super", value = "raid_charge" },
 }
 for _, range in ipairs({ "150", "200", "300", "370" }) do
     sf2.moves.patch {
         move = "HunterFly_" .. range,
-        input = { expected = "Super", value = "RaidCharge" },
+        input = { expected = "super", value = "raid_charge" },
         priority = { expected = 1110, value = 200 },
     }
 end
 sf2.moves.patch {
     move = "AbilityRootPotionPlayer",
-    input = { expected = "Super", value = "RaidCharge" },
+    input = { expected = "super", value = "raid_charge" },
 }
 -- The reviewed Arkhos and Tenebris casts name different packaged binaries.
 -- Replace the loaded clip on the original move so its perk cooldown and
 -- native projectile graph keep referring to the same caster identity.
 sf2.moves.patch {
     move = "RatWavePlayer",
-    input = { expected = "Up", value = "RaidCharge" },
+    input = { expected = "up", value = "raid_charge" },
     animation = { expected = "rats_wave.bytes",
         value = sf2.assets.binary("animations/magic_water_wave_player") },
-    conditions = { { not_mod = "Stun" }, abilities.ready("rat_wave") },
+    when = { not_mod = { "Stun", abilities.ready("rat_wave") } },
 }
 abilities.extend_lock("rat_wave", "RatWavePlayer")
 sf2.moves.patch {
     move = "PerkFearRayPlayer",
-    input = { expected = "Super", value = "RaidCharge" },
+    input = { expected = "super", value = "raid_charge" },
     animation = { expected = "boss_fear_ability.bytes",
         value = sf2.assets.binary("animations/chest_laser_ray_player") },
-    remove_interval = { name = "Evade", type = "Invulnerable", start = 0, ["end"] = 47 },
-    conditions = { { not_mod = "Stun" }, abilities.ready("fear_ray") },
+    -- The native Evade window runs from sample 0, before the move's first sample (1), so only a
+    -- sample bound can name it.
+    windows = { remove = { invulnerable = { name = "Evade", from_sample = 0, to_sample = 47 } } },
+    when = { not_mod = { "Stun", abilities.ready("fear_ray") } },
 }
 abilities.extend_lock("fear_ray", "PerkFearRayPlayer")
 
@@ -55,8 +57,8 @@ for _, move in ipairs({ "AssistantLongKatanaPlayer", "AssistantBigNaginataPlayer
     "AssistantBigMagariYariPlayer", "AssistantUniqGlaivePlayer" }) do
     sf2.moves.patch {
         move = move,
-        input = { expected = "Super", value = "RaidCharge" },
-        conditions = { abilities.ready("assistants") },
+        input = { expected = "super", value = "raid_charge" },
+        when = { not_mod = abilities.ready("assistants") },
     }
     abilities.extend_lock("assistants", move)
 end

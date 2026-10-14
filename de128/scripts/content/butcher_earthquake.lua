@@ -9,84 +9,76 @@ local earthquake_item = sf2.items.get("core:items/magic/MAGIC_BUTCHER_EARTHQUAKE
 sf2.moves.patch { move = "ButcherEarthquakePlayer", disable = true }
 sf2.moves.patch { move = "ButcherEarthquakeStart", disable = true }
 
+-- Timing: both moves start at sample 1 with 3 frames per sample, so sample N
+-- (N > 1) is game frames 3N .. 3N + 2.
 local start = sf2.moves.register {
     id = "butcher_earthquake_start",
     animation = sf2.assets.binary("animations/butcher_super_attack_activ"),
-    core_templates = { "MagicMissileFly", "MagicMissile" },
-    mid_frames = 2, no_wall_repulsion = true, no_magic_recharge = true,
-    first_frame = 1, priority = 500,
-    direction = { from = { wall = "Back", player = "Parent" }, to = { wall = "Front", player = "Parent" } },
-    align = { axes = { "X", "Z" }, pivot = { node = "Magic-Node2_1" },
-        position = { node = "NPivot", player = "Enemy" } },
+    inherit = { "MagicMissileFly", "MagicMissile" },
+    no_wall_repulsion = true, no_magic_recharge = true,
+    first_sample = 1, priority = 500,
+    face = "with_parent",
+    align = { axes = { "x", "z" }, pivot = { node = "Magic-Node2_1" },
+        position = { node = "pelvis", of = "enemy" } },
     events = { "birth" },
-    conditions = { { animation = "de128:moves/butcher_earthquake_player", player = "Parent" } },
-    locks = {
-        { item = "Weapon", name = "MAGIC_BUTCHER_EARTHQUAKE" },
-        { item = "Skeleton", subtype = "SkeletonMagic" },
-    },
-    intervals = { { type = "Attack", from = 2, attack = {
-        edges = { "Edge1" }, damage = 0.41,
-        damage_terms = { MagicDamage = 0, UnarmedDamage = -25 },
+    when = { parent = { animation = "de128:moves/butcher_earthquake_player" } },
+    only_for = { weapon = { item = "MAGIC_BUTCHER_EARTHQUAKE" }, rig = "SkeletonMagic" },
+    attacks = { {
+        from = 6, edges = { "Edge1" }, damage = { amount = 0.41, magic = 0, unarmed = -25 },
         impulse = { x = 150, y = -300 }, hit = "Earthquake",
-        options = { no_effect = true, no_critical = true, body_part = "Body",
-            defense_types = { "BodyDefense" }, ignores_block = true,
-            ignores_invulnerable = { "Evade", "Recovery", "Dash" } },
-    } } },
-    timeline = {
-        animation_end = { delete_actor = "Me" },
+        no_effect = true, no_critical = true, body_part = "body",
+        defense = { "body" }, ignores_block = true,
+        ignores_invulnerable = { "Evade", "Recovery", "Dash" },
+    } },
+    on = {
+        finish = { delete_actor = "self" },
     },
 }
 
 local player = sf2.moves.register {
     id = "butcher_earthquake_player",
     animation = sf2.assets.binary("animations/butcher_super_attack"),
-    core_templates = { "1key", "BossAbility", "Controlled", "SoundStrike" },
-    mid_frames = 2, no_wall_repulsion = true, first_frame = 1,
-    priority = 110, mirror_node = "NHeel_1",
-    tactic_conditions = {
-        { not_animation = "Jump", player = "Enemy" },
-        { any = {
-            { distance = "X", min = 250, from = { pivot = "Me" }, to = { node = "NPivot", player = "Enemy" } },
-            { animation = "Fall", player = "Enemy" },
-        } },
+    inherit = { "1key", "BossAbility", "Controlled", "SoundStrike" },
+    no_wall_repulsion = true, first_sample = 1,
+    priority = 110,
+    -- No rig requirement here (the ability lock only), so the left-heel default does not apply.
+    mirror = "left_heel",
+    tactic_when = {
+        enemy = { not_animation = "Jump" },
+        any = {
+            { distance = { axis = "x", min = 250, from = { pivot = "self" }, to = { node = "pelvis", of = "enemy" } } },
+            { enemy = { animation = "Fall" } },
+        },
     },
-    align = { axes = { "X", "Z" }, pivot = { node = "NHeel_1" }, position = { pivot = "Me" } },
-    conditions = {
-        { keys = { "RaidCharge" } },
-        { not_mod = "EarthquakeRecharge" },
-        abilities.ready("earthquake"),
-        { not_interval = "SemiUninterrupt" },
-        { not_interval = "Uninterrupt" },
-        { stage = "Fight" },
-        { not_all = {
-            { animation = "$Move" },
-            { interval = "SemiUninterrupt" },
-        } },
-        { not_animation = "Physical" },
+    align = "left_heel",
+    when = {
+        keys = "raid_charge",
+        not_mod = { "EarthquakeRecharge", abilities.ready("earthquake") },
+        controllable = true,
     },
-    locks = { abilities.lock("earthquake") },
-    intervals = {
-        { name = "Unstable", to = 24 },
-        { name = "Uninterrupt", to = 32 },
-        { type = "Block", from = 33 },
-        { name = "Throwable", from = 33 },
+    only_for = { any = abilities.lock("earthquake") },
+    windows = {
+        unstable = { to = 74 },
+        uninterruptible = { to = 98 },
+        block = { from = 99 },
+        throwable = { from = 99 },
     },
-    timeline = {
-        [22] = { { projectile = {
-            name = "Earthquake", core_skeleton = "SkeletonMagic", item = earthquake_item, start_move = start,
+    on = {
+        [66] = { { projectile = {
+            name = "Earthquake", core_skeleton = "SkeletonMagic", item = earthquake_item, start = start,
         } }, { effect = {
             name = "ButcherEarthquake", core_sequence = "mgc_effect_fall", scale = 1,
-            time_scale = 2, looped = false, position = { node = "NPivot", player = "Me", x = 40, y = -40 }, follow = false,
+            time_scale = 2, looped = false, position = { node = "pelvis", of = "self", x = 40, y = -40 }, follow = false,
         } } },
-        [23] = { { shake = {
+        [69] = { { shake = {
             pause_time = 0, effect_time = 60, amplitude_x = 7, frequency_x = 1,
             amplitude_y = 18, frequency_y = 0.5,
-        } }, { play_sound = "snd_bodyfall1", voice = "Male" }, { play_sound = "snd_bodyfall1", voice = "MaleLow" }, { sound = "snd_bucher_touchdown" } },
-        [4] = { { play_sound = "snd_bucher_jump_new", voice = "Male" }, { play_sound = "snd_bucher_jump_new", voice = "MaleLow" } },
+        } }, { sound = "snd_bodyfall1", voice = "male" }, { sound = "snd_bodyfall1", voice = "male_low" }, { sound = { "snd_bucher_touchdown" } } },
+        [12] = { { sound = "snd_bucher_jump_new", voice = "male" }, { sound = "snd_bucher_jump_new", voice = "male_low" } },
         strike = { sound = { "snd_hit1", "snd_hit2", "snd_hit3", "snd_hit4", "snd_hit5", "snd_hit6" } },
     },
-    events = { "key_pressed", { interval_end = "Uninterrupt" }, "animation_end" },
-    direction = { from = { node = "NPivot", player = "Me" }, to = { node = "NPivot", player = "Enemy" } },
+    events = "controlled",
+    face = "enemy",
 }
 
 -- Seconds between earthquakes; recorded as the boss's pacing for its HUD icon.

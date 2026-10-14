@@ -10,61 +10,50 @@ local abilities = require("content.boss_abilities")
 local function smoke(name, sequence, scale, x, y)
     return { effect = {
         name = name, core_sequence = sequence, scale = scale, time_scale = 2, looped = false,
-        position = { node = "NPivot", player = "Me", x = x, y = y }, follow = false,
+        position = { node = "pelvis", of = "self", x = x, y = y }, follow = false,
     } }
 end
 
 local function distance(min)
-    return { distance = "X", min = min, from = { pivot = "Me" }, to = { node = "NPivot", player = "Enemy" } }
+    return { axis = "x", min = min, from = { pivot = "self" }, to = { node = "pelvis", of = "enemy" } }
 end
 
+-- Game frames: the move starts at sample 1 with 3 frames per sample, so sample N is
+-- frames 3N .. 3N + 2 (samples 8 and 12 are frames 24 and 36); the Uninterrupt window
+-- ends with sample 13, on frame 41.
 local move = sf2.moves.register {
     id = "shadow_cloak_player",
     animation = sf2.assets.binary("animations/smoke_bomb"),
-    core_templates = { "1key", "BossAbility", "Controlled", "SoundStrike" },
-    type = "ATTACK", mid_frames = 2, first_frame = 1, priority = 110,
-    mirror_node = "NHeel_1",
-    tactic_conditions = {
-        { any = {
-            distance(400),
-            { all = {
-                distance(100),
-                { any = { { animation = "Fall", player = "Enemy" }, { animation = "Physical", player = "Enemy" } } },
-            } },
-        } },
+    inherit = { "1key", "BossAbility", "Controlled", "SoundStrike" },
+    type = "attack", first_sample = 1, priority = 110,
+    tactic_when = {
+        any = {
+            { distance = distance(400) },
+            { distance = distance(100),
+                any = { { enemy = { animation = "Fall" } }, { enemy = { animation = "Physical" } } } },
+        },
     },
-    align = { axes = { "X", "Z" }, pivot = { node = "NHeel_2" }, position = { pivot = "Me" } },
-    conditions = {
-        { keys = { "RaidCharge" } },
-        abilities.ready("shadow_cloak"),
-        abilities.uncloaked(),
-        { not_interval = "SemiUninterrupt" },
-        { not_interval = "Uninterrupt" },
-        { stage = "Fight" },
-        { not_all = {
-            { animation = "$Move" },
-            { interval = "SemiUninterrupt" },
-        } },
-        { not_animation = "Physical" },
+    align = "right_heel",
+    when = {
+        keys = "raid_charge",
+        not_mod = { abilities.ready("shadow_cloak"), abilities.uncloaked() },
+        controllable = true,
     },
-    locks = {
-        { perk = abilities.perks.shadow_cloak },
-        { item = "Skeleton", subtype = "Skeleton" },
-    },
-    intervals = { { name = "Uninterrupt", to = 13 } },
-    timeline = {
-        [1] = smoke("InvisibilityCloakStart", "mgc_magic_invisible_start", 1.0, -30, 110),
-        [8] = smoke("InvisibilityCloakEnd", "mgc_magic_invisible_end", 1.6, 40, 100),
-        [12] = {
-            { sound = "snd_smoke_bomb" },
-            { play_sound = "snd_m_pl_attack6", voice = "Male" },
-            { play_sound = "snd_low_pl_attack6", voice = "MaleLow" },
-            { play_sound = "snd_f_pl_attack6", voice = "Female" },
+    only_for = { perk = abilities.perks.shadow_cloak, rig = "Skeleton" },
+    windows = { uninterruptible = { to = 41 } },
+    on = {
+        [0] = smoke("InvisibilityCloakStart", "mgc_magic_invisible_start", 1.0, -30, 110),
+        [24] = smoke("InvisibilityCloakEnd", "mgc_magic_invisible_end", 1.6, 40, 100),
+        [36] = {
+            { sound = { "snd_smoke_bomb" } },
+            { sound = "snd_m_pl_attack6", voice = "male" },
+            { sound = "snd_low_pl_attack6", voice = "male_low" },
+            { sound = "snd_f_pl_attack6", voice = "female" },
         },
         strike = { sound = { "snd_hit1", "snd_hit2", "snd_hit3", "snd_hit4", "snd_hit5", "snd_hit6" } },
     },
-    events = { "key_pressed", { interval_end = "Uninterrupt" }, "animation_end" },
-    direction = { from = { node = "NPivot", player = "Me" }, to = { node = "NPivot", player = "Enemy" } },
+    events = "controlled",
+    face = "enemy",
 }
 
 return { move = move }

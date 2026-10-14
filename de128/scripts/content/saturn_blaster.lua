@@ -5,7 +5,7 @@ local sf2 = require("sf2")
 -- its input and priority; patch it in place to preserve those native links.
 sf2.moves.patch {
     move = "SaturnBlasterAbilityPlayer",
-    input = { expected = "Super", value = "RaidCharge" },
+    input = { expected = "super", value = "raid_charge" },
     priority = { expected = 1000, value = 200 },
 }
 

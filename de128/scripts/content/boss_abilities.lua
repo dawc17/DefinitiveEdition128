@@ -344,20 +344,21 @@ sf2.perks.recharge_indicator { perk = perks.titans_shield, flags = { sf2.mod.id 
 sf2.perks.recharge_indicator { perk = perks.shadow_cloak, flags = { cloak_flag("recharge"), cloak_flag("active") },
     ready = icon("shadow_cloak"), cooldown = cooldown_icon("shadow_cloak") }
 
--- Locks for de128-registered ability moves: the core boss perk (opponents) or
--- the player's enchantment.
+-- Requirement for de128-registered ability moves: the core boss perk (opponents) or
+-- the player's enchantment. A list for `any`, so a move writes
+-- only_for = { any = abilities.lock("x"), rig = "Skeleton" }.
 local function lock(key)
-    return { any = { { perk = core_perks[key] }, { perk = perks[key] } } }
+    return { { perk = core_perks[key] }, { perk = perks[key] } }
 end
 
--- Move condition: the player's recharge for this ability has finished.
+-- Flag name for a move's `not_mod` list: the player's recharge for this ability has finished.
 local function ready(key)
-    return { not_mod = flags[key] }
+    return flags[key]
 end
 
--- Move condition: the Shadow Cloak is not active (the archive's UnblockableActive).
+-- Flag name for a move's `not_mod` list: the Shadow Cloak is not active (the archive's UnblockableActive).
 local function uncloaked()
-    return { not_mod = cloak_flag("active") }
+    return cloak_flag("active")
 end
 
 -- Native moves keep their core perk lock and gain the enchantment as an alternative.

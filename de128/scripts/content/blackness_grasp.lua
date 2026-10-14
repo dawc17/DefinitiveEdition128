@@ -7,9 +7,9 @@ local abilities = require("content.boss_abilities")
 local hand_item = sf2.items.get("core:items/magic/MAGIC_ACID_CLOUD")
 -- Spawned Eclipse actors carry the two hidden items but not parent perk slots;
 -- BlackHand's actor name and hidden item still keep both phases exclusive.
-local hand_locks = {
-    { item = "Skeleton", name = "SkeletonMagic" },
-    { item = "Weapon", name = "MAGIC_ACID_CLOUD" },
+local hand_only_for = {
+    rig = { item = "SkeletonMagic" },
+    weapon = { item = "MAGIC_ACID_CLOUD" },
 }
 
 for _, name in ipairs({ "BlacknessGraspAbilityPlayer", "BlacknessGraspAbilityHandStart",
@@ -17,85 +17,76 @@ for _, name in ipairs({ "BlacknessGraspAbilityPlayer", "BlacknessGraspAbilityHan
     sf2.moves.patch { move = name, disable = true }
 end
 
+-- Frames: hand_attack starts at sample 3 with 5 frames per sample (sample 7 is frame 25,
+-- sample 12 is frame 50); hand_start and the cast start at sample 2 with 3 frames per
+-- sample (sample 3 is frame 6, 6 is 15, 9 is 24, 17 is 48, and the cast's sample 39 ends on frame 116).
 local hand_attack = sf2.moves.register {
     id = "blackness_grasp_hand_attack",
     animation = sf2.assets.binary("animations/magic_empty"),
-    core_templates = { "BossAbility", "MagicMissileFly", "MagicMissile" },
-    mid_frames = 4, first_frame = 3, end_frame = 14, priority = 500,
+    inherit = { "BossAbility", "MagicMissileFly", "MagicMissile" },
+    frames_per_sample = 5, first_sample = 3, last_sample = 14, priority = 500,
     no_interpolation_frames = true, no_magic_recharge = true,
-    align = { axes = { "X", "Z" }, pivot = { animation = true }, position = { animation = "Me" } },
-    conditions = {
-        { animation = "de128:moves/blackness_grasp_hand_start" },
-        { actor = "BlackHand" },
+    align = { axes = { "x", "z" }, pivot = { animation = true }, position = { animation = "self" } },
+    when = {
+        animation = "de128:moves/blackness_grasp_hand_start",
+        actor = "BlackHand",
     },
-    locks = hand_locks,
+    only_for = hand_only_for,
     velocity = { ax = -0.4 },
-    intervals = { { type = "Attack", from = 7, attack = {
-        edges = { "lightningEdge1" }, damage = 0.4,
-        damage_terms = { MagicDamage = 0, UnarmedDamage = -25 },
+    attacks = { {
+        from = 25, edges = { "lightningEdge1" }, damage = { amount = 0.4, magic = 0, unarmed = -25 },
         impulse = { x = -600 }, hit = "Physycal",
-        options = { no_effect = true, no_critical = true, body_part = "Body",
-            defense_types = { "BodyDefense" }, ignores_block = true,
-            ignores_invulnerable = { "Evade", "Recovery", "Dash" } },
-    } } },
-    timeline = {
-        [12] = { delete_actor = "Me" },
+        no_effect = true, no_critical = true, body_part = "body", defense = { "body" },
+        ignores_block = true, ignores_invulnerable = { "Evade", "Recovery", "Dash" },
+    } },
+    on = {
+        [50] = { delete_actor = "self" },
     },
 }
 
 local hand_start = sf2.moves.register {
     id = "blackness_grasp_hand_start",
     animation = sf2.assets.binary("animations/magic_empty"),
-    core_templates = { "BossAbility", "MagicMissileFly", "MagicMissile" },
-    mid_frames = 2, first_frame = 2, priority = 500, no_magic_recharge = true,
-    align = { axes = { "X", "Z" }, pivot = { node = "Magic-Node2_1" },
-        position = { node = "NPivot", player = "Enemy", x = 100 } },
-    direction = { from = { wall = "Back", player = "Parent" }, to = { wall = "Front", player = "Parent" } },
-    conditions = { { actor = "BlackHand" } },
-    locks = hand_locks,
-    timeline = {
-        [3] = { effect = {
+    inherit = { "BossAbility", "MagicMissileFly", "MagicMissile" },
+    first_sample = 2, priority = 500, no_magic_recharge = true,
+    align = { axes = { "x", "z" }, pivot = { node = "Magic-Node2_1" },
+        position = { node = "pelvis", of = "enemy", x = 100 } },
+    face = "with_parent",
+    when = { actor = "BlackHand" },
+    only_for = hand_only_for,
+    on = {
+        [6] = { effect = {
             name = "BlackHandEFX", core_sequence = "mgc_effect_black_hand",
             time_scale = 3, scale = 1.5,
-            position = { node = "Magic-Node2_1", player = "Me", x = 0, y = -10 }, follow = true,
+            position = { node = "Magic-Node2_1", of = "self", x = 0, y = -10 }, follow = true,
         } },
-        [6] = { sound = "snd_shadow_grasp" },
+        [15] = { sound = { "snd_shadow_grasp" } },
     },
 }
 
 local cast = sf2.moves.register {
     id = "blackness_grasp_player",
     animation = sf2.assets.binary("animations/darkness_hug_player"),
-    core_templates = { "1key", "BossAbility", "Controlled", "SoundStrike" },
-    type = "ATTACK", mid_frames = 2, first_frame = 2, priority = 200,
-    mirror_node = "NHeel_1", no_wall_repulsion = true,
-    locks = { abilities.lock("grasp_of_darkness"),
-        { item = "Skeleton", subtype = "Skeleton" } },
-    direction = { from = { node = "NPivot", player = "Me" }, to = { node = "NPivot", player = "Enemy" } },
-    align = { axes = { "X", "Z" }, pivot = { node = "NHeel_2" },
-        position = { pivot = "Me" } },
+    inherit = { "1key", "BossAbility", "Controlled", "SoundStrike" },
+    type = "attack", first_sample = 2, priority = 200,
+    no_wall_repulsion = true,
+    only_for = { any = abilities.lock("grasp_of_darkness"), rig = "Skeleton" },
+    face = "enemy",
+    align = "right_heel",
     events = { "key_pressed" },
-    conditions = {
-        { not_interval = "SemiUninterrupt" },
-        { keys = { "RaidCharge" } },
-        { not_mod = "GraspOfDarknessCD" },
-        abilities.ready("grasp_of_darkness"),
-        { not_interval = "Uninterrupt" },
-        { stage = "Fight" },
-        { not_all = {
-            { animation = "$Move" },
-            { interval = "SemiUninterrupt" },
-        } },
-        { not_animation = "Physical" },
+    when = {
+        keys = "raid_charge",
+        not_mod = { "GraspOfDarknessCD", abilities.ready("grasp_of_darkness") },
+        controllable = true,
     },
-    tactic_conditions = { { distance = "X", min = 450, from = { pivot = "Me" }, to = { node = "NPivot", player = "Enemy" } } },
-    intervals = { { name = "Uninterrupt", to = 39 } },
-    timeline = {
-        [9] = { projectile = {
+    tactic_when = { distance = { axis = "x", min = 450, from = { pivot = "self" }, to = { node = "pelvis", of = "enemy" } } },
+    windows = { uninterruptible = { to = 116 } },
+    on = {
+        [24] = { projectile = {
             name = "BlackHand", core_skeleton = "SkeletonMagic", item = hand_item,
-            start_move = hand_start,
+            start = hand_start,
         } },
-        [17] = { play_animation = hand_attack, player = "Child", child_name = "BlackHand" },
+        [48] = { play = hand_attack, target = "child", child = "BlackHand" },
     },
 }
 

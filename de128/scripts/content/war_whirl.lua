@@ -10,52 +10,50 @@ local HITS = { "snd_hit1", "snd_hit2", "snd_hit3", "snd_hit4", "snd_hit5", "snd_
 local function whirl(name, sequence, looped, time_scale)
     return { effect = {
         name = name, core_sequence = sequence, scale = 1.5, time_scale = time_scale, looped = looped,
-        position = { node = "NStomach", player = "Me", x = 3, y = 15 }, follow = true,
+        position = { node = "stomach", of = "self", x = 3, y = 15 }, follow = true,
     } }
 end
 
+-- Game frames: the move starts at sample 1 with 3 frames per sample, so sample N is frames
+-- 3N .. 3N + 2 (sample 3 is frame 9, 13 is 39, 14 is 42, 60 is 180, 70 ends on frame 212,
+-- 80 on frame 242).
 local move = sf2.moves.register {
     id = "war_whirl_player",
     animation = "animations/boss_war_ability",
-    core_templates = { "1key", "MagicPlayer", "Controlled", "SoundStrike" },
-    mid_frames = 2, first_frame = 1, end_frame = 81, priority = 110,
-    mirror_node = "NHeel_1",
+    inherit = { "1key", "MagicPlayer", "Controlled", "SoundStrike" },
+    first_sample = 1, last_sample = 81, priority = 110,
     events = "controlled",
-    direction = "face_enemy",
-    align = { axes = { "X", "Z" }, pivot = { node = "NHeel_1" }, position = { pivot = "Me" } },
+    face = "enemy",
+    align = "left_heel",
 
-    conditions = {
-        { key = "RaidCharge" },
-        { not_mod = "WarRecharge" }, abilities.ready("war_whirl"), { not_mod = "Concussion" }, { not_mod = "Stun" },
-        { controllable = true },
+    when = {
+        keys = "raid_charge",
+        not_mod = { "WarRecharge", abilities.ready("war_whirl"), "Concussion", "Stun" },
+        controllable = true,
     },
-    locks = {
-        abilities.lock("war_whirl"),
-        { item = "Skeleton", subtype = "Skeleton" },
-    },
-    tactic_conditions = {
-        { distance = "X", max = 600, from = { pivot = "Me" }, to = { node = "NPivot", player = "Enemy" } },
-        { distance = "X", min = 400, from = { node = "NPivot", player = "Me" }, to = { wall = "Front", player = "Me" } },
-    },
+    only_for = { any = abilities.lock("war_whirl"), rig = "Skeleton" },
+    tactic_when = { all = {
+        { distance = { axis = "x", max = 600, from = { pivot = "self" }, to = { node = "pelvis", of = "enemy" } } },
+        { distance = { axis = "x", min = 400, from = { node = "pelvis", of = "self" }, to = { wall = "front", of = "self" } } },
+    } },
 
-    intervals = {
-        { name = "Uninterrupt", to = 80 },
-        { type = "Attack", from = 14, to = 70, attack = {
-            edges = { "EHand_1", "EFingers_1", "EArm_1", "EArm_2", "EForearm_2", "EHand_2", "EFingers_2", "EChest" },
-            damage = 0.40, damage_terms = { MagicDamage = 0, UnarmedDamage = -25 },
-            impulse = { x = 150, y = -600 }, hit = "Physycal",
-            options = { no_critical = true, body_part = "Body", defense_types = { "BodyDefense" },
-                ignores_block = true, ignores_invulnerable = { "Evade", "Recovery", "Dash" } },
-        } },
-    },
+    windows = { uninterruptible = { to = 242 } },
+    attacks = { {
+        from = 42, to = 212,
+        edges = { "EHand_1", "EFingers_1", "EArm_1", "EArm_2", "EForearm_2", "EHand_2", "EFingers_2", "EChest" },
+        damage = { amount = 0.40, magic = 0, unarmed = -25 },
+        impulse = { x = 150, y = -600 }, hit = "Physycal",
+        no_critical = true, body_part = "body", defense = { "body" },
+        ignores_block = true, ignores_invulnerable = { "Evade", "Recovery", "Dash" },
+    } },
 
-    timeline = {
-        [3] = { whirl("MagicWarWhirlffectStart", "mgc_war_ability_start", false, 3), { sound = "snd_blade_fury" } },
-        [13] = whirl("MagicWarWhirlffectMiddle", "mgc_war_ability_middle", true, 1),
-        [60] = { { stop_effect = "MagicWarWhirlffectMiddle" },
+    on = {
+        [9] = { whirl("MagicWarWhirlffectStart", "mgc_war_ability_start", false, 3), { sound = { "snd_blade_fury" } } },
+        [39] = whirl("MagicWarWhirlffectMiddle", "mgc_war_ability_middle", true, 1),
+        [180] = { { stop_effect = "MagicWarWhirlffectMiddle" },
             whirl("MagicWarWhirlffectMiddle", "mgc_war_ability_end", false, 3) },
         hit = { { stop_effect = "MagicWarWhirlffectMiddle" }, { stop_sound = "snd_blade_fury" } },
-        animation_end = { { stop_effect = "MagicWarWhirlffectMiddle" }, { stop_sound = "snd_blade_fury" } },
+        finish = { { stop_effect = "MagicWarWhirlffectMiddle" }, { stop_sound = "snd_blade_fury" } },
         strike = { sound = HITS },
     },
 }

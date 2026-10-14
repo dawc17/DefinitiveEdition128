@@ -10,106 +10,99 @@ sf2.moves.patch { move = "HermitStormPlayer", disable = true }
 sf2.moves.patch { move = "HermitStormPlayerIdle", disable = true }
 sf2.moves.patch { move = "Win_HermitStorm", disable = true }
 
+-- Frames: hermit_storm_idle starts at sample 3 and the player move at sample 1, both
+-- with 3 frames per sample. Sample N is game frames (N - first + 1) * 3 .. +2, and the
+-- first sample is frames 0-5.
 local win = sf2.moves.register {
     id = "hermit_storm_win", animation = sf2.assets.binary("animations/hermit_super_attack_idle"),
-    core_templates = { "Win", "EndStance", "StageStance", "Stance" },
-    mid_frames = 2, first_frame = 0, end_frame = 54, priority = 100,
-    ends_stage = true, mirror_node = "NHeel_1",
-    align = { axes = { "X", "Z" }, pivot = { node = "NHeel_2" }, position = { pivot = "Me" } },
-    transitions = { { frame_shift = 0, conditions = { { animation = "de128:moves/hermit_storm_idle" }, { animation = "de128:moves/hermit_storm_win" } } } },
-    locks = { { item = "Skeleton", subtype = "Skeleton" } },
-    conditions = {
-        { any = { { animation = "de128:moves/hermit_storm_win" }, { animation = "de128:moves/hermit_storm_idle" } } },
-        { round_result = "Victory" },
-        { stage = "EndStance" },
+    inherit = { "Win", "EndStance", "StageStance", "Stance" },
+    last_sample = 54, priority = 100,
+    ends_stage = true,
+    align = "right_heel",
+    transitions = { { sample_shift = 0, when = { all = { { animation = "de128:moves/hermit_storm_idle" }, { animation = "de128:moves/hermit_storm_win" } } } } },
+    only_for = { rig = "Skeleton" },
+    when = {
+        any = { { animation = "de128:moves/hermit_storm_win" }, { animation = "de128:moves/hermit_storm_idle" } },
+        round_result = "victory",
+        stage = "end_stance",
     },
-    intervals = { { name = "Uninterrupt" }, { type = "Block" }, { name = "Throwable" } },
-    events = { { round_stage_start = "EndStance" },
-        { interval_end = "Uninterrupt" }, "animation_end" },
-    direction = { from = { node = "NPivot", player = "Me" }, to = { node = "NPivot", player = "Enemy" } },
+    windows = { uninterruptible = true, block = true, throwable = true },
+    events = { { round_stage_start = "end_stance" },
+        { interval_end = "uninterruptible" }, "animation_end" },
+    face = "enemy",
 }
 
 local idle_actions = {
-        [25] = { projectile = {
+        [69] = { projectile = {
         name = "HermitStorm", core_skeleton = "SkeletonMagic", item = storm_item,
     } },
-        [40] = { projectile = {
+        [114] = { projectile = {
         name = "HermitStorm", core_skeleton = "SkeletonMagic", item = storm_item,
     } },
         hit = { stop_effect = "HermitStormLevitation" },
     }
-for _, frame in ipairs({ 3, 10, 18, 26, 34, 42, 50 }) do
-    idle_actions[frame] = { sound = "snd_hermit_storm_idle" }
+for _, frame in ipairs({ 0, 24, 48, 72, 96, 120, 144 }) do
+    idle_actions[frame] = { sound = { "snd_hermit_storm_idle" } }
 end
 local idle = sf2.moves.register {
     id = "hermit_storm_idle", animation = sf2.assets.binary("animations/hermit_super_attack_idle"),
-    mid_frames = 2, first_frame = 3, end_frame = 54, priority = 999,
-    mirror_node = "NHeel_1", tactic_equivalent = "StanceIdle", ends_stage = true,
-    align = { axes = { "X", "Z" }, pivot = { node = "NHeel_2" }, position = { pivot = "Me" } },
+    first_sample = 3, last_sample = 54, priority = 999,
+    -- No rig requirement here (the ability lock only), so the left-heel default does not apply.
+    mirror = "left_heel", tactic_equivalent = "StanceIdle", ends_stage = true,
+    align = "right_heel",
     events = { "animation_end" },
-    conditions = { { any = { { animation = "de128:moves/hermit_storm_player" }, { animation = "de128:moves/hermit_storm_idle" }, { animation = "de128:moves/hermit_storm_win" } } } },
-    locks = { abilities.lock("hermit_storm") },
-    intervals = { { name = "Unstable" }, { name = "SemiUninterrupt", from = 36 },
-        { name = "Uninterrupt", to = 35 } },
-    timeline = idle_actions,
+    when = { any = { { animation = "de128:moves/hermit_storm_player" }, { animation = "de128:moves/hermit_storm_idle" }, { animation = "de128:moves/hermit_storm_win" } } },
+    only_for = { any = abilities.lock("hermit_storm") },
+    windows = { unstable = true, semi_uninterruptible = { from = 102 }, uninterruptible = { to = 101 } },
+    on = idle_actions,
 }
 
 local edges = { "EArm_1", "EArm_2", "EChest", "EForearm_1", "EForearm_2",
     "EHand_2", "EFingers_2", "EForearm_1", "EHand_1", "EFingers_1" }
-local terms = { WeaponDamage = 0, UnarmedDamage = -10 }
-local function attack(start, finish, hit)
-    return { type = "Attack", from = start, to = finish, attack = {
-        edges = edges, damage = 0.05, damage_terms = terms,
+local damage = { amount = 0.05, weapon = 0, unarmed = -10 }
+local function attack(from, to, hit)
+    return { from = from, to = to,
+        edges = edges, damage = damage,
         impulse = { x = 345, y = -205, z = -350 }, hit = hit,
-    } }
+    }
 end
 local player = sf2.moves.register {
     id = "hermit_storm_player", animation = sf2.assets.binary("animations/hermit_super_attack"),
-    core_templates = { "1key", "BossAbility", "Controlled", "SoundStrike" },
-    mid_frames = 2, no_wall_repulsion = true, first_frame = 1,
-    priority = 110, mirror_node = "NHeel_1",
-    tactic_conditions = {
-        { distance = "X", min = 100, from = { pivot = "Me" }, to = { node = "NPivot", player = "Enemy" } },
-        { distance = "X", min = 200, from = { wall = "Back", player = "Me" }, to = { node = "NHeel_1", player = "Me" } },
-        { distance = "X", min = 200, from = { node = "NHeel_1", player = "Me" }, to = { wall = "Front", player = "Me" } },
+    inherit = { "1key", "BossAbility", "Controlled", "SoundStrike" },
+    no_wall_repulsion = true, first_sample = 1,
+    priority = 110,
+    tactic_when = { all = {
+        { distance = { axis = "x", min = 100, from = { pivot = "self" }, to = { node = "pelvis", of = "enemy" } } },
+        { distance = { axis = "x", min = 200, from = { wall = "back", of = "self" }, to = { node = "left_heel", of = "self" } } },
+        { distance = { axis = "x", min = 200, from = { node = "left_heel", of = "self" }, to = { wall = "front", of = "self" } } },
+    } },
+    align = "left_heel",
+    when = {
+        keys = "raid_charge",
+        not_mod = { "HermitStormRecharge", abilities.ready("hermit_storm") },
+        controllable = true,
     },
-    align = { axes = { "X", "Z" }, pivot = { node = "NHeel_1" }, position = { pivot = "Me" } },
-    conditions = {
-        { keys = { "RaidCharge" } },
-        { not_mod = "HermitStormRecharge" },
-        abilities.ready("hermit_storm"),
-        { not_interval = "SemiUninterrupt" },
-        { not_interval = "Uninterrupt" },
-        { stage = "Fight" },
-        { not_all = {
-            { animation = "$Move" },
-            { interval = "SemiUninterrupt" },
-        } },
-        { not_animation = "Physical" },
-    },
-    locks = { abilities.lock("hermit_storm"),
-        { item = "Skeleton", subtype = "Skeleton" } },
-    intervals = { { name = "Unstable" }, { name = "Uninterrupt", to = 36 },
-        { name = "SemiUninterrupt", from = 36 },
-        attack(8, 9, "High"), attack(11, 19, "Low"), attack(20, 27, "Low") },
-    timeline = {
-        [20] = { projectile = {
+    only_for = { any = abilities.lock("hermit_storm"), rig = "Skeleton" },
+    windows = { unstable = true, uninterruptible = { to = 110 }, semi_uninterruptible = { from = 108 } },
+    attacks = { attack(24, 29, "High"), attack(33, 59, "Low"), attack(60, 83, "Low") },
+    on = {
+        [60] = { projectile = {
         name = "HermitStorm", core_skeleton = "SkeletonMagic", item = storm_item,
     } },
-        [19] = { effect = {
+        [57] = { effect = {
             name = "HermitStormLevitation", core_sequence = "mgc_effect_levitation_middle",
             scale = 1.5, time_scale = 2, looped = true, on_background = true,
-            position = { node = "NStomach", player = "Me", x = 3, y = 15 }, follow = true,
+            position = { node = "stomach", of = "self", x = 3, y = 15 }, follow = true,
         } },
         hit = { stop_effect = "HermitStormLevitation" },
-        [1] = { sound = "snd_hermit_storm_start" },
-        [31] = { sound = "snd_hermit_storm_idle" },
-        [39] = { sound = "snd_hermit_storm_idle" },
+        [0] = { sound = { "snd_hermit_storm_start" } },
+        [93] = { sound = { "snd_hermit_storm_idle" } },
+        [117] = { sound = { "snd_hermit_storm_idle" } },
         strike = { sound = {
             "snd_hit1", "snd_hit2", "snd_hit3", "snd_hit4", "snd_hit5", "snd_hit6" } },
     },
-    events = { "key_pressed", { interval_end = "Uninterrupt" }, "animation_end" },
-    direction = { from = { node = "NPivot", player = "Me" }, to = { node = "NPivot", player = "Enemy" } },
+    events = "controlled",
+    face = "enemy",
 }
 
 -- Seconds between storms; recorded as the boss's pacing for its HUD icon.

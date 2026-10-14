@@ -8,29 +8,29 @@ data.profile.display_name = sf2.localization.register {
 
 for _, move in ipairs(data.item_lock_extensions) do
     sf2.moves.extend_item_lock {
-        move = move, item_type = "Weapon", source_subtype = "Sai", subtype = "ChineseSwords",
+        move = move, slot = "weapon", source_subtype = "Sai", subtype = "ChineseSwords",
     }
 end
 
 local slash = sf2.moves.register {
     id = "chinese_swords_super_slash", animation = animation,
-    core_templates = { "3key", "Forward", "Weapon", "Jump", "Controlled", "NotTitan", "SoundStrike" },
-    type = "ATTACK", mid_frames = 2, first_frame = 4, priority = 130,
-    tactic_weapon = "HermitSwords", mirror_node = "NHeel_1",
+    inherit = { "3key", "Forward", "Weapon", "Jump", "Controlled", "NotTitan", "SoundStrike" },
+    type = "attack", first_sample = 4, priority = 130,
+    tactic_weapon = "HermitSwords",
     profile = data.profile, tactic_distance = data.tactic_distance,
-    conditions = data.conditions, locks = data.locks, intervals = data.intervals,
-    transitions = data.transitions, align = data.align, direction = data.direction,
-    timeline = data.timeline,
-    events = { "key_pressed", { interval_end = "Uninterrupt" }, "animation_end" },
+    when = data.when, only_for = data.only_for, windows = data.windows, attacks = data.attacks,
+    transitions = data.transitions, align = data.align, face = data.face,
+    on = data.on,
+    events = "controlled",
 }
 local preview = sf2.moves.register {
     id = "shop_chinese_swords_super_slash", animation = animation,
-    core_templates = { "ShopTryOn", "StanceShop", "StageStance", "Stance" },
-    mid_frames = 2, first_frame = 2, priority = 1, mirror_node = "NHeel_1", ends_stage = true,
+    inherit = { "ShopTryOn", "StanceShop", "StageStance", "Stance" },
+    first_sample = 2, priority = 1, ends_stage = true,
     no_wall_repulsion = data.preview.no_wall_repulsion,
     no_interpolation_frames = data.preview.no_interpolation_frames,
-    locks = data.preview.locks, align = data.preview.align, direction = data.direction,
-    timeline = data.preview.timeline, events = { { round_stage_start = "TryOn" } },
+    only_for = data.preview.only_for, align = data.preview.align, face = data.face,
+    on = data.preview.on, events = { { round_stage_start = "try_on" } },
 }
 sf2.items.set_subtype {
     item = sf2.items.get("core:items/weapon/WEAPON_CHNY21_JIAN"), subtype = "ChineseSwords",

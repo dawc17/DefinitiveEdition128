@@ -5,10 +5,12 @@ local abilities = require("content.boss_abilities")
 -- native chain phases already match the reviewed DE graph.
 sf2.moves.patch {
     move = "LightingChainPlayer",
-    input = { expected = "Super", value = "RaidCharge" },
+    input = { expected = "super", value = "raid_charge" },
     priority = { expected = 9000, value = 200 },
-    interval_start = { name = "Uninterrupt", expected = 9, value = 0 },
-    conditions = { abilities.ready("lightning_chain") },
+    -- The native Uninterrupt window starts at sample 9 (frame 24) and the new start is sample 0,
+    -- before the move's first sample (2), so these bounds are samples.
+    windows = { change = { uninterruptible = { expected = { from_sample = 9, to_sample = 39 }, value = { from_sample = 0 } } } },
+    when = { not_mod = abilities.ready("lightning_chain") },
 }
 abilities.extend_lock("lightning_chain", "LightingChainPlayer")
 
@@ -18,7 +20,7 @@ local chain_perk = sf2.perks.get("core:perks/PERK_LIGHTING_CHAIN")
 for _, name in ipairs({ "LightingChainStart", "LightingChain50", "LightingChain150",
     "LightingChain300", "LightingChain400" }) do
     sf2.moves.remove_perk_lock { move = name, perk = chain_perk }
-    sf2.moves.patch { move = name, conditions = { { actor = "LightningChain" } } }
+    sf2.moves.patch { move = name, when = { actor = "LightningChain" } }
 end
 
 -- Opening wait in frames; the tactic and the boss's HUD pacing share it.
