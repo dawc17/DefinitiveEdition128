@@ -26,11 +26,11 @@ end
 local master_behavior = sf2.behaviors.register {
     id = "master_of_style",
     parameters = {
-        active_frames = { type = sf2.behaviors.INTEGER, default = 300 },
-        drain = { type = sf2.behaviors.NUMBER, default = 0.1 },
+        active_frames = 300,
+        drain = 0.1,
     },
     state = { lifetime = "round", fields = {
-        expires = { type = sf2.behaviors.INTEGER, default = 0 },
+        expires = 0,
     } },
     on_style_changed = function(self, fighter, event)
         -- XML ORs Min=Brutal, Min=Aggressive, Min=Crazy. Brutal is native rank 2.
@@ -69,14 +69,14 @@ end
 local relentless_behavior = sf2.behaviors.register {
     id = "relentless",
     parameters = {
-        active_time = { type = sf2.behaviors.INTEGER, default = 300 },
-        combo_min_count = { type = sf2.behaviors.INTEGER, default = 3 },
-        combo_max_count = { type = sf2.behaviors.INTEGER, default = 15 },
-        damage_per_stack = { type = sf2.behaviors.NUMBER, default = 0.01 },
+        active_time = 300,
+        combo_min_count = 3,
+        combo_max_count = 15,
+        damage_per_stack = 0.01,
     },
     state = { lifetime = "round", fields = {
-        combo_count = { type = sf2.behaviors.INTEGER, default = 0 },
-        expires = { type = sf2.behaviors.INTEGER, default = 0 },
+        combo_count = 0,
+        expires = 0,
     } },
     on_round_begin = function(self, fighter)
         self.state.combo_count = 0
@@ -129,13 +129,13 @@ for rank = 1, 5 do
 end
 
 local master = sf2.perks.register {
-    id = "master_of_style", behavior = master_behavior, kind = sf2.perks.SINGLE,
+    id = "master_of_style", behavior = master_behavior,
     display_name = text("perk.master_of_style.name", "Master of Style"),
     description = master_upgrades[5].description, icon = master_icon,
     upgrades = master_upgrades, initial_upgrade = 1,
 }
 local relentless = sf2.perks.register {
-    id = "relentless", behavior = relentless_behavior, kind = sf2.perks.SINGLE,
+    id = "relentless", behavior = relentless_behavior,
     display_name = text("perk.relentless.name", "Relentless"),
     description = relentless_upgrades[1].description, icon = relentless_icon,
     upgrades = relentless_upgrades, initial_upgrade = 1,

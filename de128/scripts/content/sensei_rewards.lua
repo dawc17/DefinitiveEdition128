@@ -16,14 +16,14 @@ for act, data in ipairs(acts) do
     local normal = {}
     for fight, gems in ipairs(data.normal) do
         normal[fight] = {
-            sf2.rewards.register { id = prefix .. "normal_" .. fight .. "_0", prize_base = data.base },
-            sf2.rewards.register { id = prefix .. "normal_" .. fight .. "_1", experience = 2, gems = gems, prize_base = data.base },
+            [0] = sf2.rewards.register { id = prefix .. "normal_" .. fight .. "_0", prize_base = data.base },
+            [1] = sf2.rewards.register { id = prefix .. "normal_" .. fight .. "_1", experience = 2, gems = gems, prize_base = data.base },
         }
     end
     local eclipse = {}
-    -- Native slots count wins, including zero and partially completed gauntlets.
+    -- Rewards are keyed by wins, including zero and partially completed gauntlets.
     for wins = 0, #data.normal do
-        eclipse[wins + 1] = sf2.rewards.register {
+        eclipse[wins] = sf2.rewards.register {
             id = prefix .. "eclipse_" .. wins,
             gems = wins == #data.normal and data.eclipse or 0,
             prize_base = 1,

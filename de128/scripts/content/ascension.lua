@@ -19,11 +19,11 @@ local defeated = label("ascension.defeated", "Your Ascension run has ended. The 
 sf2.state.register {
     version = 1,
     fields = {
-        ascension_rng = { type = sf2.state.INTEGER, default = 128731 },
-        ascension_foes = { type = sf2.state.STRING, default = "" },
-        ascension_trials = { type = sf2.state.STRING, default = "" },
-        ascension_buffs = { type = sf2.state.STRING, default = "" },
-        ascension_ranged = { type = sf2.state.STRING, default = "" },
+        ascension_rng = 128731,
+        ascension_foes = "",
+        ascension_trials = "",
+        ascension_buffs = "",
+        ascension_ranged = "",
     },
 }
 
@@ -56,8 +56,8 @@ end
 -- Monk/material lottery need separate public contracts before replacing them.
 local zone = sf2.zones.register { id = "ascension", file = "Map1.2", start = false }
 local battle = sf2.battles.register {
-    id = "ascension", zone = zone, type = sf2.battles.STORY, x = -374, y = 50,
-    alias = title, title = title, description = overview, icon = "ascension",
+    id = "ascension", zone = zone, x = -374, y = 50,
+    title = title, description = overview, icon = "ascension",
     preview = "preview_main.statue", location = "core:locations/statue", music = "halls_of_the_dead_heroes",
 }
 local loss_reward = sf2.rewards.register { id = "ascension_preview_loss", items = {} }
@@ -73,7 +73,7 @@ for step = 1, 5 do
         id = "ascension_trial_" .. step, battle = battle, power = 0,
         rounds = 1, round_time = 150, replays = 1, location = "core:locations/statue", music = "halls_of_the_dead_heroes",
         description = overview, warriors = { opponents[step][1] },
-        rules = trial.base, rewards = { loss_reward, win_reward },
+        rules = trial.base, rewards = { [0] = loss_reward, [1] = win_reward },
     }
 end
 
@@ -143,28 +143,28 @@ sf2.modes.register {
 }
 
 sf2.quests.register {
-    id = "ascension_entry", place = "map", events = { "session" },
-    actions = { { type = "show_battle", battle = battle, locked = false } },
+    id = "ascension_entry", place = "map", on = "session",
+    actions = { { show_battle = battle, locked = false } },
 }
 sf2.quests.register {
-    id = "ascension_complete", place = "map", events = { "fight_end" },
+    id = "ascension_complete", place = "map", on = "fight_end",
     conditions = {
-        { op = "eq", left = { kind = "event_fight" }, right = { kind = "fight_id", fight = fights[5] } },
-        { op = "eq", left = { kind = "fight_result" }, right = "Win" },
+        { eq = { { event_fight = true }, { fight_id = fights[5] } } },
+        { eq = { { fight_result = true }, "Win" } },
     },
-    actions = { { type = "dialog", title = title, image = "character_puppeteer", lines = { completed } } },
+    actions = { { dialog = { title = title, image = "character_puppeteer", lines = { completed } } } },
 }
 local ours = {}
 for _, fight in ipairs(fights) do
-    ours[#ours + 1] = { op = "eq", left = { kind = "event_fight" }, right = { kind = "fight_id", fight = fight } }
+    ours[#ours + 1] = { eq = { { event_fight = true }, { fight_id = fight } } }
 end
 sf2.quests.register {
-    id = "ascension_defeat", place = "map", events = { "fight_end" },
+    id = "ascension_defeat", place = "map", on = "fight_end",
     conditions = {
-        { op = "any", conditions = ours },
-        { op = "eq", left = { kind = "fight_result" }, right = "Win", ["not"] = true },
+        { any = ours },
+        { eq = { { fight_result = true }, "Win" }, negate = true },
     },
-    actions = { { type = "dialog", title = title, image = "character_puppeteer", lines = { defeated } } },
+    actions = { { dialog = { title = title, image = "character_puppeteer", lines = { defeated } } } },
 }
 
 return { fights = fights, battle = battle }

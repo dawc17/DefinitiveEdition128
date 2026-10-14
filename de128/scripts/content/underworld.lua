@@ -286,7 +286,7 @@ local function install(raid_charge_rule)
                 end
                 local rewards = {}
                 for index, r in ipairs(fight_spec.rewards) do
-                    rewards[index] = sf2.rewards.register {
+                    rewards[index - 1] = sf2.rewards.register {
                         id = prefix .. "_r" .. (index - 1), prize_base = r.prize_base, experience = r.experience,
                         gems = r.gems, currencies = r.currencies,
                     }

@@ -98,12 +98,12 @@ end
 local recharge_behavior = sf2.behaviors.register {
     id = behavior_id,
     parameters = {
-        key = sf2.behaviors.STRING,
-        frames = sf2.behaviors.INTEGER,
-        initial_frames = sf2.behaviors.INTEGER,
+        key = { type = sf2.behaviors.STRING },
+        frames = { type = sf2.behaviors.INTEGER },
+        initial_frames = { type = sf2.behaviors.INTEGER },
     },
     state = { lifetime = "round", fields = {
-        started = { type = sf2.behaviors.BOOLEAN, default = false },
+        started = false,
     } },
     on_tick = function(self, fighter)
         if self.state.started then return end
@@ -157,9 +157,9 @@ end
 
 local shield_behavior = sf2.behaviors.register {
     id = "titans_shield",
-    parameters = { cooldown = sf2.behaviors.INTEGER },
+    parameters = { cooldown = { type = sf2.behaviors.INTEGER } },
     state = { lifetime = "round", fields = {
-        started = { type = sf2.behaviors.BOOLEAN, default = false },
+        started = false,
     } },
     on_tick = function(self, fighter)
         if self.state.started then return end
@@ -213,13 +213,13 @@ end
 local cloak_behavior = sf2.behaviors.register {
     id = cloak_behavior_id,
     parameters = {
-        frames = sf2.behaviors.INTEGER,
-        invisibility_frames = sf2.behaviors.INTEGER,
-        initial_frames = sf2.behaviors.INTEGER,
+        frames = { type = sf2.behaviors.INTEGER },
+        invisibility_frames = { type = sf2.behaviors.INTEGER },
+        initial_frames = { type = sf2.behaviors.INTEGER },
     },
     state = { lifetime = "round", fields = {
-        started = { type = sf2.behaviors.BOOLEAN, default = false },
-        cloaked = { type = sf2.behaviors.BOOLEAN, default = false },
+        started = false,
+        cloaked = false,
     } },
     on_tick = function(self, fighter)
         if not self.state.started then
@@ -275,13 +275,13 @@ local pace_moves = {}
 local pace_behavior = sf2.behaviors.register {
     id = pace_flag_behavior,
     parameters = {
-        id = sf2.behaviors.STRING,
-        key = sf2.behaviors.STRING,
-        frames = sf2.behaviors.INTEGER,
-        initial_frames = sf2.behaviors.INTEGER,
+        id = { type = sf2.behaviors.STRING },
+        key = { type = sf2.behaviors.STRING },
+        frames = { type = sf2.behaviors.INTEGER },
+        initial_frames = { type = sf2.behaviors.INTEGER },
     },
     state = { lifetime = "fight", fields = {
-        started = { type = sf2.behaviors.BOOLEAN, default = false },
+        started = false,
     } },
     on_tick = function(self, fighter)
         if self.state.started then return end
@@ -307,7 +307,6 @@ local function pace_perk(key, initial, frames, moves)
             id = id,
             display_name = sf2.localization.key("ability." .. key .. ".name"),
             description = sf2.localization.key("ability." .. key .. ".description"),
-            kind = sf2.perks.SINGLE,
             behavior = pace_behavior,
             parameters = { id = id, key = key, frames = frames, initial_frames = initial },
         }

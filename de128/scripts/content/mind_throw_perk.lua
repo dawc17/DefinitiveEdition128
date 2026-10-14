@@ -14,7 +14,7 @@ local behavior = sf2.behaviors.register {
     end,
 }
 return sf2.perks.register {
-    id = "mind_throw", behavior = behavior, kind = sf2.perks.SINGLE,
+    id = "mind_throw", behavior = behavior,
     display_name = sf2.localization.register { id = "perk.mind_throw.name", language = "eng", value = "Mind Throw" },
     description = sf2.localization.register { id = "perk.mind_throw.description", language = "eng", value = "Lifts an opponent and slams them into the ground." },
 }

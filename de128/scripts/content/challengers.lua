@@ -170,7 +170,7 @@ local function install(raid_charge_rule)
         }
         sf2.fights.register {
             id = c.battle .. "_1", battle = battle, warriors = { warrior }, rules = rules,
-            rewards = { no_reward, victory }, rounds = 3, round_time = 150, replays = 0, power = 0,
+            rewards = { [0] = no_reward, [1] = victory }, rounds = 3, round_time = 150, replays = 0, power = 0,
         }
         by_fight[sf2.mod.id .. ":fights/" .. c.battle .. "_1"] = c
         by_weapon[("core:items/weapon/" .. c.weapon):lower()] = c
