@@ -3,7 +3,9 @@ local sf2 = require("sf2")
 -- Historical forge.xml splits the twelve existing Complex candidates into
 -- three equal pools. The two new pools use the unchanged core Complex prices.
 -- Special Recipes I-III (Abilities, Abilities2, Abilities3) grant the boss-ability
--- enchantments from content.boss_abilities at their own archived price table.
+-- enchantments from content.boss_abilities. Like the current DE forge.xml, every
+-- added recipe prices with the core Complex table; content.forge_choice scales it
+-- per candidate (boss abilities 1.5x) and per strength tier.
 local equipment = {
     sf2.forge.WEAPON, sf2.forge.ARMOR, sf2.forge.HELM,
     sf2.forge.RANGED, sf2.forge.MAGIC,
@@ -43,16 +45,6 @@ end
 -- forge.xml Abilities* recipes: one enchantment per category, BarScale
 -- "Enchantment", no deviation, no variation conditions, in archived order.
 local abilities = require("content.boss_abilities").perks
-local price_rows = require("content.special_recipe_prices")
-local prices = {}
-for _, category in ipairs(equipment) do
-    local rows = {}
-    for _, row in ipairs(price_rows[category]) do
-        rows[#rows + 1] = { min_level = row[1], max_level = row[2] or nil, materials = { row[3], row[4], row[5] } }
-    end
-    prices[#prices + 1] = { equipment = category, rows = rows }
-end
-local special = sf2.forge.register_profile { id = "special_recipes", prices = prices }
 local special_recipes = {
     { id = "abilities_1", text = "forge.abilities_1", perks = { "shadow_cloak", "hermit_storm", "earthquake", "wasp_fly" } },
     { id = "abilities_2", text = "forge.abilities_2", perks = { "teleportation", "assistants", "rat_wave", "war_whirl" } },
@@ -69,7 +61,7 @@ for _, recipe in ipairs(special_recipes) do
     end
     registered[recipe.id] = sf2.forge.register_recipe {
         id = recipe.id, alias = sf2.mod.id .. ":localization/" .. recipe.text,
-        economic_profile = special, items = items, candidates = candidates,
+        economic_profile = complex, items = items, candidates = candidates,
     }
 end
 

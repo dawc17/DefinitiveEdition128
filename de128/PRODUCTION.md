@@ -4681,3 +4681,16 @@ showed every overlapping body part and joint. The glass cloak draws the stage th
 fighter, blurred and refracted, with a rim, an entry flash, a flash on landed hits and a short
 white flash as it ends. Timing, unblockable hits and the recharge are unchanged. No Unity run
 or in-game playtest was done.
+
+### Special Recipes at the core Complex prices (0.48.0, 2026-10-16)
+
+The current DE `forge.xml` (owner's download, 2026-10-16) prices every added recipe,
+Complex II and III and Special Recipes I-III, with the core Complex price table; Simple,
+Medium and Complex match `vanillaXml/forge.xml`. Special Recipes now use the core Complex
+profile instead of the archived `DExml/forge.xml` Abilities table, and the generated
+`content/special_recipe_prices.lua` is removed. The deterministic forge still scales a row
+per candidate (boss abilities 1.5x, mythical sets 2x) and per strength tier (0.5x, 1x, 2x).
+
+Not adopted: the same file adds `PERK_ITEM_SPECIAL_SHOCK` as a Medium recipe weapon
+enchantment (aspect -30 to 30). Its Simple deviation (15 to 75) and Complex pools already
+match this mod. No Unity run or in-game playtest was done.
