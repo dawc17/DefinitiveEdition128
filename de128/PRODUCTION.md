@@ -4691,6 +4691,13 @@ profile instead of the archived `DExml/forge.xml` Abilities table, and the gener
 `content/special_recipe_prices.lua` is removed. The deterministic forge still scales a row
 per candidate (boss abilities 1.5x, mythical sets 2x) and per strength tier (0.5x, 1x, 2x).
 
-Not adopted: the same file adds `PERK_ITEM_SPECIAL_SHOCK` as a Medium recipe weapon
-enchantment (aspect -30 to 30). Its Simple deviation (15 to 75) and Complex pools already
-match this mod. No Unity run or in-game playtest was done.
+Its Simple deviation (15 to 75) and Complex pools already match this mod. No Unity run or
+in-game playtest was done.
+
+### Shock in the Medium recipe (0.49.0, 2026-10-16)
+
+The same `forge.xml` adds `PERK_ITEM_SPECIAL_SHOCK` to the Medium recipe for weapons with
+`?RandomAspect[-30,30]`. It is included with Eclipse's new `sf2.forge.include_candidate`,
+with `min_deviation = -30, max_deviation = 30`: Medium's item rows declare 15 to 75, but every
+native Medium candidate rolls -30 to 30. In the deterministic forge it is a normal (1x) candidate.
+No Unity run or in-game playtest was done.

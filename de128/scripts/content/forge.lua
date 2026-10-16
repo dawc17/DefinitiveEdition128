@@ -65,6 +65,15 @@ for _, recipe in ipairs(special_recipes) do
     }
 end
 
+-- The current DE forge.xml adds Shock to Medium for weapons, rolling the same -30..30
+-- as every native Medium candidate (Medium's item rows declare 15..75).
+sf2.forge.include_candidate {
+    profile = sf2.forge.profile("Medium"),
+    perk = sf2.perks.get("core:perks/PERK_ITEM_SPECIAL_SHOCK"),
+    equipment = sf2.forge.WEAPON,
+    min_deviation = -30, max_deviation = 30,
+}
+
 -- Simple changes only its random-aspect deviation; base prices and base aspect
 -- scale remain owned by Eclipse.
 for _, category in ipairs(equipment) do
