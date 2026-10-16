@@ -11,7 +11,8 @@ local sf2 = require("sf2")
 --
 -- The double-kick inputs start FrontKick or BackKick on the first Kick; the
 -- second Kick cancels that starter during its early cancel window (patched
--- at the end of this file).
+-- at the end of this file). Axe Kick also takes a second Kick that is up to
+-- late_frames behind that window.
 -- tactic_equivalent lets the AI use each move wherever its tables use the
 -- named native move of similar timing and range; the tables have no rows of
 -- their own for these moves (nor did the Definitive Edition's).
@@ -80,7 +81,11 @@ register("axe_kick_old", {
     tactic_distance = near_enemy, align = "left_heel",
     -- Not in the archive: continue FrontKick's frame (native frame + 1 + shift) so
     -- the double tap reads as one axe kick, as DoublePunch does from HeavyPunch.
-    transitions = { { sample_shift = -1, when = { animation = "FrontKick", window = "semi_uninterruptible" } } },
+    -- late_frames = 6: FrontKick's 0-2 window is its first 6 frames; a second Kick
+    -- up to 6 frames later (through frame 11, the old 0-4 window) still lands Axe
+    -- Kick, while every other cancel out of FrontKick keeps the 6-frame window.
+    transitions = { { sample_shift = -1, late_frames = 6,
+        when = { animation = "FrontKick", window = "semi_uninterruptible" } } },
     when = { keys = { "kick", "kick", { "forward", press = "hold" } }, all = controlled("Forward", true) },
     only_for = unarmed_only_for,
     windows = { unstable = { from = 15, to = 35 }, semi_uninterruptible = { to = 17 }, uninterruptible = { to = 53 },
@@ -224,7 +229,8 @@ register("throw_leg_push_profile", {
 -- while the starter is outside Uninterrupt and inside SemiUninterrupt.
 -- Vanilla FrontKick is Uninterrupt from frame 0 (the Definitive Edition gave
 -- it 0-4); the owner chose a tighter 0-2 SemiUninterrupt after playtesting
--- 0-7 and 0-4. BackKick's 0-4 window is widened to 0-6 for a quick tap.
+-- 0-7 and 0-4 (Axe Kick's late_frames gives only its double tap the 0-4 timing).
+-- BackKick's 0-4 window is widened to 0-6 for a quick tap.
 -- Those numbers are animation samples, and FrontKick (first sample 2) and BackKick
 -- (first sample 1) have windows that start at sample 0, before their first sample,
 -- so the bounds are written in samples.
