@@ -40,6 +40,8 @@ require("content.progression")
 require("content.campaign_music")
 require("content.map_positions")
 require("content.dojo_changer")
+-- Per-save difficulty: Easy, Medium (DE128 as designed), Hard and Very Hard.
+require("content.difficulty")
 -- Sensei story: guard templates and RaidCharge availability are synthesized from
 -- archive evidence (see sensei_guard_templates.lua, sensei_raid_charge_state.lua).
 require("content.sensei_story").install_default()

@@ -144,6 +144,30 @@ without waiting. Ascension remains disabled; Master of Style and Relentless
 follow the archived DE XML.
 Definitions, translations and behavior are authored through the public Lua API.
 
+## Difficulty (since 0.50.0)
+
+`scripts/content/difficulty.lua` asks for a difficulty when a save is created (and
+once for older saves), using `sf2.saves.option`. The dojo's Difficulty button
+changes it or locks it for good. Medium is DE128 as designed.
+
+| | Easy | Medium | Hard | Very Hard |
+| --- | --- | --- | --- | --- |
+| Round time | 200 s | 150 s | 99 s | 99 s |
+| Opponent strength (difficulty bar) | one band lower (x0.5) | unchanged | one band higher (x2) | one band higher (x2) |
+| Opponent AI | unchanged | unchanged | x1.25 dodges/counters, faster reactions | x1.5, much faster |
+| Seeded enchantments on unenchanted opponents | none | none | 1-2 | 2-3 |
+| Shop (coins and gems) | -15% | unchanged | unchanged | +10% |
+| Upgrades (coins only) | -30% | unchanged | unchanged | unchanged |
+| Survival coins | unchanged | unchanged | -10% | -10% |
+
+Upgrades cost coins only on every difficulty. The Underworld, tutorial fights and
+raids are never changed; Underworld rounds are endless. Seeded enchantments use one
+per equipped slot, never repeat a type, never pair Lifesteal, Regeneration or
+Rejuvenation with Damage Return, and repeat for the same save and fight; Hard's are
+the first of Very Hard's. The manifest's `save_binding = "required"` keeps DE128
+saves and other saves apart. The AI and strength values are first-pass numbers for
+playtesting.
+
 ## Underworld (since 0.20.0)
 
 `main.lua` installs all eight archived Underworld tiers (`underworld.lua`) and
