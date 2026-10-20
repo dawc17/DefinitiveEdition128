@@ -153,8 +153,8 @@ changes it or locks it for good. Medium is DE128 as designed.
 | | Easy | Medium | Hard | Very Hard |
 | --- | --- | --- | --- | --- |
 | Round time | 200 s | 150 s | 99 s | 99 s |
-| Opponent strength (difficulty bar) | one band lower (x0.5) | unchanged | one band higher (x2) | one band higher (x2) |
-| Opponent AI | unchanged | unchanged | x1.25 dodges/counters, faster reactions | x1.5, much faster |
+| Opponent strength (difficulty bar) | one band lower (x0.5) | unchanged | one band higher (x2), never below Normal | one band higher (x2), never below Hard |
+| Opponent AI | unchanged | unchanged | +0.15-0.2 starting dodge/counter/block/combo chance, learns x1.25 faster, cap 75% | +0.35-0.45, learns x1.5 faster, cap 90% |
 | Seeded enchantments on unenchanted opponents | none | none | 1-2 | 2-3 |
 | Shop (coins and gems) | -15% | unchanged | unchanged | +10% |
 | Upgrades (coins only) | -30% | unchanged | unchanged | unchanged |
@@ -166,7 +166,8 @@ per equipped slot, never repeat a type, never pair Lifesteal, Regeneration or
 Rejuvenation with Damage Return, and repeat for the same save and fight; Hard's are
 the first of Very Hard's. The manifest's `save_binding = "required"` keeps DE128
 saves and other saves apart. The AI and strength values are first-pass numbers for
-playtesting.
+playtesting. Gear still lowers a fight's bar on Hard and Very Hard, but only down to
+that difficulty's floor band; the bar shows the raised value.
 
 ## Underworld (since 0.20.0)
 

@@ -31,25 +31,38 @@ sf2.economy.modifier { option = OPTION, choice = "hard", reward_coins = { surviv
 sf2.economy.modifier { option = OPTION, choice = "very_hard", shop_coins = 1.1, shop_gems = 1.1,
     reward_coins = { survival = 0.9 } }
 
--- Multipliers on each opponent's own AI profile. Chances never rise past 90%.
+-- The Standard AI most opponents use starts every fight with no dodge, counter, block or
+-- attack-sequence chance and only learns them from the player's repeated moves. The
+-- multipliers make that learning faster; the additions give a chance from the first exchange.
+-- Sensei, the game's hardest AI, has every chance at 1.
 local HARD_AI = {
-    dodge = 1.25, evade = 1.25, dodge_missiles = 1.25, dodge_magic = 1.25, counter_attack = 1.25,
-    block = 1.15, table_attack = 1.3, quick_attack = 1.3,
-    response_delay = 0.8, enemy_response_delay = 0.8, distance_error = 0.75, frame_error = 0.75,
-    chance_cap = 0.9,
+    counter_attack = 1.25, dodge = 1.25, block = 1.25, evade = 1.25, dodge_missiles = 1.25, dodge_magic = 1.25,
+    table_attack = 1.3, quick_attack = 1.3, response_delay = 0.8, distance_error = 0.75, frame_error = 0.75,
+    chance_cap = 0.75,
+}
+local HARD_AI_ADD = {
+    counter_attack = 0.15, dodge = 0.15, block = 0.2, evade = 0.1, dodge_missiles = 0.15, dodge_magic = 0.1,
+    table_attack = 0.2, safe_attack = 0.1, quick_attack = 0.1,
 }
 local VERY_HARD_AI = {
-    dodge = 1.5, evade = 1.5, dodge_missiles = 1.5, dodge_magic = 1.5, counter_attack = 1.5,
-    block = 1.3, table_attack = 1.6, quick_attack = 1.6,
-    response_delay = 0.6, enemy_response_delay = 0.6, distance_error = 0.5, frame_error = 0.5,
+    counter_attack = 1.5, dodge = 1.5, block = 1.5, evade = 1.5, dodge_missiles = 1.5, dodge_magic = 1.5,
+    table_attack = 1.6, quick_attack = 1.6, response_delay = 0.6, distance_error = 0.5, frame_error = 0.5,
     chance_cap = 0.9,
 }
+local VERY_HARD_AI_ADD = {
+    counter_attack = 0.35, dodge = 0.35, block = 0.4, evade = 0.25, dodge_missiles = 0.35, dodge_magic = 0.3,
+    table_attack = 0.45, safe_attack = 0.2, quick_attack = 0.2,
+}
 
--- strength: one difficulty-bar band is about x2 on the opponent's rating.
+-- Difficulty-bar bands: Easy below 0.82, Normal from 0.82, Hard from 1.3, Insane from 2.6,
+-- Impossible from 5.2. strength moves a fight about one band per x2. minimum_ratio is the
+-- band gear cannot push a fight below: Normal on Hard, Hard on Very Hard.
 local TIERS = {
     easy = { round_time = 200, strength = 0.5 },
-    hard = { round_time = 99, strength = 2, ai = HARD_AI, enchantments = "hard" },
-    very_hard = { round_time = 99, strength = 2, ai = VERY_HARD_AI, enchantments = "very_hard" },
+    hard = { round_time = 99, strength = 2, minimum_ratio = 0.85,
+        ai = HARD_AI, ai_add = HARD_AI_ADD, enchantments = "hard" },
+    very_hard = { round_time = 99, strength = 2, minimum_ratio = 1.35,
+        ai = VERY_HARD_AI, ai_add = VERY_HARD_AI_ADD, enchantments = "very_hard" },
 }
 
 -- Fight kinds left as they are. The Underworld is excluded separately.
@@ -143,8 +156,9 @@ sf2.fights.on_prepare(function(fight)
     if fight.underworld or UNCHANGED[fight.mode] then return nil end
     local tier = TIERS[sf2.saves.get(OPTION)]
     if tier == nil then return nil end
-    if fight.preview then return { strength = tier.strength } end
-    local plan = { round_time = tier.round_time, strength = tier.strength, ai = tier.ai }
+    if fight.preview then return { strength = tier.strength, minimum_ratio = tier.minimum_ratio } end
+    local plan = { round_time = tier.round_time, strength = tier.strength, minimum_ratio = tier.minimum_ratio,
+        ai = tier.ai, ai_add = tier.ai_add }
     if tier.enchantments then
         local seed, enemies = sf2.saves.seed(), {}
         for _, enemy in ipairs(fight.enemies) do
