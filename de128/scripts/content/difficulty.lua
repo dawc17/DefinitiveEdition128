@@ -57,12 +57,13 @@ local VERY_HARD_AI_ADD = {
 -- Difficulty-bar bands: Easy below 0.82, Normal from 0.82, Hard from 1.3, Insane from 2.6,
 -- Impossible from 5.2. strength moves a fight about one band per x2. minimum_ratio is the
 -- band gear cannot push a fight below: Normal on Hard, Hard on Very Hard.
+-- arrow is the tint of the player's ground arrow: green, orange or red (Medium keeps the native one).
 local TIERS = {
-    easy = { round_time = 200, strength = 0.5 },
+    easy = { round_time = 200, strength = 0.5, arrow = "#40FF40" },
     hard = { round_time = 99, strength = 2, minimum_ratio = 0.85,
-        ai = HARD_AI, ai_add = HARD_AI_ADD, enchantments = "hard" },
+        ai = HARD_AI, ai_add = HARD_AI_ADD, enchantments = "hard", arrow = "#FF9A3C" },
     very_hard = { round_time = 99, strength = 2, minimum_ratio = 1.35,
-        ai = VERY_HARD_AI, ai_add = VERY_HARD_AI_ADD, enchantments = "very_hard" },
+        ai = VERY_HARD_AI, ai_add = VERY_HARD_AI_ADD, enchantments = "very_hard", arrow = "#FF3030" },
 }
 
 -- Fight kinds left as they are. The Underworld is excluded separately.
@@ -153,12 +154,16 @@ local function roll(seed, fight_id, enemy, tier)
 end
 
 sf2.fights.on_prepare(function(fight)
-    if fight.underworld or UNCHANGED[fight.mode] then return nil end
     local tier = TIERS[sf2.saves.get(OPTION)]
     if tier == nil then return nil end
+    -- The arrow shows the save's difficulty in every fight, the dojo's sparring included;
+    -- the fights the difficulty leaves alone get only the arrow.
+    if fight.mode == "dojo" or fight.underworld or UNCHANGED[fight.mode] then
+        return { arrow_color = tier.arrow }
+    end
     if fight.preview then return { strength = tier.strength, minimum_ratio = tier.minimum_ratio } end
     local plan = { round_time = tier.round_time, strength = tier.strength, minimum_ratio = tier.minimum_ratio,
-        ai = tier.ai, ai_add = tier.ai_add }
+        ai = tier.ai, ai_add = tier.ai_add, arrow_color = tier.arrow }
     if tier.enchantments then
         local seed, enemies = sf2.saves.seed(), {}
         for _, enemy in ipairs(fight.enemies) do
