@@ -177,71 +177,18 @@ sf2.fights.on_prepare(function(fight)
     return plan
 end)
 
--- The dojo's Difficulty button: change the difficulty, or lock it for this save.
+-- The dojo's Difficulty button opens Eclipse's difficulty screen (the same one a new save
+-- shows) to change the difficulty or lock it for this save.
 local BUTTON = sf2.ui.dojo_button { id = "difficulty",
     image = sf2.assets.sprite("sprites/difficulty/button"),
     pressed_image = sf2.assets.sprite("sprites/difficulty/button_pressed") }
 
-local function label(id)
-    for _, choice in ipairs(CHOICES) do
-        if choice.id == id then return choice.title .. "  -  " .. choice.subtitle end
-    end
-    return id
-end
-
-local view
-local function status()
-    local text = "Current: " .. label(sf2.saves.get(OPTION))
-    if sf2.saves.is_locked(OPTION) then text = text .. "  (locked)" end
-    return text
-end
-
-local function refresh(current, confirming)
-    local locked = sf2.saves.is_locked(OPTION)
-    sf2.ui.set_text(current, "status", status())
-    for _, choice in ipairs(CHOICES) do sf2.ui.set_enabled(current, choice.id, not locked) end
-    sf2.ui.set_enabled(current, "lock", not locked)
-    sf2.ui.set_text(current, "lock", locked and "Locked for this save"
-        or (confirming and "Press again to lock for good" or "Lock difficulty"))
-end
-
-local function open_menu()
-    if view ~= nil and sf2.ui.is_open(view) then return end
-    local confirming = false
-    local rows = {
-        { id = "title", kind = "text", width = 560, height = 52, text = "Difficulty", style = { font_size = 32 } },
-        { id = "status", kind = "text", width = 560, height = 36, text = status() },
-    }
-    for _, choice in ipairs(CHOICES) do
-        rows[#rows + 1] = { id = choice.id, kind = "button", width = 520, height = 52, text = label(choice.id),
-            on_click = function(current)
-                sf2.saves.set(OPTION, choice.id)
-                confirming = false
-                refresh(current, confirming)
-            end }
-    end
-    rows[#rows + 1] = { id = "lock", kind = "button", width = 520, height = 52, text = "Lock difficulty",
-        on_click = function(current)
-            if confirming then sf2.saves.lock(OPTION) end
-            confirming = not confirming
-            refresh(current, confirming)
-        end }
-    rows[#rows + 1] = { id = "close", kind = "button", width = 520, height = 52, text = "Close",
-        on_click = function(current) sf2.ui.close(current) end }
-    view = sf2.ui.open {
-        id = "difficulty", mount = "modal",
-        root = { kind = "column", width = 600, height = 580, gap = 8, children = rows },
-        on_close = function() view = nil end,
-    }
-    refresh(view, false)
-end
-
 sf2.story.on("dojo_button", function(event)
-    if event.button == BUTTON then open_menu() end
+    if event.button == BUTTON then sf2.saves.show(OPTION) end
 end)
 
 -- A save the title screen could not ask (it opened before the mod's options were known)
 -- is asked once on the map.
 sf2.story.on("scene_enter", function(event)
-    if event.scene == "map" and not sf2.saves.is_chosen(OPTION) then open_menu() end
+    if event.scene == "map" and not sf2.saves.is_chosen(OPTION) then sf2.saves.show(OPTION) end
 end)
