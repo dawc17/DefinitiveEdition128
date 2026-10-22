@@ -633,3 +633,9 @@ challenger.descRonin = "Ronin accepted your challenge."
 challenger.descRose = "Rose accepted your challenge."
 challenger.descTrickster = "Trickster accepted your challenge."
 # END GENERATED Challengers (Tools/GenerateDE128ChallengerText.py)
+
+# BEGIN Underworld phased prototype uw_phased.
+uw_phased.alias = "VOLCANO · PHASED"
+uw_phased.title = "Volcano (Phased)"
+uw_phased.description = "Prototype: four seals, each with its own twist.{br}Break a seal before the timer ends; four lost phases end the raid."
+# END Underworld phased prototype

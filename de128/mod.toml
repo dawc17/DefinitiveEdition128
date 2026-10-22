@@ -4,7 +4,7 @@ name = "Definitive Edition 128"
 version = "0.50.1"
 authors = ["Dawid Czaplicki"]
 entrypoint = "scripts/main.lua"
-capabilities = ["policy.services", "policy.timers", "content.register", "content.patch", "combat.modify_outgoing_hit", "combat.modify_hit", "combat.effects", "story.events", "story.progression", "profile.read", "state.read", "state.write", "ui.create", "presentation.navigate", "presentation.dojo", "assets.replace", "save.options", "policy.economy", "fights.prepare"]
+capabilities = ["policy.services", "policy.timers", "content.register", "content.patch", "combat.modify_outgoing_hit", "combat.modify_hit", "combat.effects", "combat.change_life", "combat.round_outcome", "story.events", "story.progression", "profile.read", "state.read", "state.write", "ui.create", "presentation.navigate", "presentation.dojo", "assets.replace", "save.options", "policy.economy", "fights.prepare"]
 save_binding = "required"
 
 [[dependencies]]
