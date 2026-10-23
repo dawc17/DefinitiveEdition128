@@ -146,66 +146,37 @@ local function install(raid_charge_rule)
         return nil
     end
 
-    -- Templates, parents first (the generator orders them).
+    -- Fighters, parents first (the generator orders them).
     local templates = {}
     local function template(ref)
         if ref:sub(1, 5) == "core:" then
-            return sf2.warriors.get_template("core:warrior-templates/" .. ref:sub(6):lower())
+            return sf2.fighters.get("core:warrior-templates/" .. ref:sub(6):lower())
         end
         return assert(templates[ref], "Unregistered Underworld template " .. ref)
     end
     for _, spec in ipairs(data.templates) do
-        templates[spec.name] = sf2.warriors.register_template {
-            id = "uw_" .. lower_id(spec.name), template = spec.parent and template(spec.parent) or nil,
+        templates[spec.name] = sf2.fighters.register {
+            id = "uw_" .. lower_id(spec.name), fighter = spec.parent and template(spec.parent) or nil,
             first_name = spec.first_name and text.key(spec.first_name) or nil,
             avatar = avatar(spec.avatar), voice = spec.voice, health_bars = spec.health_bars,
             attributes = spec.attributes, items = item_list(spec.items), skeleton = spec.skeleton,
         }
     end
 
-    local function build_rule(spec, id)
-        local kind = spec.kind
-        if kind == "raid_charge" then return raid_charge_rule end
-        if kind == "perk" then
-            return sf2.rules.perk { id = id, perk = perk(spec.perk), target = spec.target, aspect = spec.aspect,
-                parameters = spec.parameters }
+    -- Generated rule rows are already rule tables ({ kind = ..., ... }) with the same field
+    -- names. Only two things are resolved here: the shared RaidCharge rule, and a group's
+    -- description key, which names a localization in content.underworld_text.
+    local function rule_table(spec)
+        if spec.kind == "raid_charge" then return raid_charge_rule end
+        if spec.kind == "group" or spec.kind == "random" then
+            local rule = {}
+            for key, value in pairs(spec) do rule[key] = value end
+            rule.rules = {}
+            for index, child in ipairs(spec.rules) do rule.rules[index] = rule_table(child) end
+            if spec.description then rule.description = text[spec.description] end
+            return rule
         end
-        if kind == "group" or kind == "random" then
-            local children = {}
-            for index, child in ipairs(spec.rules) do children[index] = build_rule(child, id .. "_" .. index) end
-            if kind == "group" then
-                return sf2.rules.group { id = id, rules = children,
-                    description = spec.description and text[spec.description] or nil }
-            end
-            return sf2.rules.random { id = id, refresh = spec.refresh, rules = children }
-        end
-        if kind == "equip_item" then return sf2.rules.equip_item { id = id, item = item(spec.item), target = spec.target } end
-        if kind == "avatar" then return sf2.rules.avatar { id = id, name = spec.name, target = spec.target } end
-        if kind == "name" then return sf2.rules.name { id = id, name = spec.name, target = spec.target } end
-        if kind == "no_button" then return sf2.rules.no_button { id = id, name = spec.name, target = spec.target } end
-        if kind == "hot_ground" then
-            return sf2.rules.hot_ground { id = id, frames = spec.frames, nodes = spec.nodes, animations = spec.animations,
-                target = spec.target }
-        end
-        if kind == "random_area" then
-            return sf2.rules.random_area { id = id, image = spec.image, icon = spec.icon, width = spec.width,
-                fade_in = spec.fade_in, frames_on = spec.frames_on, fade_out = spec.fade_out,
-                frames_off = spec.frames_off, target = spec.target }
-        end
-        if kind == "light_in_the_darkness" then
-            return sf2.rules.light_in_the_darkness { id = id, radius = spec.radius,
-                shape = spec.shape, target = spec.target }
-        end
-        if kind == "no_animation" then return sf2.rules.no_animation { id = id, name = spec.name } end
-        if kind == "remove_interval" then return sf2.rules.remove_interval { id = id, type = spec.type, target = spec.target } end
-        if kind == "regeneration" then
-            return sf2.rules.regeneration { id = id, rate = spec.rate, frames_after_hit = spec.frames_after_hit,
-                target = spec.target }
-        end
-        if kind == "attributes" then return sf2.rules.attributes { id = id, values = spec.values, target = spec.target } end
-        if kind == "no_health_bar" then return sf2.rules.no_health_bar { id = id, target = spec.target } end
-        if kind == "invert_joystick" then return sf2.rules.invert_joystick { id = id, target = spec.target } end
-        error("Unsupported Underworld rule kind " .. tostring(kind))
+        return spec
     end
 
     local owned_music = {}
@@ -215,7 +186,8 @@ local function install(raid_charge_rule)
         return owned_music[name]
     end
     local zones, battles, fights = {}, {}, {}
-    -- Every registered warrior by archive template name (content.forge_choice reads the bosses).
+    -- Every registered opponent's qualified ID by archive template name (content.forge_choice
+    -- reads the bosses).
     local by_template = {}
     -- by_battle[archive battle][archive fight] = { handle, id } for story hooks.
     local by_battle = {}
@@ -228,7 +200,7 @@ local function install(raid_charge_rule)
     for tier, zone_spec in ipairs(data.zones) do
         local zone_id = "underworld_tier_" .. tier
         local art = sf2.assets.sprite("sprites/underworld/maps/tier" .. tier)
-        local zone = sf2.zones.register { id = zone_id, file = art, underworld = true }
+        local zone = sf2.map.register { id = zone_id, art = art, underworld = true }
         zones[tier] = zone
         for _, spec in ipairs(zone_spec.battles) do
             local battle_id = "uw_" .. lower_id(spec.name)
@@ -248,16 +220,8 @@ local function install(raid_charge_rule)
                 local normal = spec.name:gsub("_HARDMODE$", "")
                 place = assert(places[TIER8_PLACES[normal]], "No tier 4 place for Underworld battle " .. spec.name)
             end
-            local battle = sf2.battles.register {
-                id = battle_id, zone = zone, type = BATTLE_TYPES[spec.type], x = place.x, y = place.y,
-                alias = text.key(spec.alias), title = text.key(spec.title), description = description,
-                icon = spec.icon, icon_atlas = (not icons) and spec.icon_atlas or nil, icons = icons,
-                preview = spec.preview, location = spec.location, music = music(spec.music),
-                power_mode = spec.power_mode,
-            }
-            battles[spec.name] = battle
-            by_battle[spec.name] = {}
             fight_rows[spec.name] = {}
+            local fight_specs, fight_ids = {}, {}
             for _, row in ipairs(spec.fights) do
                 local fight_spec = row
                 if row.inherit then
@@ -270,8 +234,10 @@ local function install(raid_charge_rule)
                     end
                 end
                 fight_rows[spec.name][row.name] = fight_spec
-                local prefix = battle_id .. "_" .. lower_id(fight_spec.name)
-                local warriors = {}
+                -- A fight's ID is <battle id>_<name>, so this name keeps the archive's fight IDs.
+                local fight_name = lower_id(fight_spec.name)
+                local prefix = battle_id .. "_" .. fight_name
+                local opponents = {}
                 for index, w in ipairs(fight_spec.warriors) do
                     local tactic = w.template == "Boss_Wasp_Young" and wasp_fly.tactic or
                         (w.template == "Boss_Butcher_Young" and butcher_earthquake.tactic or
@@ -294,31 +260,47 @@ local function install(raid_charge_rule)
                         perks = perks or {}
                         perks[#perks + 1] = pace
                     end
-                    warriors[index] = sf2.warriors.register {
-                        id = prefix .. "_w" .. index, template = template(w.template), tactic = tactic,
+                    -- The opponent keeps its archive-era warrior ID (<fight id>_w<position>).
+                    local opponent_id = prefix .. "_w" .. index
+                    opponents[index] = {
+                        id = opponent_id, fighter = template(w.template), tactic = tactic,
                         avatar = avatar(w.avatar), health_bars = w.health_bars, attributes = w.attributes,
                         attribute_alignments = w.alignments, perks = perks,
                         items = item_list(w.items), skeleton = w.skeleton,
                     }
                     by_template[w.template] = by_template[w.template] or {}
-                    table.insert(by_template[w.template], warriors[index])
+                    table.insert(by_template[w.template], sf2.mod.id .. ":warriors/" .. opponent_id)
                 end
                 local rewards = {}
                 for index, r in ipairs(fight_spec.rewards) do
-                    rewards[index - 1] = sf2.rewards.register {
-                        id = prefix .. "_r" .. (index - 1), prize_base = r.prize_base, experience = r.experience,
-                        gems = r.gems, currencies = r.currencies,
-                    }
+                    local reward = { prize_base = r.prize_base, experience = r.experience,
+                        gems = r.gems, currencies = r.currencies }
+                    -- An empty reward is a missing key: the slot still exists and pays nothing.
+                    if next(reward) then rewards[index - 1] = reward end
                 end
                 local rules = {}
-                for index, rule in ipairs(fight_spec.rules) do rules[index] = build_rule(rule, prefix .. "_rule" .. index) end
-                local fight = sf2.fights.register {
-                    id = prefix, battle = battle, power = fight_spec.power, rounds = fight_spec.rounds,
+                for index, rule in ipairs(fight_spec.rules) do rules[index] = rule_table(rule) end
+                fight_specs[#fight_specs + 1] = {
+                    name = fight_name, power = fight_spec.power, rounds = fight_spec.rounds,
                     round_time = fight_spec.round_time, replays = fight_spec.replays,
-                    health_recovery = fight_spec.health_recovery, warriors = warriors, rules = rules, rewards = rewards,
+                    health_recovery = fight_spec.health_recovery, opponents = opponents, rules = rules, rewards = rewards,
                 }
-                fights[#fights + 1] = fight
-                by_battle[spec.name][fight_spec.name] = { handle = fight, id = sf2.mod.id .. ":fights/" .. prefix }
+                fight_ids[#fight_ids + 1] = { name = fight_spec.name, id = sf2.mod.id .. ":fights/" .. prefix }
+            end
+            local battle = sf2.battles.register {
+                id = battle_id, page = zone, type = BATTLE_TYPES[spec.type], x = place.x, y = place.y,
+                alias = text.key(spec.alias), title = text.key(spec.title), description = description,
+                icon = spec.icon, icon_atlas = (not icons) and spec.icon_atlas or nil, icons = icons,
+                preview = spec.preview, location = spec.location, music = music(spec.music),
+                power_mode = spec.power_mode,
+                fights = fight_specs,
+            }
+            battles[spec.name] = battle
+            by_battle[spec.name] = {}
+            for index, ids in ipairs(fight_ids) do
+                local handle = battle.fights[index]
+                fights[#fights + 1] = handle
+                by_battle[spec.name][ids.name] = { handle = handle, id = ids.id }
             end
         end
     end

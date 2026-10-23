@@ -1,5 +1,6 @@
 local sf2 = require("sf2")
 local art = require("content.sensei_art")
+-- Opponent tables (written inline into fights), not registered here.
 -- Pending: not required by main.lua. Historical DE stages.xml boss loadouts.
 -- Guards and encounter assembly remain unresolved; never replace missing templates.
 -- Reconcile with SOURCE_CORPUS.md before current-corpus parity claims.
@@ -7,9 +8,9 @@ local result = { require("content.sensei_act_one_opponents") }
 
 do
     local function register(id, alignments)
-        return sf2.warriors.register {
+        return {
             id = id,
-            template = sf2.warriors.get_template("core:warrior-templates/hermit_swords"),
+            fighter = "core:warrior-templates/hermit_swords",
             tactic = "Lynx_Ranged", first_name = "BOSS_HERMIT", avatar = art.avatar("boss_hermit_young"),
             attributes = { WeaponDamage = 10, UnarmedDamage = 0, BodyDefense = 8, HeadDefense = 2 },
             items = { sf2.items.get("core:items/ranged/RANGED_NEEDLE") },
@@ -36,9 +37,9 @@ end
 
 do
     local function register(id, alignments)
-        return sf2.warriors.register {
+        return {
             id = id,
-            template = sf2.warriors.get_template("core:warrior-templates/butcher_backswords"),
+            fighter = "core:warrior-templates/butcher_backswords",
             tactic = "Standard", first_name = "BOSS_BUTCHER", avatar = art.avatar("boss_butcher_young"),
             attributes = { WeaponDamage = 10, UnarmedDamage = 0, BodyDefense = 8, HeadDefense = 2 },
             items = { sf2.items.get("core:items/ranged/RANGED_CHAKRAM") },
@@ -64,9 +65,9 @@ end
 
 do
     local function register(id, alignments)
-        return sf2.warriors.register {
+        return {
             id = id,
-            template = sf2.warriors.get_template("core:warrior-templates/wasp_naginata"),
+            fighter = "core:warrior-templates/wasp_naginata",
             tactic = "Standard", first_name = "BOSS_WASP", avatar = art.avatar("boss_wasp_young"),
             attributes = { WeaponDamage = 10, UnarmedDamage = 0, BodyDefense = 8, HeadDefense = 2 },
             items = { sf2.items.get("core:items/ranged/RANGED_SHURIKEN_OF_DARKNESS") },
@@ -92,9 +93,9 @@ end
 
 do
     local function register(id, alignments)
-        return sf2.warriors.register {
+        return {
             id = id,
-            template = sf2.warriors.get_template("core:warrior-templates/huntress_fan"),
+            fighter = "core:warrior-templates/huntress_fan",
             tactic = "Standard", first_name = "BOSS_HUNTRESS", avatar = art.avatar("boss_widow_young"),
             attributes = { WeaponDamage = 10, UnarmedDamage = 0, BodyDefense = 8, HeadDefense = 2 },
             items = { sf2.items.get("core:items/ranged/RANGED_ASSASSINS_DAGGER") },
@@ -120,9 +121,9 @@ end
 
 do
     local function register(id, alignments)
-        return sf2.warriors.register {
+        return {
             id = id,
-            template = sf2.warriors.get_template("core:warrior-templates/shogun_katana"),
+            fighter = "core:warrior-templates/shogun_katana",
             tactic = "Standard", first_name = "NAME_SHOGUN", avatar = art.avatar("boss_shogun_young"),
             attributes = { WeaponDamage = 10, UnarmedDamage = 0, BodyDefense = 8, HeadDefense = 2 },
             items = { sf2.items.get("core:items/ranged/RANGED_CHAKRAM_OF_MASTER") },

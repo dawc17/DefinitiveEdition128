@@ -140,8 +140,8 @@ local function install(underworld)
             show_next()
         end, function(index)
             if index > 1 then
-                sf2.underworld.set_toggle_visible(true)
-                sf2.underworld.set_focus(underworld.battles[story.focus])
+                sf2.map.show_underworld(true)
+                sf2.map.focus(underworld.battles[story.focus])
             end
         end)
     end
@@ -206,7 +206,7 @@ local function install(underworld)
         view = nil
         if scene ~= "map" then return end
         -- The toggle stays hidden until the intro's ShowRaidsGag step.
-        if sf2.state.get("uw_intro") == 0 then sf2.underworld.set_toggle_visible(false) end
+        if sf2.state.get("uw_intro") == 0 then sf2.map.show_underworld(false) end
         show_next()
     end)
 end

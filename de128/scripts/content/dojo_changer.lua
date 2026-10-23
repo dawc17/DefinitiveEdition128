@@ -25,7 +25,7 @@ local choices = {
 
 for _, choice in ipairs(choices) do
     choice.preview = sf2.assets.sprite("sprites/dojo_changer/" .. choice.location)
-    choice.name = sf2.localization.key("dojo." .. choice.label)
+    choice.name = sf2.text.get("dojo." .. choice.label)
 end
 -- Eclipse draws the picker (a large medallion with a gliding strip) and hosts its
 -- button in the dojo menu, below the disciple toggle's slot.
@@ -33,7 +33,7 @@ sf2.locations.dojo_picker {
     id = "dojo_changer",
     button = sf2.assets.sprite("sprites/dojo_changer/button"),
     button_pressed = sf2.assets.sprite("sprites/dojo_changer/button_pressed"),
-    title = sf2.localization.key("dojo.DojoChangerTitle"),
+    title = sf2.text.get("dojo.DojoChangerTitle"),
     choices = (function()
         local list = {}
         for i, choice in ipairs(choices) do

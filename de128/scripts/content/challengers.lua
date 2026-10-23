@@ -111,26 +111,24 @@ end
 local function install(raid_charge_rule)
     assert(raid_charge_rule, "Challenger fights need the shared RaidCharge conditional rule")
     shared.register()
-    local default = sf2.warriors.get_template("core:warrior-templates/default")
+    local default = sf2.fighters.get("core:warrior-templates/default")
     local rules = {
-        sf2.rules.perk { id = "challenger_anti_shock", perk = sf2.perks.get("core:perks/PERK_ANTI_SHOCK"),
-            target = "opponent" },
-        sf2.rules.attributes { id = "challenger_player_damage", target = "player", values = { DamageFactor = -8500 } },
-        sf2.rules.attributes { id = "challenger_opponent_damage", target = "opponent", values = { DamageFactor = 1000 } },
+        { kind = "perk", perk = sf2.perks.get("core:perks/PERK_ANTI_SHOCK"), target = "opponent" },
+        { kind = "attributes", target = "player", values = { DamageFactor = -8500 } },
+        { kind = "attributes", target = "opponent", values = { DamageFactor = 1000 } },
         raid_charge_rule,
     }
-    local no_reward = nil
     local by_fight, by_weapon, battles = {}, {}, {}
     for _, c in ipairs(CHALLENGERS) do
         local items = {}
         for index, ref in ipairs(c.items) do items[index] = sf2.items.get("core:items/" .. ref) end
-        local template = sf2.warriors.register_template {
-            id = "challenger_" .. c.key, template = default, first_name = text.key(c.first_name),
+        local fighter = sf2.fighters.register {
+            id = "challenger_" .. c.key, fighter = default, first_name = text.key(c.first_name),
             avatar = sprite(c.avatar), voice = c.voice, attributes = { EnchantmentResistance = 100 },
             items = items, skeleton = c.skeleton,
         }
-        local warrior = sf2.warriors.register {
-            id = "challenger_" .. c.key, template = template, tactic = "Aggressive",
+        local opponent = {
+            fighter = fighter, tactic = "Aggressive",
             attributes = { MagicInitialCharge = 5000, WarriorPower = 1880 },
             attribute_alignments = {
                 { factor = 1, shift = 0, priority = 1 },
@@ -139,22 +137,13 @@ local function install(raid_charge_rule)
             },
             perks = { { perk = sf2.perks.get("core:perks/" .. c.perk), aspect = 100000 } },
         }
-        local battle = sf2.battles.register {
-            id = c.battle, zone = sf2.zones.get("core:zones/" .. c.zone), type = "final",
-            x = c.x, y = c.y, alias = text.key(c.alias), title = text.key(c.title),
-            description = text.key(c.description), icon = c.key,
-            icons = { base = sprite("battlebtn" .. c.key .. "_base"), active = sprite("battlebtn" .. c.key .. "_active") },
-            preview = sprite("preview_" .. c.key), location = c.location,
-            music = sf2.assets.audio("audio/challenger/" .. c.music),
-        }
         -- DropWeapon_<Name>: the first win grants the weapon at the player's level with
         -- the archived enchantment. Native ownership filtering skips an owned weapon.
         local weapon = sf2.items.get("core:items/weapon/" .. c.weapon)
         local grant_perk = sf2.perks.get("core:perks/" .. c.grant.perk)
         local grant = c.grant
-        no_reward = no_reward or sf2.rewards.register { id = "challenger_loss", prize_base = 1 }
-        local victory = sf2.rewards.register {
-            id = "challenger_" .. c.key .. "_win", prize_base = 1, experience = c.experience, gems = 27,
+        local victory = {
+            prize_base = 1, experience = c.experience, gems = 27,
             items = { {
                 item = weapon,
                 configure = function(context)
@@ -168,9 +157,21 @@ local function install(raid_charge_rule)
                 end,
             } },
         }
-        sf2.fights.register {
-            id = c.battle .. "_1", battle = battle, warriors = { warrior }, rules = rules,
-            rewards = { [0] = no_reward, [1] = victory }, rounds = 3, round_time = 150, replays = 0, power = 0,
+        -- The fight is unnamed, so its ID is <battle id>_1, as before.
+        local battle = sf2.battles.register {
+            id = c.battle, page = sf2.map.get("core:zones/" .. c.zone), type = "final",
+            x = c.x, y = c.y, alias = text.key(c.alias), title = text.key(c.title),
+            description = text.key(c.description), icon = c.key,
+            icons = { base = sprite("battlebtn" .. c.key .. "_base"), active = sprite("battlebtn" .. c.key .. "_active") },
+            preview = sprite("preview_" .. c.key), location = c.location,
+            music = sf2.assets.audio("audio/challenger/" .. c.music),
+            fights = {
+                {
+                    opponents = { opponent }, rules = rules,
+                    rewards = { [0] = { prize_base = 1 }, [1] = victory },
+                    rounds = 3, round_time = 150, replays = 0, power = 0,
+                },
+            },
         }
         by_fight[sf2.mod.id .. ":fights/" .. c.battle .. "_1"] = c
         by_weapon[("core:items/weapon/" .. c.weapon):lower()] = c
@@ -184,7 +185,7 @@ local function install(raid_charge_rule)
     local function reveal()
         if sf2.state.get("challengers_revealed") or sf2.profile.fight(UNLOCK_FIGHT).wins < 1 then return end
         for _, battle in ipairs(battles) do
-            if not sf2.battles.reveal(battle, false) then return end
+            if not sf2.map.reveal { battle = battle, locked = false } then return end
         end
         sf2.state.set { challengers_revealed = true }
     end

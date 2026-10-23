@@ -41,7 +41,7 @@ for _, key in ipairs({
     "descRose",
     "descTrickster",
 }) do
-    text[key] = sf2.localization.key("challenger." .. key)
+    text[key] = sf2.text.get("challenger." .. key)
 end
 -- Battle and opponent fields take the qualified runtime key, not a handle.
 function text.key(key)

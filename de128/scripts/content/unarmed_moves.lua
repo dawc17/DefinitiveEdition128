@@ -18,7 +18,7 @@ local sf2 = require("sf2")
 -- their own for these moves (nor did the Definitive Edition's).
 local function name(id) return "de128:moves/" .. id end
 -- Profile titles copied from the archive by Tools/GenerateDE128MoveNames.py.
-local function title(archived) return sf2.localization.key("moves." .. archived) end
+local function title(archived) return sf2.text.get("moves." .. archived) end
 
 local moves = {}
 local function register(id, value)

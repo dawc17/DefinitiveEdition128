@@ -8,11 +8,11 @@ local function open_act(act, battles)
     assert(type(battles) == "table" and #battles == 6, "Six Sensei battles required")
     if act == 1 then
         for index = 1, 6 do
-            if not sf2.battles.reveal(battles[index], index ~= 1) then return false end
+            if not sf2.map.reveal { battle = battles[index], locked = index ~= 1 } then return false end
         end
     end
-    if not sf2.battles.set_locked(battles[act], false) then return false end
-    return sf2.battles.focus(battles[act])
+    if not sf2.map.lock { battle = battles[act], locked = false } then return false end
+    return sf2.map.focus(battles[act])
 end
 
 -- The caller marks the opened flag only after true. A failed partial sequence

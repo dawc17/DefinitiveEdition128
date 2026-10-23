@@ -14,8 +14,7 @@ local function at_player_level(perk_name)
     end
 end
 
-local desolator_reward = sf2.rewards.register {
-    id = "titans_desolator",
+local desolator_reward = {
     items = {
         {
             item = equipment.titans_desolator,
@@ -42,8 +41,8 @@ local desolator_reward = sf2.rewards.register {
 
 -- Slot 1 is the final fight's winning reward. Native ownership filtering prevents
 -- duplicate copies, and the scoped item-drop patch preserves the base economy.
-sf2.fights.patch {
-    target = "core:fights/zone_7/c3_boss_titan_eclipsemode/6",
+sf2.battles.patch {
+    fight = "core:fights/zone_7/c3_boss_titan_eclipsemode/6",
     reward_drops = {
         { wins = 1, mode = "eclipse", reward = desolator_reward },
     },

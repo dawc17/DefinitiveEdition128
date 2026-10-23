@@ -70,6 +70,6 @@ for _, key in ipairs({
     "character_Sister",
     "dlgStoryBtnFight",
 }) do
-    text[key] = sf2.localization.key("sensei.entry." .. key)
+    text[key] = sf2.text.get("sensei.entry." .. key)
 end
 return text

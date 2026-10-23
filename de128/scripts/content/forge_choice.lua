@@ -4,21 +4,20 @@ local sf2 = require("sf2")
 -- exact enchantment and a strength tier instead of rolling one (selection
 -- "choose"). Tier strength is a fraction of the recipe item's deviation range;
 -- the price scale multiplies the recipe's level price row. Eclipse owns the
--- mechanism (sf2.forge.configure_recipe / configure_candidate); this module is
+-- mechanism (sf2.forge.patch with selection / perk); this module is
 -- only DE128's policy. Design: Docs/Engineering/Modding/DETERMINISTIC_FORGE_PLAN.md.
 --
 -- Candidate price scales: normal enchantments 1x (the default, so unconfigured),
 -- boss abilities 1.5x, mythical set enchantments 2x. Mythical sets need no code
 -- here: Eclipse offers a set enchantment once every piece of its set is owned.
 -- Boss abilities unlock after any win against that ability's boss.
-assert(type(sf2.forge.configure_recipe) == "function" and type(sf2.forge.configure_candidate) == "function",
-    "DE128 requires the public sf2.forge.configure_recipe and configure_candidate APIs.")
+assert(type(sf2.forge.patch) == "function", "DE128 requires the public sf2.forge.patch API.")
 local registered = require("content.forge")
 
 local tiers = {
-    { id = "low", name = sf2.localization.key("forge.tier.low"), strength = 0.0, price = 0.5 },
-    { id = "mid", name = sf2.localization.key("forge.tier.mid"), strength = 0.5, price = 1.0 },
-    { id = "high", name = sf2.localization.key("forge.tier.high"), strength = 1.0, price = 2.0 },
+    { id = "low", name = sf2.text.get("forge.tier.low"), strength = 0.0, price = 0.5 },
+    { id = "mid", name = sf2.text.get("forge.tier.mid"), strength = 0.5, price = 1.0 },
+    { id = "high", name = sf2.text.get("forge.tier.high"), strength = 1.0, price = 2.0 },
 }
 
 -- Core recipes (vanillaXml/forge.xml Simple, Medium, Complex) are patched by
@@ -29,7 +28,7 @@ local recipes = {
     registered.abilities_1, registered.abilities_2, registered.abilities_3,
 }
 for _, recipe in ipairs(recipes) do
-    sf2.forge.configure_recipe { recipe = recipe, selection = "choose", tiers = tiers }
+    sf2.forge.patch { recipe = recipe, selection = "choose", tiers = tiers }
 end
 
 -- The twelve ItemSet DefaultComboPerk enchantments (vanillaXml/list.xml), which
@@ -45,7 +44,7 @@ local mythical = {
 }
 for recipe, names in pairs(mythical) do
     for _, name in ipairs(names) do
-        sf2.forge.configure_candidate { recipe = recipe, perk = sf2.perks.get("core:perks/" .. name), price = 2.0 }
+        sf2.forge.patch { recipe = recipe, perk = sf2.perks.get("core:perks/" .. name), price = 2.0 }
     end
 end
 
@@ -55,7 +54,9 @@ end
 -- WaspAbil_flight, HuntressAbil_teleportation, ShogunAbil_calltoarms, RatAbil,
 -- WarAbil, FearAbil, PowerFieldAbil, BlacknessHugAbility, LightningAbil,
 -- TitanShield) and the warriors that carry the matching core boss perk.
-local function both(pair) return { pair.normal, pair.eclipse } end
+-- The Sensei opponents are inline opponent tables that keep their archive-era warrior IDs.
+local function warrior_id(opponent) return sf2.mod.id .. ":warriors/" .. opponent.id end
+local function both(pair) return { warrior_id(pair.normal), warrior_id(pair.eclipse) } end
 local function join(...)
     local result = {}
     for _, list in ipairs({ ... }) do
@@ -100,7 +101,7 @@ local function install(underworld)
     for id, keys in pairs(recipe_perks) do
         for _, key in ipairs(keys) do
             local warriors = bosses[key]
-            sf2.forge.configure_candidate {
+            sf2.forge.patch {
                 recipe = registered[id], perk = abilities[key], price = 1.5,
                 unlock = warriors and { defeated = warriors } or nil,
             }

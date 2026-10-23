@@ -1,6 +1,7 @@
 local sf2 = require("sf2")
 local art = require("content.sensei_art")
 
+-- Opponent tables (written inline into fights), not registered here.
 -- Pending content: deliberately not required by main.lua. Archived Act I also
 -- references Guard_Girl/Guard_Man templates absent from the available sources.
 -- Source: Assets/DExml/stages.xml, ZONE_1/SENSEI_MEMORIES fight 3 and
@@ -9,9 +10,9 @@ local function lynx(id, alignments)
     local function enchantment(name, chance)
         return { perk = sf2.perks.get("core:perks/" .. name), aspect = 100000, chance_factor = chance }
     end
-    return sf2.warriors.register {
+    return {
         id = id,
-        template = sf2.warriors.get_template("core:warrior-templates/lynx_claws"),
+        fighter = "core:warrior-templates/lynx_claws",
         tactic = "Lynx_Ranged", first_name = "BOSS_LYNX", avatar = art.avatar("boss_lynx_young"),
         attributes = { WeaponDamage = 10, UnarmedDamage = 0, BodyDefense = 8, HeadDefense = 2 },
         items = { sf2.items.get("core:items/ranged/RANGED_SHURIKENS") },

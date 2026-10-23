@@ -19,8 +19,8 @@ local battles = {
 
 for _, battle in ipairs(battles) do
     for fight = 1, battle.fights do
-        sf2.fights.patch {
-            target = "core:fights/" .. battle.zone .. "/" .. battle.battle .. "/" .. fight,
+        sf2.battles.patch {
+            fight = "core:fights/" .. battle.zone .. "/" .. battle.battle .. "/" .. fight,
             music = battle.music,
         }
     end

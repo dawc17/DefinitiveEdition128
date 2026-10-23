@@ -9,7 +9,7 @@ for _, entry in ipairs({
     { "weapon", "WEAPON_BG_YARI", "MagariYari" },
     { "ranged", "RANGED_BP_S3_WIND_MAKER", "Kunai" },
 }) do
-    sf2.items.set_subtype {
+    sf2.items.patch {
         item = sf2.items.get("core:items/" .. entry[1] .. "/" .. entry[2]),
         subtype = entry[3],
     }

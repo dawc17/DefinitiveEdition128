@@ -8,20 +8,23 @@ local places = {
     { x = -400, y = 20, location = "core:locations/flooded_village", preview = "preview_pvp_flooded_village", music = "fight38_sakura_forest" },
     { x = -400, y = -30, location = "core:locations/magic_rocks", preview = "preview_pvp_magic_rocks", music = "flying_rocks" },
 }
-local function register()
+-- fights[mode][act] is the list of fight tables of that battle (see content.sensei_encounters).
+-- Fights are unnamed, so they are "1", "2", ...: sensei_act_<act>_<mode>_<position>.
+local function register(fights)
     local text = require("content.sensei_battle_text")
     local art = require("content.sensei_art")
     local result = { normal = {}, eclipse = {} }
     for act, place in ipairs(places) do
-        local zone = sf2.zones.get("core:zones/zone_" .. act)
+        local page = sf2.map.get("core:zones/zone_" .. act)
         for _, mode in ipairs({ "normal", "eclipse" }) do
             result[mode][act] = sf2.battles.register {
-                id = "sensei_act_" .. act .. "_" .. mode, zone = zone,
+                id = "sensei_act_" .. act .. "_" .. mode, page = page,
                 type = mode == "normal" and "story" or "final",
                 x = place.x, y = place.y, location = place.location, preview = art.preview(place.preview), music = place.music,
                 alias = text.alias, title = text.title, icon = "sensei",
                 description = mode == "normal" and text.locked or text.description,
                 eclipse_toggle_name = mode == "normal" and (sf2.mod.id .. ":battles/sensei_act_" .. act .. "_eclipse") or nil,
+                fights = fights[mode][act],
             }
         end
     end

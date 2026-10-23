@@ -1,4 +1,4 @@
-local sf2 = require("sf2")
+-- Rewards are plain tables, written inline into each fight by content.sensei_encounters.
 -- Pending: main.lua does not load this module until the complete story is ready.
 -- Historical source: Assets/DExml/stages.xml, six Sensei normal/eclipse battles.
 -- Reconcile with SOURCE_CORPUS.md before claiming current-corpus parity.
@@ -12,19 +12,17 @@ local acts = {
 }
 local result = {}
 for act, data in ipairs(acts) do
-    local prefix = "sensei_act_" .. act .. "_"
     local normal = {}
     for fight, gems in ipairs(data.normal) do
         normal[fight] = {
-            [0] = sf2.rewards.register { id = prefix .. "normal_" .. fight .. "_0", prize_base = data.base },
-            [1] = sf2.rewards.register { id = prefix .. "normal_" .. fight .. "_1", experience = 2, gems = gems, prize_base = data.base },
+            [0] = { prize_base = data.base },
+            [1] = { experience = 2, gems = gems, prize_base = data.base },
         }
     end
     local eclipse = {}
     -- Rewards are keyed by wins, including zero and partially completed gauntlets.
     for wins = 0, #data.normal do
-        eclipse[wins] = sf2.rewards.register {
-            id = prefix .. "eclipse_" .. wins,
+        eclipse[wins] = {
             gems = wins == #data.normal and data.eclipse or 0,
             prize_base = 1,
         }

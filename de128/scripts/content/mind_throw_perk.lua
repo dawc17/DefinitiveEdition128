@@ -1,7 +1,7 @@
 local sf2 = require("sf2")
 -- The three archived MindThrowNormal triggers, implemented as Lua decisions.
-local behavior = sf2.behaviors.register {
-    id = "mind_throw",
+-- The behavior is registered under the perk's ID, "mind_throw".
+local behavior = {
     on_animation_start = function(_, fighter, event)
         if event.target == "self" and event.animation_name == "de128:moves/mind_throw_player" then
             if not fighter:has_flag("pending") then fighter:set_flag("pending") end
@@ -15,6 +15,6 @@ local behavior = sf2.behaviors.register {
 }
 return sf2.perks.register {
     id = "mind_throw", behavior = behavior,
-    display_name = sf2.localization.register { id = "perk.mind_throw.name", language = "eng", value = "Mind Throw" },
-    description = sf2.localization.register { id = "perk.mind_throw.description", language = "eng", value = "Lifts an opponent and slams them into the ground." },
+    display_name = sf2.text.register { id = "perk.mind_throw.name", language = "eng", value = "Mind Throw" },
+    description = sf2.text.register { id = "perk.mind_throw.description", language = "eng", value = "Lifts an opponent and slams them into the ground." },
 }

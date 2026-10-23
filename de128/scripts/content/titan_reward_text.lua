@@ -8,6 +8,6 @@ for _, key in ipairs({
     "MAGIC_MIND_THROW",
     "RANGED_TITANS_HARPOON",
 }) do
-    text[key] = sf2.localization.key("titan_reward." .. key)
+    text[key] = sf2.text.get("titan_reward." .. key)
 end
 return text

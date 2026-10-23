@@ -4,7 +4,7 @@ local sf2 = require("sf2")
 -- rank payloads: Assets/DExml/CharacterProgress.xml, Progress/Perks.
 -- The archive is research input only. This module executes no XML.
 local function text(id, value)
-    return sf2.localization.register { id = id, language = "eng", value = value }
+    return sf2.text.register { id = id, language = "eng", value = value }
 end
 
 local master_icon = sf2.assets.sprite("core:ui/skills/IconMasterOfStyle")
@@ -23,8 +23,9 @@ local function clear_master(self, fighter)
     fighter:clear_status_icon("MasterReward")
 end
 
-local master_behavior = sf2.behaviors.register {
-    id = "master_of_style",
+-- Behavior tables are registered under the ID of the perk that first uses them,
+-- so each keeps its historical behavior ID ("master_of_style", "relentless").
+local master_behavior = {
     parameters = {
         active_frames = 300,
         drain = 0.1,
@@ -66,8 +67,7 @@ local function clear_relentless(self, fighter)
     fighter:clear_status_icon("BuffRelentless")
 end
 
-local relentless_behavior = sf2.behaviors.register {
-    id = "relentless",
+local relentless_behavior = {
     parameters = {
         active_time = 300,
         combo_min_count = 3,

@@ -15,19 +15,23 @@ for _, lock in ipairs({
 end
 
 -- Assets/DExml/CharacterProgress.xml: PerkTree/Level Values 4,8,11,14,17.
-sf2.progression.replace_perk_branch {
-    level = 4,
-    entries = {
-        { action = "unlock", perk = perks.master_of_style },
-        { action = "unlock", perk = perks.relentless },
+sf2.perks.patch {
+    branch = {
+        level = 4,
+        entries = {
+            { action = "unlock", perk = perks.master_of_style },
+            { action = "unlock", perk = perks.relentless },
+        },
     },
 }
 for _, level in ipairs({ 8, 11, 14, 17 }) do
-    sf2.progression.replace_perk_branch {
-        level = level,
-        entries = {
-            { action = "upgrade", perk = perks.master_of_style },
-            { action = "upgrade", perk = perks.relentless },
+    sf2.perks.patch {
+        branch = {
+            level = level,
+            entries = {
+                { action = "upgrade", perk = perks.master_of_style },
+                { action = "upgrade", perk = perks.relentless },
+            },
         },
     }
 end

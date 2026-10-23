@@ -140,7 +140,7 @@ local function roll(seed, fight_id, enemy, tier)
     return perks
 end
 
-sf2.fights.on_prepare(function(fight)
+sf2.battles.on_prepare(function(fight)
     local tier = TIERS[sf2.saves.get(OPTION)]
     if tier == nil then return nil end
     -- The arrow shows the save's difficulty in every fight, the dojo's sparring included;

@@ -10,8 +10,8 @@ local equipment = {
     "weapon", "armor", "helm",
     "ranged", "magic",
 }
-local complex = sf2.forge.profile("Complex")
-local simple = sf2.forge.profile("Simple")
+local complex = sf2.forge.get("Complex")
+local simple = sf2.forge.get("Simple")
 local pools = {
     { id = "complex_2", text = "forge.complex_2", perks = {
         "PERK_SKANDA_SET_KARMA", "PERK_GUST_SET_WIND_MAKER",
@@ -32,13 +32,13 @@ for _, pool in ipairs(pools) do
         items[#items + 1] = { equipment = category, enchantments = 1, bar_scale = "Enchantment" }
         for _, name in ipairs(pool.perks) do
             local perk = sf2.perks.get("core:perks/" .. name)
-            sf2.forge.exclude_candidate { profile = complex, perk = perk, equipment = category }
+            sf2.forge.patch { profile = complex, perk = perk, equipment = category, exclude = true }
             candidates[#candidates + 1] = { perk = perk, equipment = category }
         end
     end
-    registered[pool.id] = sf2.forge.register_recipe {
+    registered[pool.id] = sf2.forge.register {
         id = pool.id, alias = sf2.mod.id .. ":localization/" .. pool.text,
-        economic_profile = complex, items = items, candidates = candidates,
+        profile = complex, items = items, candidates = candidates,
     }
 end
 
@@ -59,26 +59,26 @@ for _, recipe in ipairs(special_recipes) do
             candidates[#candidates + 1] = { perk = abilities[key], equipment = category }
         end
     end
-    registered[recipe.id] = sf2.forge.register_recipe {
+    registered[recipe.id] = sf2.forge.register {
         id = recipe.id, alias = sf2.mod.id .. ":localization/" .. recipe.text,
-        economic_profile = complex, items = items, candidates = candidates,
+        profile = complex, items = items, candidates = candidates,
     }
 end
 
 -- The current DE forge.xml adds Shock to Medium for weapons, rolling the same -30..30
 -- as every native Medium candidate (Medium's item rows declare 15..75).
-sf2.forge.include_candidate {
-    profile = sf2.forge.profile("Medium"),
+sf2.forge.patch {
+    profile = sf2.forge.get("Medium"),
     perk = sf2.perks.get("core:perks/PERK_ITEM_SPECIAL_SHOCK"),
     equipment = "weapon",
-    min_deviation = -30, max_deviation = 30,
+    include = { min_deviation = -30, max_deviation = 30 },
 }
 
 -- Simple changes only its random-aspect deviation; base prices and base aspect
 -- scale remain owned by Eclipse.
 for _, category in ipairs(equipment) do
-    sf2.forge.override_deviation {
-        profile = simple, equipment = category, minimum = 15, maximum = 75,
+    sf2.forge.patch {
+        profile = simple, equipment = category, deviation = { minimum = 15, maximum = 75 },
     }
 end
 

@@ -35,6 +35,6 @@ for _, key in ipairs({
     "characterAncient",
     "characterSensei",
 }) do
-    text[key] = sf2.localization.key("sensei.victory." .. key)
+    text[key] = sf2.text.get("sensei.victory." .. key)
 end
 return text

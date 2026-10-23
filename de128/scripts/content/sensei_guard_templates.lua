@@ -11,7 +11,7 @@ local sf2 = require("sf2")
 -- such a template would produce, because native parsing layers template and
 -- warrior attributes through the same function.
 local function resolve()
-    local default = sf2.warriors.get_template("core:warrior-templates/default")
+    local default = sf2.fighters.get("core:warrior-templates/default")
     return {
         guard_girl = { template = default, voice = "Female" },
         guard_man = { template = default, voice = "Male" },

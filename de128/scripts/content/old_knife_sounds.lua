@@ -13,7 +13,7 @@ local old_knives = sf2.settings.toggle {
 }
 
 for number = 1, 3 do
-    sf2.audio.swap_move_sound {
+    sf2.assets.replace {
         sound = "snd_swish_sword" .. number,
         replacement = sf2.assets.audio("core:gamedata/sounds/swish_sword" .. number),
         subtypes = { "Knives", "Daggers" },

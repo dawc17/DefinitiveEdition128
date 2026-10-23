@@ -385,7 +385,7 @@ for _, key in ipairs({
     "summerfest25_story2_win_1",
     "tutorial_ascention_intro_title",
 }) do
-    text[key] = sf2.localization.key("uw." .. key)
+    text[key] = sf2.text.get("uw." .. key)
 end
 function text.key(key)
     assert(text[key], "Unknown Underworld text key " .. tostring(key))

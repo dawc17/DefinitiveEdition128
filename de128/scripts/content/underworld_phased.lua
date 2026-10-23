@@ -53,8 +53,7 @@ local function open_hud(seal)
     }
 end
 
-local controller = sf2.behaviors.register {
-    id = "phased_volcano",
+local controller = {
     state = { lifetime = "fight", fields = {
         seal = { type = "integer", default = 0 },
         requested = { type = "boolean", default = false },
@@ -126,39 +125,40 @@ local controller = sf2.behaviors.register {
 }
 
 local function install(underworld, raid_charge_rule)
-    local text = function(key) return sf2.localization.key("uw_phased." .. key) end
+    local text = function(key) return sf2.text.get("uw_phased." .. key) end
     local zone = assert(underworld.zones[1], "Underworld tier 1 is missing")
     local volcano = assert(underworld.templates["Man_Volcano"], "Volcano's template is missing")
     local tactic = widow_teleportation.normal
     local perks = { { perk = sf2.perks.get("core:perks/PERK_TELEPORTATION"), frames = 600 } }
     local pace = boss_abilities.pace_perk_for(tactic)
     if pace then perks[#perks + 1] = pace end
-    local boss = sf2.warriors.register {
-        id = "uw_phased_volcano", template = volcano, tactic = tactic,
+    -- The opponent is written inline; the fight is named "1", so its ID is uw_phased_volcano_1.
+    local boss = {
+        id = "uw_phased_volcano", fighter = volcano, tactic = tactic,
         health_bars = SHIELD, visible_health_bars = SHIELD,
         attributes = { MagicInitialCharge = 5000, WarriorPower = 51 },
         attribute_alignments = { { factor = 0, shift = 0, priority = 1 }, { factor = 1, shift = -10, priority = 1 } },
         perks = perks,
     }
-    local battle = sf2.battles.register {
-        id = "uw_phased_volcano", zone = zone, type = "final", x = -95, y = -115,
+    sf2.battles.register {
+        id = "uw_phased_volcano", page = zone, type = "final", x = -95, y = -115,
         alias = text("alias"), title = text("title"), description = text("description"),
         icon = "vulcan_raid", preview = "preview_raid_base.vulcan_raid",
         location = "core:locations/vulcan_raid", music = sf2.assets.audio("audio/underworld/vulcan"),
         power_mode = "normal",
-    }
-    local rewards = {
-        [0] = sf2.rewards.register { id = "uw_phased_volcano_r0", prize_base = 1 },
-        [1] = sf2.rewards.register { id = "uw_phased_volcano_r1", prize_base = 1, experience = 1, gems = 17 },
-    }
-    sf2.fights.register {
-        id = "uw_phased_volcano", battle = battle, rounds = SEALS, round_time = 60, warriors = { boss },
-        rewards = rewards, rules = {
-            sf2.rules.perk { id = "uw_phased_volcano_anti_shock", perk = sf2.perks.get("core:perks/PERK_ANTI_SHOCK"),
-                target = "opponent" },
-            raid_charge_rule,
-            sf2.rules.behavior { id = "uw_phased_volcano_seals", behavior = controller,
-                target = "player", controls_outcome = true },
+        fights = {
+            {
+                name = "1", rounds = SEALS, round_time = 60, opponents = { boss },
+                rewards = {
+                    [0] = { prize_base = 1 },
+                    [1] = { prize_base = 1, experience = 1, gems = 17 },
+                },
+                rules = {
+                    { kind = "perk", perk = sf2.perks.get("core:perks/PERK_ANTI_SHOCK"), target = "opponent" },
+                    raid_charge_rule,
+                    { kind = "behavior", behavior = controller, target = "player", controls_outcome = true },
+                },
+            },
         },
     }
 end

@@ -18,30 +18,24 @@ local definitions = {
     { "dragons_breath", "Dragon’s Breath", "magic", "Magic9.img_MAGIC_C2_Z5_DRAGON_EARTHQUAKE", "mdl_magic_mass_bomb", "MassBomb", 13, 44, "ACT_3", "PERK_ITEM_SPECIAL_OVERHEAT_MAGIC", 442 },
     { "lightning_arc", "Lightning Arc", "magic", "Magic13.img_magic_lightning", "mdl_magic_fireball", "LightningArrow", 39, 139, "INTERMISSION", "PERK_ITEM_SPECIAL_ENFEEBLE_MAGIC", 1388 },
 }
-local categories = {
-    armor = { sf2.items.register_armor, "armor" },
-    helm = { sf2.items.register_helm, "helmets" },
-    ranged = { sf2.items.register_ranged, "ranged" },
-    magic = { sf2.items.register_magic, "magic" },
-}
 local equipment = {}
 for _, row in ipairs(definitions) do
-    local category = categories[row[3]]
     local definition = {
+        category = row[3],
         id = row[1],
-        display_name = sf2.localization.register { id = "item." .. row[1], language = "eng", value = row[2] },
+        display_name = sf2.text.register { id = "item." .. row[1], language = "eng", value = row[2] },
         icon = sf2.assets.sprite("core:UI/Items/" .. row[4]),
         model = sf2.assets.model("core:gamedata/models/" .. row[5]),
         initial_stats = row[12],
     }
     if row[6] then definition.subtype = row[6] end
-    local item = category[1](definition)
-    sf2.shop.add_item { section = category[2], item = item, level = row[7], price = sf2.price.gems(row[8]) }
-    sf2.shop.set_availability { item = item, required_group = row[9], minimum_level = row[7] }
-    sf2.items.set_default_enchantments {
-        item = item, entries = { { perk = sf2.perks.get("core:perks/" .. row[10]), aspect = row[11] } },
+    definition.shop = { level = row[7], price = { gems = row[8] } }
+    local item = sf2.items.register(definition)
+    sf2.items.patch {
+        item = item, required_group = row[9], minimum_level = row[7],
+        enchantments = { { perk = sf2.perks.get("core:perks/" .. row[10]), aspect = row[11] } },
     }
     equipment[row[1]] = item
 end
-sf2.items.set_innate_perks { item = equipment.mind_throw, entries = { { perk = require("content.mind_throw_perk") } } }
+sf2.items.patch { item = equipment.mind_throw, perks = { { perk = require("content.mind_throw_perk") } } }
 return equipment

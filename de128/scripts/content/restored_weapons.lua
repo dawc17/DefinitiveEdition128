@@ -19,18 +19,18 @@ local definitions = {
 }
 local weapons = {}
 for _, row in ipairs(definitions) do
-    local item = sf2.items.register_weapon {
+    local item = sf2.items.register {
+        category = "weapon",
         id = row[1],
-        display_name = sf2.localization.register { id = "item." .. row[1], language = "eng", value = row[2] },
+        display_name = sf2.text.register { id = "item." .. row[1], language = "eng", value = row[2] },
         icon = sf2.assets.sprite("core:UI/Items/" .. row[3]),
         model = sf2.assets.model("core:gamedata/models/" .. row[4]), subtype = row[5],
         initial_stats = row[11],
+        shop = { level = row[6], price = { gems = row[7] } },
     }
-    sf2.shop.add_item { section = "weapons", item = item, level = row[6], price = sf2.price.gems(row[7]) }
-    sf2.shop.set_availability { item = item, required_group = row[8], minimum_level = row[6] }
-    sf2.items.set_default_enchantments {
-        item = item,
-        entries = { { perk = sf2.perks.get("core:perks/PERK_ITEM_SPECIAL_" .. row[9] .. "_WEAPON"), aspect = row[10] } },
+    sf2.items.patch {
+        item = item, required_group = row[8], minimum_level = row[6],
+        enchantments = { { perk = sf2.perks.get("core:perks/PERK_ITEM_SPECIAL_" .. row[9] .. "_WEAPON"), aspect = row[10] } },
     }
     weapons[row[1]] = item
 end

@@ -4,7 +4,7 @@ local sf2 = require("sf2")
 local trial = require("content.ascension_rules")
 
 local function label(id, value)
-    sf2.localization.register { id = id, language = "eng", value = value }
+    sf2.text.register { id = id, language = "eng", value = value }
     return "de128:localization/" .. id
 end
 
@@ -39,9 +39,10 @@ local opponents = {}
 for i, template in ipairs(templates) do
     opponents[i] = {}
     for j, ranged in ipairs(ranged_items) do
-        opponents[i][j] = sf2.warriors.register {
+        -- An opponent table, written inline into a fight (and into a mode's prepared plan).
+        opponents[i][j] = {
             id = "ascension_opponent_" .. i .. "_" .. j,
-            template = sf2.warriors.get_template("core:warrior-templates/" .. template),
+            fighter = "core:warrior-templates/" .. template,
             tactic = "Standard", items = { ranged },
             attributes = { WarriorPower = 0, EnchantmentResistance = 1500 },
             attribute_alignments = {
@@ -54,28 +55,29 @@ end
 
 -- The preview has its own map entry. Story unlocks, ticket costs and the mixed
 -- Monk/material lottery need separate public contracts before replacing them.
-local zone = sf2.zones.register { id = "ascension", file = "Map1.2", start = false }
-local battle = sf2.battles.register {
-    id = "ascension", zone = zone, x = -374, y = 50,
-    title = title, description = overview, icon = "ascension",
-    preview = "preview_main.statue", location = "core:locations/statue", music = "halls_of_the_dead_heroes",
-}
-local loss_reward = sf2.rewards.register { id = "ascension_preview_loss", items = {} }
-local win_reward = sf2.rewards.register { id = "ascension_preview_win", items = {} }
-local fights, descriptions = {}, {}
+local zone = sf2.map.register { id = "ascension", art = "Map1.2", start = false }
+local descriptions, fight_specs = {}, {}
 for step = 1, 5 do
     descriptions[step] = {}
     for index, challenge in ipairs(trial.challenges) do
         descriptions[step][index] = label("ascension.trial." .. step .. "." .. index,
             "Trial " .. step .. "/5: " .. challenge.name .. ". " .. challenge.text)
     end
-    fights[step] = sf2.fights.register {
-        id = "ascension_trial_" .. step, battle = battle, power = 0,
+    -- The fight ID is <battle id>_<name>: ascension_trial_<step>.
+    fight_specs[step] = {
+        name = "trial_" .. step, power = 0,
         rounds = 1, round_time = 150, replays = 1, location = "core:locations/statue", music = "halls_of_the_dead_heroes",
-        description = overview, warriors = { opponents[step][1] },
-        rules = trial.base, rewards = { [0] = loss_reward, [1] = win_reward },
+        description = overview, opponents = { opponents[step][1] },
+        rules = trial.base, rewards = { [0] = { items = {} }, [1] = { items = {} } },
     }
 end
+local battle = sf2.battles.register {
+    id = "ascension", page = zone, x = -374, y = 50,
+    title = title, description = overview, icon = "ascension",
+    preview = "preview_main.statue", location = "core:locations/statue", music = "halls_of_the_dead_heroes",
+    fights = fight_specs,
+}
+local fights = battle.fights
 
 local function shuffle(count)
     local values = {}

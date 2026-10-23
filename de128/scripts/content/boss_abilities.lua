@@ -20,7 +20,10 @@ local sf2 = require("sf2")
 -- flag. A boss's is its core perk's native flag, plus, for DE128's own boss tactics,
 -- a pacing flag that follows the tactic's cadence (see pace_perk below).
 
-local behavior_id = "boss_ability"
+-- One behavior table drives every ability enchantment below. A behavior is registered
+-- under the ID of the first perk that uses it, which is the first entry of `order`
+-- (asserted where the perks are registered), so that perk's ID names the timed flags.
+local behavior_id = "hermit_storm"
 
 -- Flag names seen by native move conditions: <qualified behavior ID>:<key>.
 local function flag(key)
@@ -95,8 +98,7 @@ local function recharge(self, fighter, frames)
     fighter:set_button_cooldown("raid_charge", frames)
 end
 
-local recharge_behavior = sf2.behaviors.register {
-    id = behavior_id,
+local recharge_behavior = {
     parameters = {
         key = { type = "string" },
         frames = { type = "integer" },
@@ -129,6 +131,7 @@ local recharge_behavior = sf2.behaviors.register {
     end,
 }
 
+assert(order[1] == behavior_id, "The recharge behavior is registered by the first ability perk")
 local perks = {}
 local flags = {}
 local core_perks = {}
@@ -136,8 +139,8 @@ for _, key in ipairs(order) do
     local ability = abilities[key]
     perks[key] = sf2.perks.register {
         id = key,
-        display_name = sf2.localization.key("ability." .. key .. ".name"),
-        description = sf2.localization.key("ability." .. key .. ".description"),
+        display_name = sf2.text.get("ability." .. key .. ".name"),
+        description = sf2.text.get("ability." .. key .. ".description"),
         icon = icon(key),
         kind = "combo",
         behavior = recharge_behavior,
@@ -155,8 +158,7 @@ local function shield_recharge(self, fighter)
     fighter:set_flag("down", self.params.cooldown)
 end
 
-local shield_behavior = sf2.behaviors.register {
-    id = "titans_shield",
+local shield_behavior = {
     parameters = { cooldown = { type = "integer" } },
     state = { lifetime = "round", fields = {
         started = false,
@@ -176,8 +178,8 @@ local shield_behavior = sf2.behaviors.register {
 
 perks.titans_shield = sf2.perks.register {
     id = "titans_shield",
-    display_name = sf2.localization.key("ability.titans_shield.name"),
-    description = sf2.localization.key("ability.titans_shield.description"),
+    display_name = sf2.text.get("ability.titans_shield.name"),
+    description = sf2.text.get("ability.titans_shield.description"),
     icon = icon("titans_shield"),
     kind = "combo",
     behavior = shield_behavior,
@@ -210,8 +212,7 @@ local function cloak_recharge(fighter, frames)
     fighter:set_button_cooldown("raid_charge", frames)
 end
 
-local cloak_behavior = sf2.behaviors.register {
-    id = cloak_behavior_id,
+local cloak_behavior = {
     parameters = {
         frames = { type = "integer" },
         invisibility_frames = { type = "integer" },
@@ -256,8 +257,8 @@ local cloak_behavior = sf2.behaviors.register {
 
 perks.shadow_cloak = sf2.perks.register {
     id = "shadow_cloak",
-    display_name = sf2.localization.key("ability.shadow_cloak.name"),
-    description = sf2.localization.key("ability.shadow_cloak.description"),
+    display_name = sf2.text.get("ability.shadow_cloak.name"),
+    description = sf2.text.get("ability.shadow_cloak.description"),
     icon = icon("shadow_cloak"),
     kind = "combo",
     behavior = cloak_behavior,
@@ -272,8 +273,7 @@ flags.shadow_cloak = cloak_flag("recharge")
 -- native recharge. Created on demand while warriors register; one per cadence.
 local pace_flag_behavior = "boss_ability_pace"
 local pace_moves = {}
-local pace_behavior = sf2.behaviors.register {
-    id = pace_flag_behavior,
+local pace_behavior = {
     parameters = {
         id = { type = "string" },
         key = { type = "string" },
@@ -297,6 +297,16 @@ local pace_behavior = sf2.behaviors.register {
 }
 
 local pace_perks = {}
+-- A behavior is registered under the ID of the first perk that uses it, and pacing perks are
+-- created on demand. This anchor perk is the first user, so the pacing flags are always named
+-- "<mod>:behaviors/boss_ability_pace:<key>" whichever cadence is created first. Nothing equips it.
+sf2.perks.register {
+    id = pace_flag_behavior,
+    display_name = sf2.text.get("ability.hermit_storm.name"),
+    description = sf2.text.get("ability.hermit_storm.description"),
+    behavior = pace_behavior,
+    parameters = { id = pace_flag_behavior, key = "hermit_storm", frames = 0, initial_frames = 0 },
+}
 -- key: ability; initial/frames: the tactic's opening wait and cadence in native
 -- frames; moves: the cast moves whose start the tactic paces.
 local function pace_perk(key, initial, frames, moves)
@@ -305,8 +315,8 @@ local function pace_perk(key, initial, frames, moves)
         pace_moves[id] = set_of(moves)
         pace_perks[id] = sf2.perks.register {
             id = id,
-            display_name = sf2.localization.key("ability." .. key .. ".name"),
-            description = sf2.localization.key("ability." .. key .. ".description"),
+            display_name = sf2.text.get("ability." .. key .. ".name"),
+            description = sf2.text.get("ability." .. key .. ".description"),
             behavior = pace_behavior,
             parameters = { id = id, key = key, frames = frames, initial_frames = initial },
         }
@@ -331,17 +341,17 @@ end
 -- One indicator per perk: the player's enchantment watches its timed recharge; a
 -- boss's core perk watches the native flag and the DE128 pacing flag.
 for _, key in ipairs(order) do
-    sf2.perks.recharge_indicator { perk = perks[key], flags = { flags[key] },
-        ready = icon(key), cooldown = cooldown_icon(key) }
-    sf2.perks.recharge_indicator { perk = core_perks[key],
+    sf2.perks.patch { perk = perks[key], recharge_indicator = { flags = { flags[key] },
+        ready = icon(key), cooldown = cooldown_icon(key) } }
+    sf2.perks.patch { perk = core_perks[key], recharge_indicator = {
         flags = { abilities[key].native, sf2.mod.id .. ":behaviors/" .. pace_flag_behavior .. ":" .. key },
-        ready = icon(key), cooldown = cooldown_icon(key) }
+        ready = icon(key), cooldown = cooldown_icon(key) } }
 end
-sf2.perks.recharge_indicator { perk = perks.titans_shield, flags = { sf2.mod.id .. ":behaviors/titans_shield:down" },
-    ready = icon("titans_shield"), cooldown = cooldown_icon("titans_shield") }
+sf2.perks.patch { perk = perks.titans_shield, recharge_indicator = { flags = { sf2.mod.id .. ":behaviors/titans_shield:down" },
+    ready = icon("titans_shield"), cooldown = cooldown_icon("titans_shield") } }
 -- Greyed while cloaked too: the move cannot be cast again until the recharge ends.
-sf2.perks.recharge_indicator { perk = perks.shadow_cloak, flags = { cloak_flag("recharge"), cloak_flag("active") },
-    ready = icon("shadow_cloak"), cooldown = cooldown_icon("shadow_cloak") }
+sf2.perks.patch { perk = perks.shadow_cloak, recharge_indicator = { flags = { cloak_flag("recharge"), cloak_flag("active") },
+    ready = icon("shadow_cloak"), cooldown = cooldown_icon("shadow_cloak") } }
 
 -- Requirement for de128-registered ability moves: the core boss perk (opponents) or
 -- the player's enchantment. A list for `any`, so a move writes

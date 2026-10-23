@@ -1,13 +1,14 @@
 local sf2 = require("sf2")
 
 -- Each translation belongs to DE128 and is authored through the public Lua API.
-local title = sf2.localization.register {
+local title = sf2.text.register {
     id = "item.titans_desolator",
     language = "eng",
     value = "Titan's Desolator",
 }
 
-local desolator = sf2.items.register_weapon {
+local desolator = sf2.items.register {
+    category = "weapon",
     id = "titans_desolator",
     display_name = title,
     icon = sf2.assets.sprite("core:UI/Items/Weapon17.img_weapon_boss_giant_sword"),
@@ -15,9 +16,9 @@ local desolator = sf2.items.register_weapon {
     subtype = "TitanGiantSword",
 }
 
-sf2.items.set_innate_perks {
+sf2.items.patch {
     item = desolator,
-    entries = {
+    perks = {
         { perk = sf2.perks.get("core:perks/PERK_TITAN") },
         { perk = sf2.perks.get("core:perks/PERK_ANTI_SHOCK") },
     },

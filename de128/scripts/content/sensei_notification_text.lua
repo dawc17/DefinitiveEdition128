@@ -7,6 +7,6 @@ for _, key in ipairs({
     "more",
     "title",
 }) do
-    text[key] = sf2.localization.key("sensei.notify." .. key)
+    text[key] = sf2.text.get("sensei.notify." .. key)
 end
 return text

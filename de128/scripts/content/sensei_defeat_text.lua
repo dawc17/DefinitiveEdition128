@@ -10,6 +10,6 @@ for _, key in ipairs({
     "Sensei_defeat5",
     "characterSensei",
 }) do
-    text[key] = sf2.localization.key("sensei.defeat." .. key)
+    text[key] = sf2.text.get("sensei.defeat." .. key)
 end
 return text

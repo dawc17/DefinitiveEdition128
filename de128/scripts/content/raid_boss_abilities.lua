@@ -3,11 +3,11 @@ local abilities = require("content.boss_abilities")
 
 -- Core's two hidden Root Potion items fall back to generic magic geometry.
 -- Their archived attack edges live in these reviewed owner models.
-sf2.items.set_presentation {
+sf2.items.patch {
     item = sf2.items.get("core:items/magic/MAGIC_VERTICAL_TRIGGER"),
     model = sf2.assets.model("models/underworld/mdl_vertical_trigger"),
 }
-sf2.items.set_presentation {
+sf2.items.patch {
     item = sf2.items.get("core:items/magic/SMALL_COLLISION_BOX"),
     model = sf2.assets.model("models/underworld/mdl_small_collision_box"),
 }

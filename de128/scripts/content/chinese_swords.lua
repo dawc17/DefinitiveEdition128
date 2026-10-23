@@ -2,7 +2,7 @@ local sf2 = require("sf2")
 local data = require("content.chinese_swords_data")
 local animation = sf2.assets.binary("animations/chinese_swords_super_slash_old")
 
-data.profile.display_name = sf2.localization.register {
+data.profile.display_name = sf2.text.register {
     id = "move.chinese_swords_super_slash", language = "eng", value = "Super Slash",
 }
 
@@ -32,7 +32,7 @@ local preview = sf2.moves.register {
     only_for = data.preview.only_for, align = data.preview.align, face = data.face,
     on = data.preview.on, events = { { round_stage = "try_on" } },
 }
-sf2.items.set_subtype {
+sf2.items.patch {
     item = sf2.items.get("core:items/weapon/WEAPON_CHNY21_JIAN"), subtype = "ChineseSwords",
 }
 return { slash = slash, preview = preview }
