@@ -50,6 +50,16 @@ local OWNED_AVATARS = {
     boss_whisper_hardmode_new = true, new_man_shuang_gou_hardmode_new = true,
 }
 
+-- seby's Underworld map art (2026-10-22), one page per tier: tiers 1-4 in daylight and
+-- their dark copies 5-8. It replaces the archive's zone files, so tier 8 is now tier 4's
+-- island instead of the mountain map, and its four battles take the places of the
+-- matching tier 4 buttons. Power Mode twins follow their normal battle.
+local MAP_TIERS = 8
+local TIER8_PLACES = {
+    BOSS_INVISIBLE = "BOSS_11", BOSS_HAUNTED_PRINCE = "BOSS_12",
+    Survival_MERCENARY = "BOSS_13", Survival_DEMON = "BOSS_ARCHITECT_2",
+}
+
 local function avatar(name)
     if OWNED_AVATARS[name] then
         return sf2.assets.sprite("sprites/underworld/" .. name)
@@ -212,9 +222,13 @@ local function install(raid_charge_rule)
     -- Generated Power Mode rows contain only differences from the normal fight.
     -- Resolve into a fresh table so registering a twin cannot mutate its source.
     local fight_rows = {}
+    assert(#data.zones == MAP_TIERS, "Underworld map art expects " .. MAP_TIERS .. " tiers")
+    local places = {}
+    for _, spec in ipairs(data.zones[4].battles) do places[spec.name] = spec end
     for tier, zone_spec in ipairs(data.zones) do
         local zone_id = "underworld_tier_" .. tier
-        local zone = sf2.zones.register { id = zone_id, file = zone_spec.file, underworld = true }
+        local art = sf2.assets.sprite("sprites/underworld/maps/tier" .. tier)
+        local zone = sf2.zones.register { id = zone_id, file = art, underworld = true }
         zones[tier] = zone
         for _, spec in ipairs(zone_spec.battles) do
             local battle_id = "uw_" .. lower_id(spec.name)
@@ -229,8 +243,13 @@ local function install(raid_charge_rule)
             if spec.description then
                 description = text.key(spec.description) .. (spec.description_level and ("{" .. spec.description_level .. "}") or "")
             end
+            local place = spec
+            if tier == 8 then
+                local normal = spec.name:gsub("_HARDMODE$", "")
+                place = assert(places[TIER8_PLACES[normal]], "No tier 4 place for Underworld battle " .. spec.name)
+            end
             local battle = sf2.battles.register {
-                id = battle_id, zone = zone, type = BATTLE_TYPES[spec.type], x = spec.x, y = spec.y,
+                id = battle_id, zone = zone, type = BATTLE_TYPES[spec.type], x = place.x, y = place.y,
                 alias = text.key(spec.alias), title = text.key(spec.title), description = description,
                 icon = spec.icon, icon_atlas = (not icons) and spec.icon_atlas or nil, icons = icons,
                 preview = spec.preview, location = spec.location, music = music(spec.music),

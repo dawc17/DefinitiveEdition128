@@ -40,6 +40,8 @@ require("content.progression")
 require("content.campaign_music")
 require("content.map_positions")
 require("content.dojo_changer")
+-- Options > Mod settings: knives and daggers can use the old knife swing sounds.
+require("content.old_knife_sounds")
 -- Per-save difficulty: Easy, Medium (DE128 as designed), Hard and Very Hard.
 require("content.difficulty")
 -- Sensei story: guard templates and RaidCharge availability are synthesized from
