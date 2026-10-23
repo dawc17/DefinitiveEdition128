@@ -29,7 +29,7 @@ for _, choice in ipairs(choices) do
 end
 -- Eclipse draws the picker (a large medallion with a gliding strip) and hosts its
 -- button in the dojo menu, below the disciple toggle's slot.
-sf2.locations.dojo_picker {
+sf2.world.dojo_picker {
     id = "dojo_changer",
     button = sf2.assets.sprite("sprites/dojo_changer/button"),
     button_pressed = sf2.assets.sprite("sprites/dojo_changer/button_pressed"),

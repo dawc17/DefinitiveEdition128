@@ -194,15 +194,17 @@ local function install(raid_charge_rule)
         if scene ~= "map" or view or shared.dialogue_pending() or shared.defeat_pending() then return end
         for _, c in ipairs(CHALLENGERS) do
             if pending():find("," .. c.key .. ",", 1, true) then
-                view = sf2.ui.story_dialog {
-                    title = text[c.weapon], portrait = sprite(c.drop_image),
-                    lines = { { text = text[c.drop] } }, button = text.OK,
+                view = sf2.story.play_sequence {
+                    steps = { { dialog = {
+                        title = text[c.weapon], portrait = sprite(c.drop_image),
+                        lines = { { text = text[c.drop] } }, button = text.OK,
+                    } } },
                     on_complete = function()
                         view = false
                         set_pending(c.key, false)
                         -- The archived OK button opens the shop's Weapon tab on this item.
                         -- The navigation API opens the shop; it cannot select the tab or item.
-                        if pending() == "," then sf2.scenes.open("shop") else show_next() end
+                        if pending() == "," then sf2.world.open_scene("shop") else show_next() end
                     end,
                     on_cancel = function() view = false end,
                 }

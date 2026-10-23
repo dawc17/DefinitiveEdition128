@@ -72,9 +72,9 @@ local controller = {
         local seal = self.state.seal
         local remaining = view.opponent.health - threshold(seal)
         if hud and sf2.ui.is_open(hud) then
-            sf2.ui.set_text(hud, "left", seal + 1 < SEALS
+            sf2.ui.update(hud, "left", { text = seal + 1 < SEALS
                 and string.format("Seal holds for %.1f more bars", math.max(0, remaining))
-                or string.format("%.1f bars of shield left", math.max(0, view.opponent.health)))
+                or string.format("%.1f bars of shield left", math.max(0, view.opponent.health)) })
         end
         -- The last seal ends with the shield itself: the knockout wins the round natively.
         if seal + 1 < SEALS and remaining <= 0 and not self.state.requested then

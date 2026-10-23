@@ -12,8 +12,9 @@ local function definition(card, text, portrait)
     }
 end
 local function open(card, text, portrait, on_complete, on_cancel)
-    local value = definition(card, text, portrait)
-    value.on_complete, value.on_cancel = on_complete, on_cancel
-    return sf2.ui.story_dialog(value)
+    return sf2.story.play_sequence {
+        steps = { { dialog = definition(card, text, portrait) } },
+        on_complete = on_complete, on_cancel = on_cancel,
+    }
 end
 return { open = open, definition = definition }

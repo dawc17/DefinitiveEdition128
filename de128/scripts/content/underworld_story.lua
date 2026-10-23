@@ -180,7 +180,7 @@ local function install(underworld)
             assert(cards[#cards].scene == "dojo", "Underworld followup must end in the dojo")
             run_cards("followup", cards, function()
                 sf2.state.set { uw_intro = 2 }
-                sf2.scenes.open("dojo")
+                sf2.world.open_scene("dojo")
             end)
             return
         end
