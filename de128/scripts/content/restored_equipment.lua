@@ -19,10 +19,10 @@ local definitions = {
     { "lightning_arc", "Lightning Arc", "magic", "Magic13.img_magic_lightning", "mdl_magic_fireball", "LightningArrow", 39, 139, "INTERMISSION", "PERK_ITEM_SPECIAL_ENFEEBLE_MAGIC", 1388 },
 }
 local categories = {
-    armor = { sf2.items.register_armor, sf2.shop.ARMOR },
-    helm = { sf2.items.register_helm, sf2.shop.HELMETS },
-    ranged = { sf2.items.register_ranged, sf2.shop.RANGED },
-    magic = { sf2.items.register_magic, sf2.shop.MAGIC },
+    armor = { sf2.items.register_armor, "armor" },
+    helm = { sf2.items.register_helm, "helmets" },
+    ranged = { sf2.items.register_ranged, "ranged" },
+    magic = { sf2.items.register_magic, "magic" },
 }
 local equipment = {}
 for _, row in ipairs(definitions) do

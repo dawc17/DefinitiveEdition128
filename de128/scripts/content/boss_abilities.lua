@@ -98,9 +98,9 @@ end
 local recharge_behavior = sf2.behaviors.register {
     id = behavior_id,
     parameters = {
-        key = { type = sf2.behaviors.STRING },
-        frames = { type = sf2.behaviors.INTEGER },
-        initial_frames = { type = sf2.behaviors.INTEGER },
+        key = { type = "string" },
+        frames = { type = "integer" },
+        initial_frames = { type = "integer" },
     },
     state = { lifetime = "round", fields = {
         started = false,
@@ -139,7 +139,7 @@ for _, key in ipairs(order) do
         display_name = sf2.localization.key("ability." .. key .. ".name"),
         description = sf2.localization.key("ability." .. key .. ".description"),
         icon = icon(key),
-        kind = sf2.perks.COMBO,
+        kind = "combo",
         behavior = recharge_behavior,
         parameters = { key = key, frames = ability.frames, initial_frames = ability.initial_frames or ability.frames },
     }
@@ -157,7 +157,7 @@ end
 
 local shield_behavior = sf2.behaviors.register {
     id = "titans_shield",
-    parameters = { cooldown = { type = sf2.behaviors.INTEGER } },
+    parameters = { cooldown = { type = "integer" } },
     state = { lifetime = "round", fields = {
         started = false,
     } },
@@ -179,7 +179,7 @@ perks.titans_shield = sf2.perks.register {
     display_name = sf2.localization.key("ability.titans_shield.name"),
     description = sf2.localization.key("ability.titans_shield.description"),
     icon = icon("titans_shield"),
-    kind = sf2.perks.COMBO,
+    kind = "combo",
     behavior = shield_behavior,
     parameters = { cooldown = 600 },
 }
@@ -213,9 +213,9 @@ end
 local cloak_behavior = sf2.behaviors.register {
     id = cloak_behavior_id,
     parameters = {
-        frames = { type = sf2.behaviors.INTEGER },
-        invisibility_frames = { type = sf2.behaviors.INTEGER },
-        initial_frames = { type = sf2.behaviors.INTEGER },
+        frames = { type = "integer" },
+        invisibility_frames = { type = "integer" },
+        initial_frames = { type = "integer" },
     },
     state = { lifetime = "round", fields = {
         started = false,
@@ -259,7 +259,7 @@ perks.shadow_cloak = sf2.perks.register {
     display_name = sf2.localization.key("ability.shadow_cloak.name"),
     description = sf2.localization.key("ability.shadow_cloak.description"),
     icon = icon("shadow_cloak"),
-    kind = sf2.perks.COMBO,
+    kind = "combo",
     behavior = cloak_behavior,
     parameters = { frames = 600, invisibility_frames = 650, initial_frames = 300 },
 }
@@ -275,10 +275,10 @@ local pace_moves = {}
 local pace_behavior = sf2.behaviors.register {
     id = pace_flag_behavior,
     parameters = {
-        id = { type = sf2.behaviors.STRING },
-        key = { type = sf2.behaviors.STRING },
-        frames = { type = sf2.behaviors.INTEGER },
-        initial_frames = { type = sf2.behaviors.INTEGER },
+        id = { type = "string" },
+        key = { type = "string" },
+        frames = { type = "integer" },
+        initial_frames = { type = "integer" },
     },
     state = { lifetime = "fight", fields = {
         started = false,

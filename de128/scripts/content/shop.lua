@@ -8,7 +8,7 @@ for _, row in ipairs(require("content.shop_data")) do
     local item = sf2.items.get("core:items/" .. row[1] .. "/" .. row[2])
     sf2.shop.set_availability {
         item = item,
-        visibility = sf2.shop.FORCE_VISIBLE,
+        visibility = "force_visible",
         minimum_level = row[3],
         required_group = row[4],
     }

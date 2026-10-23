@@ -114,9 +114,9 @@ local function install(raid_charge_rule)
     local default = sf2.warriors.get_template("core:warrior-templates/default")
     local rules = {
         sf2.rules.perk { id = "challenger_anti_shock", perk = sf2.perks.get("core:perks/PERK_ANTI_SHOCK"),
-            target = sf2.rules.OPPONENT },
-        sf2.rules.attributes { id = "challenger_player_damage", target = sf2.rules.PLAYER, values = { DamageFactor = -8500 } },
-        sf2.rules.attributes { id = "challenger_opponent_damage", target = sf2.rules.OPPONENT, values = { DamageFactor = 1000 } },
+            target = "opponent" },
+        sf2.rules.attributes { id = "challenger_player_damage", target = "player", values = { DamageFactor = -8500 } },
+        sf2.rules.attributes { id = "challenger_opponent_damage", target = "opponent", values = { DamageFactor = 1000 } },
         raid_charge_rule,
     }
     local no_reward = nil
@@ -140,7 +140,7 @@ local function install(raid_charge_rule)
             perks = { { perk = sf2.perks.get("core:perks/" .. c.perk), aspect = 100000 } },
         }
         local battle = sf2.battles.register {
-            id = c.battle, zone = sf2.zones.get("core:zones/" .. c.zone), type = sf2.battles.FINAL,
+            id = c.battle, zone = sf2.zones.get("core:zones/" .. c.zone), type = "final",
             x = c.x, y = c.y, alias = text.key(c.alias), title = text.key(c.title),
             description = text.key(c.description), icon = c.key,
             icons = { base = sprite("battlebtn" .. c.key .. "_base"), active = sprite("battlebtn" .. c.key .. "_active") },

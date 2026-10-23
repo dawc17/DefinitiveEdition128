@@ -67,7 +67,7 @@ local function avatar(name)
     return name
 end
 
-local BATTLE_TYPES = { final = sf2.battles.FINAL, survival = sf2.battles.SURVIVAL }
+local BATTLE_TYPES = { final = "final", survival = "survival" }
 
 local function lower_id(name) return (name:gsub("[^%w_]", "_")):lower() end
 

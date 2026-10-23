@@ -141,7 +141,7 @@ local function install(underworld, raid_charge_rule)
         perks = perks,
     }
     local battle = sf2.battles.register {
-        id = "uw_phased_volcano", zone = zone, type = sf2.battles.FINAL, x = -95, y = -115,
+        id = "uw_phased_volcano", zone = zone, type = "final", x = -95, y = -115,
         alias = text("alias"), title = text("title"), description = text("description"),
         icon = "vulcan_raid", preview = "preview_raid_base.vulcan_raid",
         location = "core:locations/vulcan_raid", music = sf2.assets.audio("audio/underworld/vulcan"),
@@ -155,10 +155,10 @@ local function install(underworld, raid_charge_rule)
         id = "uw_phased_volcano", battle = battle, rounds = SEALS, round_time = 60, warriors = { boss },
         rewards = rewards, rules = {
             sf2.rules.perk { id = "uw_phased_volcano_anti_shock", perk = sf2.perks.get("core:perks/PERK_ANTI_SHOCK"),
-                target = sf2.rules.OPPONENT },
+                target = "opponent" },
             raid_charge_rule,
             sf2.rules.behavior { id = "uw_phased_volcano_seals", behavior = controller,
-                target = sf2.rules.PLAYER, controls_outcome = true },
+                target = "player", controls_outcome = true },
         },
     }
 end

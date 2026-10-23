@@ -16,7 +16,7 @@ local function register(is_available)
         end,
     }
     registered = sf2.rules.behavior {
-        id = "sensei_raid_charge_conditional", behavior = behavior, target = sf2.rules.PLAYER,
+        id = "sensei_raid_charge_conditional", behavior = behavior, target = "player",
     }
     return registered
 end

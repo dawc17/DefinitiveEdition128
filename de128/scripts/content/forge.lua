@@ -7,8 +7,8 @@ local sf2 = require("sf2")
 -- added recipe prices with the core Complex table; content.forge_choice scales it
 -- per candidate (boss abilities 1.5x) and per strength tier.
 local equipment = {
-    sf2.forge.WEAPON, sf2.forge.ARMOR, sf2.forge.HELM,
-    sf2.forge.RANGED, sf2.forge.MAGIC,
+    "weapon", "armor", "helm",
+    "ranged", "magic",
 }
 local complex = sf2.forge.profile("Complex")
 local simple = sf2.forge.profile("Simple")
@@ -70,7 +70,7 @@ end
 sf2.forge.include_candidate {
     profile = sf2.forge.profile("Medium"),
     perk = sf2.perks.get("core:perks/PERK_ITEM_SPECIAL_SHOCK"),
-    equipment = sf2.forge.WEAPON,
+    equipment = "weapon",
     min_deviation = -30, max_deviation = 30,
 }
 

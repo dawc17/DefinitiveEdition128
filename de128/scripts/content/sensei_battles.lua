@@ -17,7 +17,7 @@ local function register()
         for _, mode in ipairs({ "normal", "eclipse" }) do
             result[mode][act] = sf2.battles.register {
                 id = "sensei_act_" .. act .. "_" .. mode, zone = zone,
-                type = mode == "normal" and sf2.battles.STORY or sf2.battles.FINAL,
+                type = mode == "normal" and "story" or "final",
                 x = place.x, y = place.y, location = place.location, preview = art.preview(place.preview), music = place.music,
                 alias = text.alias, title = text.title, icon = "sensei",
                 description = mode == "normal" and text.locked or text.description,
