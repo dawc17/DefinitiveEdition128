@@ -94,21 +94,6 @@ for slot, types in pairs(POOLS) do
     end
 end
 
--- Park-Miller: the same save, fight and opponent always roll the same enchantments.
-local MODULUS = 2147483647
-local function hash(seed, text)
-    local value = seed % MODULUS
-    for i = 1, #text do value = (value * 31 + string.byte(text, i)) % MODULUS end
-    if value == 0 then value = 1 end
-    return value
-end
-local function stream(state)
-    return function(count)
-        state = (state * 48271) % MODULUS
-        return state % count + 1
-    end
-end
-
 local function enchanted(enemy)
     for _, perk in ipairs(enemy.perks) do
         if perk:sub(1, #ENCHANTMENT_PREFIX) == ENCHANTMENT_PREFIX then return true end
@@ -118,8 +103,10 @@ end
 
 -- Very Hard keeps 2-3 picks and Hard 1-2, both from the front of one ordered roll, so a
 -- difficulty change only adds or removes enchantments. No pick pairs healing with Damage Return.
+-- The same save, fight and opponent always roll the same enchantments.
 local function roll(seed, fight_id, enemy, tier)
-    local next_value = stream(hash(seed, fight_id .. "#" .. enemy.index))
+    local stream = sf2.random.stream(seed, fight_id, enemy.index)
+    local function next_value(count) return stream:integer(1, count) end
     -- Both counts are drawn every time so both difficulties read the same sequence.
     local hard_count, very_hard_count = next_value(2), 1 + next_value(2)
     local count = tier == "very_hard" and very_hard_count or hard_count
