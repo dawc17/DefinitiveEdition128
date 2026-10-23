@@ -35,7 +35,7 @@ local function install(battles, finals, portrait)
         local opened = dialog.open(card, captions, portrait, function()
             if view ~= token then return end
             view = nil
-            if act == 1 and not sf2.profile.set_eclipse_mode(false) then return end
+            if act == 1 and not sf2.game.set_eclipse_mode(false) then return end
             if not map.open_act(act, battles) then return end
             sf2.state.set { ["sensei_opened_" .. act] = true, ["sensei_pending_" .. act] = false }
             show_next()

@@ -44,9 +44,8 @@ sf2.locations.dojo_picker {
 }
 
 -- Earlier versions saved a map button into profiles; remove it at each session start.
-sf2.quests.register {
-    id = "dojo_changer_map_button", place = "map", on = "session",
-    actions = { { hide_map_button = "dojo_changer" } },
-}
+sf2.story.on("session", function()
+    sf2.map.hide_button("dojo_changer")
+end)
 
 return choices

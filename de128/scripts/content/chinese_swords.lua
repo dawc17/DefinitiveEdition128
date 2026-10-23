@@ -7,8 +7,9 @@ data.profile.display_name = sf2.text.register {
 }
 
 for _, move in ipairs(data.item_lock_extensions) do
-    sf2.moves.extend_item_lock {
-        move = move, slot = "weapon", source_subtype = "Sai", subtype = "ChineseSwords",
+    sf2.moves.patch {
+        move = move,
+        item_locks = { add = { { slot = "weapon", source_subtype = "Sai", subtype = "ChineseSwords" } } },
     }
 end
 

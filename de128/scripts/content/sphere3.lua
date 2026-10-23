@@ -9,7 +9,7 @@ local animation = {
     start = sf2.assets.binary("animations/magic_fire_aura_bullet"),
     middle = sf2.assets.binary("animations/magic_fire_aura_bullet"),
 }
-local family = sf2.moves.register_template { id = "sphere3" }
+local family = sf2.moves.register { kind = "template", id = "sphere3" }
 local moves = {}
 
 -- Equipment the fighter (player) or the spawned sphere actor must carry.

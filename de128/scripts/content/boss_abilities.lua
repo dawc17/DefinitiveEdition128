@@ -372,7 +372,7 @@ end
 
 -- Native moves keep their core perk lock and gain the enchantment as an alternative.
 local function extend_lock(key, move)
-    sf2.moves.extend_perk_lock { move = move, source_perk = core_perks[key], perk = perks[key] }
+    sf2.moves.patch { move = move, perk_locks = { add = { { source_perk = core_perks[key], perk = perks[key] } } } }
 end
 
 return {

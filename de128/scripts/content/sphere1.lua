@@ -3,7 +3,7 @@ local sf2 = require("sf2")
 -- middle and wall hit) and the shop preview and try-on moves.
 -- Game frames: every move has 3 frames per sample. With first_sample F, the first sample
 -- is frames 0-5 and sample N > F is frames (N - F + 1) * 3 .. (N - F + 1) * 3 + 2.
-local family = sf2.moves.register_template { id = "sphere1" }
+local family = sf2.moves.register { kind = "template", id = "sphere1" }
 local moves = {}
 
 local HITS = { "snd_hit1", "snd_hit2", "snd_hit3", "snd_hit4", "snd_hit5", "snd_hit6" }

@@ -86,7 +86,7 @@ local cast = sf2.moves.register {
 
 -- Seconds between fields; recorded as the boss's pacing for its HUD icon.
 local FIELD_EVERY = 6
-local tactic = sf2.tactics.register {
+local tactic = sf2.ai.register {
     id = "gatekeeper_power_field", template = "Aggressive",
     on_decide = function(memory, event)
         if event.seconds < (memory.next_field or 0) then return nil end
@@ -101,5 +101,5 @@ local tactic = sf2.tactics.register {
 }
 
 return { cast = cast, surge = surge,
-    tactic = abilities.pace(sf2.tactics.name(tactic), "power_field", 0, FIELD_EVERY * 60,
+    tactic = abilities.pace(sf2.ai.name(tactic), "power_field", 0, FIELD_EVERY * 60,
         { "de128:moves/gatekeeper_power_field" }) }

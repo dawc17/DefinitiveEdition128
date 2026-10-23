@@ -25,10 +25,10 @@ sf2.saves.option {
 }
 
 -- Upgrades cost coins only, on every difficulty.
-sf2.economy.modifier { upgrade_gems = 0 }
-sf2.economy.modifier { option = OPTION, choice = "easy", shop_coins = 0.85, shop_gems = 0.85, upgrade_coins = 0.7 }
-sf2.economy.modifier { option = OPTION, choice = "hard", reward_coins = { survival = 0.9 } }
-sf2.economy.modifier { option = OPTION, choice = "very_hard", shop_coins = 1.1, shop_gems = 1.1,
+sf2.game.economy { upgrade_gems = 0 }
+sf2.game.economy { option = OPTION, choice = "easy", shop_coins = 0.85, shop_gems = 0.85, upgrade_coins = 0.7 }
+sf2.game.economy { option = OPTION, choice = "hard", reward_coins = { survival = 0.9 } }
+sf2.game.economy { option = OPTION, choice = "very_hard", shop_coins = 1.1, shop_gems = 1.1,
     reward_coins = { survival = 0.9 } }
 
 -- The Standard AI most opponents use starts every fight with no dodge, counter, block or

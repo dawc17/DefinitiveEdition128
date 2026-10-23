@@ -10,7 +10,7 @@ sf2.moves.patch {
 }
 
 local function register_tactic(id, cooldown)
-    return sf2.tactics.register {
+    return sf2.ai.register {
         id = id, template = "Aggressive",
         on_decide = function(memory, event)
             local ready = event.frame >= 300 and event.frame >= (memory.next_blaster_frame or 0)
@@ -39,6 +39,6 @@ local function register_tactic(id, cooldown)
 end
 
 return {
-    tactic = sf2.tactics.name(register_tactic("saturn_blaster", 660)),
-    power_tactic = sf2.tactics.name(register_tactic("saturn_blaster_power", 550)),
+    tactic = sf2.ai.name(register_tactic("saturn_blaster", 660)),
+    power_tactic = sf2.ai.name(register_tactic("saturn_blaster_power", 550)),
 }

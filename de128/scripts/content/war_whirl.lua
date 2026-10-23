@@ -60,7 +60,7 @@ local move = sf2.moves.register {
 
 -- Opening wait and seconds between whirls; recorded as the boss's pacing for its HUD icon.
 local WHIRL_DELAY, WHIRL_EVERY = 2, 6
-local tactic = sf2.tactics.register {
+local tactic = sf2.ai.register {
     id = "war_whirl", template = "Aggressive",
     on_decide = function(memory, event)
         if event.seconds < WHIRL_DELAY or event.seconds < (memory.next_whirl or 0) then return nil end
@@ -75,5 +75,5 @@ local tactic = sf2.tactics.register {
 }
 
 return { move = move,
-    tactic = abilities.pace(sf2.tactics.name(tactic), "war_whirl", WHIRL_DELAY * 60, WHIRL_EVERY * 60,
+    tactic = abilities.pace(sf2.ai.name(tactic), "war_whirl", WHIRL_DELAY * 60, WHIRL_EVERY * 60,
         { "de128:moves/war_whirl_player" }) }

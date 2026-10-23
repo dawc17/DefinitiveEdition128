@@ -11,7 +11,7 @@ for _, lock in ipairs({
     { move = "ThrowSuplex", perk = "PERK_SUPLEX" },
     { move = "ThrowSuplexProfile", perk = "PERK_SUPLEX" },
 }) do
-    sf2.moves.remove_perk_lock { move = lock.move, perk = sf2.perks.get("core:perks/" .. lock.perk) }
+    sf2.moves.patch { move = lock.move, perk_locks = { remove = { sf2.perks.get("core:perks/" .. lock.perk) } } }
 end
 
 -- Assets/DExml/CharacterProgress.xml: PerkTree/Level Values 4,8,11,14,17.

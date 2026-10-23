@@ -64,7 +64,7 @@ for _, move in ipairs({ "AssistantLongKatanaPlayer", "AssistantBigNaginataPlayer
 end
 
 local function tactic(id, moves, initial, cooldown, advance_for_range)
-    return sf2.tactics.name(sf2.tactics.register {
+    return sf2.ai.name(sf2.ai.register {
         id = id, template = "Aggressive",
         on_decide = function(memory, event)
             local ready = event.frame >= initial and event.frame >= (memory.next_ability_frame or 0)

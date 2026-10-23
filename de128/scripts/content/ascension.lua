@@ -144,30 +144,23 @@ sf2.modes.register {
     end,
 }
 
-sf2.quests.register {
-    id = "ascension_entry", place = "map", on = "session",
-    actions = { { show_battle = battle, locked = false } },
-}
-sf2.quests.register {
-    id = "ascension_complete", place = "map", on = "fight_end",
-    conditions = {
-        { eq = { { event_fight = true }, { fight_id = fights[5] } } },
-        { eq = { { fight_result = true }, "Win" } },
-    },
-    actions = { { dialog = { title = title, image = "character_puppeteer", lines = { completed } } } },
-}
+sf2.story.on("session", function()
+    sf2.map.reveal { battle = battle, locked = false }
+end)
+sf2.story.on("fight_end", function(event)
+    if event.fight == fights[5] and event.result == "Win" then
+        sf2.story.play_sequence { title = title, image = "character_puppeteer", lines = { completed } }
+    end
+end)
 local ours = {}
 for _, fight in ipairs(fights) do
-    ours[#ours + 1] = { eq = { { event_fight = true }, { fight_id = fight } } }
+    ours[fight] = true
 end
-sf2.quests.register {
-    id = "ascension_defeat", place = "map", on = "fight_end",
-    conditions = {
-        { any = ours },
-        { eq = { { fight_result = true }, "Win" }, negate = true },
-    },
-    actions = { { dialog = { title = title, image = "character_puppeteer", lines = { defeated } } } },
-}
+sf2.story.on("fight_end", function(event)
+    if ours[event.fight] and event.result ~= "Win" then
+        sf2.story.play_sequence { title = title, image = "character_puppeteer", lines = { defeated } }
+    end
+end)
 
 return { fights = fights, battle = battle }
 ]==]

@@ -91,7 +91,7 @@ local cast = sf2.moves.register {
 }
 
 local function register_tactic(id, cooldown)
-    return sf2.tactics.register {
+    return sf2.ai.register {
         id = id, template = "Aggressive",
         on_decide = function(memory, event)
             -- The archived perk sets GraspOfDarknessCD for the warrior's _Frames
@@ -124,7 +124,7 @@ local function register_tactic(id, cooldown)
 end
 
 return { cast = cast, hand_start = hand_start, hand_attack = hand_attack,
-    tactic = abilities.pace(sf2.tactics.name(register_tactic("blackness_grasp", 800)),
+    tactic = abilities.pace(sf2.ai.name(register_tactic("blackness_grasp", 800)),
         "grasp_of_darkness", 800, 800, { "de128:moves/blackness_grasp_player" }),
-    power_tactic = abilities.pace(sf2.tactics.name(register_tactic("blackness_grasp_power", 700)),
+    power_tactic = abilities.pace(sf2.ai.name(register_tactic("blackness_grasp_power", 700)),
         "grasp_of_darkness", 700, 700, { "de128:moves/blackness_grasp_player" }) }

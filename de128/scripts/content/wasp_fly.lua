@@ -91,7 +91,7 @@ end
 -- still decide whether the move appears in event.actions.
 -- Opening wait and seconds between flights; recorded as the boss's pacing for its HUD icon.
 local FLY_DELAY, FLY_EVERY = 2, 5
-local tactic = sf2.tactics.register {
+local tactic = sf2.ai.register {
     id = "wasp_fly",
     template = "Aggressive",
     on_decide = function(memory, event)
@@ -109,4 +109,4 @@ local tactic = sf2.tactics.register {
 local fly_moves = {}
 for _, range in ipairs({ "150", "200", "300", "370" }) do fly_moves[#fly_moves + 1] = "de128:moves/wasp_fly_" .. range end
 return { moves = moves,
-    tactic = abilities.pace(sf2.tactics.name(tactic), "wasp_fly", FLY_DELAY * 60, FLY_EVERY * 60, fly_moves) }
+    tactic = abilities.pace(sf2.ai.name(tactic), "wasp_fly", FLY_DELAY * 60, FLY_EVERY * 60, fly_moves) }

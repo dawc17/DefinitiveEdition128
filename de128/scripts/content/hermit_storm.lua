@@ -107,7 +107,7 @@ local player = sf2.moves.register {
 
 -- Seconds between storms; recorded as the boss's pacing for its HUD icon.
 local STORM_EVERY = 6
-local tactic = sf2.tactics.register {
+local tactic = sf2.ai.register {
     id = "hermit_storm", template = "Aggressive",
     on_decide = function(memory, event)
         if event.seconds < (memory.next_storm or 0) then return nil end
@@ -122,5 +122,5 @@ local tactic = sf2.tactics.register {
 }
 
 return { player = player, idle = idle, win = win,
-    tactic = abilities.pace(sf2.tactics.name(tactic), "hermit_storm", 0, STORM_EVERY * 60,
+    tactic = abilities.pace(sf2.ai.name(tactic), "hermit_storm", 0, STORM_EVERY * 60,
         { "de128:moves/hermit_storm_player" }) }

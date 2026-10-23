@@ -1,9 +1,9 @@
 local sf2 = require("sf2")
 
-assert(type(sf2.services) == "table" and type(sf2.services.disable) == "function",
-    "DE128 requires the public sf2.services.disable API.")
-assert(type(sf2.timers) == "table" and type(sf2.timers.set) == "function",
-    "DE128 requires the public sf2.timers.set API.")
+assert(type(sf2.game) == "table" and type(sf2.game.disable) == "function",
+    "DE128 requires the public sf2.game.disable API.")
+assert(type(sf2.game.timers) == "function",
+    "DE128 requires the public sf2.game.timers API.")
 
 -- Module order is explicit. Eclipse commits these declarations together.
 require("content.map_buttons")

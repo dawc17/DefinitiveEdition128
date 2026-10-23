@@ -7,7 +7,7 @@ local animation = {
     start = sf2.assets.binary("animations/fireball_start"),
     middle = sf2.assets.binary("animations/fireball_middle"),
 }
-local family = sf2.moves.register_template { id = "sphere2" }
+local family = sf2.moves.register { kind = "template", id = "sphere2" }
 local moves = {}
 local function name(id) return "de128:moves/" .. id end
 

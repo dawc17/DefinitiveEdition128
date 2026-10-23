@@ -19,7 +19,7 @@ abilities.extend_lock("lightning_chain", "LightingChainPlayer")
 local chain_perk = sf2.perks.get("core:perks/PERK_LIGHTING_CHAIN")
 for _, name in ipairs({ "LightingChainStart", "LightingChain50", "LightingChain150",
     "LightingChain300", "LightingChain400" }) do
-    sf2.moves.remove_perk_lock { move = name, perk = chain_perk }
+    sf2.moves.patch { move = name, perk_locks = { remove = { chain_perk } } }
     sf2.moves.patch { move = name, when = { actor = "LightningChain" } }
 end
 
@@ -27,7 +27,7 @@ end
 local CHAIN_DELAY = 300
 
 local function register_tactic(id, cooldown)
-    return sf2.tactics.register {
+    return sf2.ai.register {
         id = id, template = "Aggressive",
         on_decide = function(memory, event)
             local ready = event.frame >= CHAIN_DELAY and event.frame >= (memory.next_chain_frame or 0)
@@ -58,8 +58,8 @@ local function register_tactic(id, cooldown)
 end
 
 return {
-    tactic = abilities.pace(sf2.tactics.name(register_tactic("dandy_lightning_chain", 600)),
+    tactic = abilities.pace(sf2.ai.name(register_tactic("dandy_lightning_chain", 600)),
         "lightning_chain", CHAIN_DELAY, 600, { "LightingChainPlayer" }),
-    power_tactic = abilities.pace(sf2.tactics.name(register_tactic("dandy_lightning_chain_power", 500)),
+    power_tactic = abilities.pace(sf2.ai.name(register_tactic("dandy_lightning_chain_power", 500)),
         "lightning_chain", CHAIN_DELAY, 500, { "LightingChainPlayer" }),
 }
