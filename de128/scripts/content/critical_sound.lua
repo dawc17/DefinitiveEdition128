@@ -16,7 +16,7 @@ sf2.fx.screen {
     id = "critical_sound",
     trigger = "critical",
     hold = 0,
-    duration = 0.01,
+    duration = 0.02,
     sound = { sound = "snd_crit" },
     setting = critical_sound,
 }
