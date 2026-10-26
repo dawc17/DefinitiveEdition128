@@ -1,5 +1,8 @@
 local sf2 = require("sf2")
 
+-- Shop search on every tab; sort and a type filter on the weapon, ranged and magic tabs.
+sf2.game.enable { "shop_search", "shop_sort" }
+
 -- Priced core equipment that the DE archive makes available in the normal shop.
 -- The generated table contains static data; no XML is read by the mod in game.
 -- Core identity stays base-owned. Prices, art, starting profiles, legacy paid
