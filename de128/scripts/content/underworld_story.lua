@@ -134,15 +134,21 @@ local function install(underworld)
         if not opened then view = nil end
     end
 
+    -- RaidIntro after its ActScreen: ShowRaidsGag and SetMapFocus on the first boss. DE128
+    -- also opens the Underworld map there, so the rest of the story plays on it. Repeating
+    -- this before every later card is harmless and recovers a resumed or refused switch.
+    local function enter_underworld()
+        sf2.map.show_underworld(true)
+        sf2.map.focus(underworld.battles[story.focus])
+        sf2.map.open_underworld()
+    end
+
     local function run_intro()
         run_cards("intro", story.intro, function()
             sf2.state.set { uw_intro = 1 }
             show_next()
         end, function(index)
-            if index > 1 then
-                sf2.map.show_underworld(true)
-                sf2.map.focus(underworld.battles[story.focus])
-            end
+            if index > 1 then enter_underworld() end
         end)
     end
 
@@ -175,13 +181,12 @@ local function install(underworld)
             return
         end
         if intro == 1 then
-            -- RaidIntro2 ends with ChangeScene Dojo on its last button.
-            local cards = story.followup
-            assert(cards[#cards].scene == "dojo", "Underworld followup must end in the dojo")
-            run_cards("followup", cards, function()
+            -- RaidIntro2. Its last button changed scene to the dojo (the card's scene field);
+            -- DE128 keeps the player on the Underworld map the intro just opened.
+            run_cards("followup", story.followup, function()
                 sf2.state.set { uw_intro = 2 }
-                sf2.world.open_scene("dojo")
-            end)
+                show_next()
+            end, enter_underworld)
             return
         end
         local boss, kind = pending_result()

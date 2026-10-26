@@ -42,6 +42,8 @@ require("content.map_positions")
 require("content.dojo_changer")
 -- Options > Mod settings: knives and daggers can use the old knife swing sounds.
 require("content.old_knife_sounds")
+-- Options > Mod settings: critical hits can play the DE critical sound.
+require("content.critical_sound")
 -- Per-save difficulty: Easy, Medium (DE128 as designed), Hard and Very Hard.
 require("content.difficulty")
 -- Sensei story: guard templates and RaidCharge availability are synthesized from
