@@ -10,9 +10,9 @@ local CHOICES = {
     { id = "medium", title = "Medium", subtitle = "Give Me Balance",
       description = "Definitive Edition as designed." },
     { id = "hard", title = "Hard", subtitle = "Give Me a Challenge",
-      description = "99-second rounds; stronger, smarter, enchanted foes; fewer Survival coins." },
+      description = "99-second rounds; stronger, smarter, enchanted foes; fewer Survival coins; items sell for less." },
     { id = "very_hard", title = "Very Hard", subtitle = "Give Me Shadow Fight",
-      description = "Hard, with far smarter foes, more enchantments and dearer shop prices." },
+      description = "Hard, with far smarter foes, more enchantments, dearer shop prices and no selling." },
 }
 
 sf2.saves.option {
@@ -30,6 +30,12 @@ sf2.game.economy { option = OPTION, choice = "easy", shop_coins = 0.85, shop_gem
 sf2.game.economy { option = OPTION, choice = "hard", reward_coins = { survival = 0.9 } }
 sf2.game.economy { option = OPTION, choice = "very_hard", shop_coins = 1.1, shop_gems = 1.1,
     reward_coins = { survival = 0.9 } }
+
+-- Selling pays a share of an item's worth (its price plus its upgrades). Very Hard sets
+-- none, so its saves have no Sell button.
+sf2.game.economy { option = OPTION, choice = "easy", sell_coins = 0.25 }
+sf2.game.economy { option = OPTION, choice = "medium", sell_coins = 0.25 }
+sf2.game.economy { option = OPTION, choice = "hard", sell_coins = 0.1 }
 
 -- The Standard AI most opponents use starts every fight with no dodge, counter, block or
 -- attack-sequence chance and only learns them from the player's repeated moves. The
