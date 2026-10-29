@@ -1,7 +1,7 @@
 schema = 1
 id = "de128"
 name = "Definitive Edition 128"
-version = "0.50.1"
+version = "0.51.0"
 authors = ["Dawid Czaplicki"]
 entrypoint = "scripts/main.lua"
 save_binding = "required"

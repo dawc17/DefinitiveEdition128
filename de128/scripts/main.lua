@@ -44,6 +44,8 @@ require("content.dojo_changer")
 require("content.old_knife_sounds")
 -- Options > Mod settings: critical hits can play the DE critical sound.
 require("content.critical_sound")
+-- Options > Mod settings: story fights can use the Special Edition locations.
+require("content.se_locations")
 -- Per-save difficulty: Easy, Medium (DE128 as designed), Hard and Very Hard.
 require("content.difficulty")
 -- Sensei story: guard templates and RaidCharge availability are synthesized from

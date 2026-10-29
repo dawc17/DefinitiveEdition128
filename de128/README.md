@@ -144,6 +144,16 @@ without waiting. Ascension remains disabled; Master of Style and Relentless
 follow the archived DE XML.
 Definitions, translations and behavior are authored through the public Lua API.
 
+## Special Edition locations (since 0.51.0)
+
+`scripts/content/se_locations.lua` adds the **Special Edition locations** switch under
+Options > Mod settings (Visuals, off by default). While it is on, every fight outside
+versus that would use one of the 25 stages Shadow Fight 2 Special Edition redrew uses the
+SE version instead, through `sf2.world.replace`; so does the dojo backdrop while the player
+keeps the default dojo (dojo picker choices are left alone). The SE stages themselves are
+core content (`core:locations/<name>_se`, installed by Eclipse's
+`Tools/Recovery/ImportSELocations.py`), so versus offers them with or without DE128.
+
 ## Difficulty (since 0.50.0)
 
 `scripts/content/difficulty.lua` asks for a difficulty when a save is created (and
