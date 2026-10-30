@@ -1,4 +1,5 @@
 local sf2 = require("sf2")
+local words = require("content.text")
 -- The three archived MindThrowNormal triggers, implemented as Lua decisions.
 -- The behavior is registered under the perk's ID, "mind_throw".
 local behavior = {
@@ -15,6 +16,6 @@ local behavior = {
 }
 return sf2.perks.register {
     id = "mind_throw", behavior = behavior,
-    display_name = sf2.text.register { id = "perk.mind_throw.name", language = "eng", value = "Mind Throw" },
-    description = sf2.text.register { id = "perk.mind_throw.description", language = "eng", value = "Lifts an opponent and slams them into the ground." },
+    display_name = words.get("MAGIC_MIND_THROW_NORMAL"),
+    description = words.get("de128.mind_throw.description"),
 }

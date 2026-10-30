@@ -1,4 +1,5 @@
 local sf2 = require("sf2")
+local words = require("content.text")
 
 -- Boss-ability enchantments granted by DE's Special Recipes I-III.
 -- Authority: Assets/DExml/perks.xml PERK_SHADOW_CLOAK .. PERK_TITANS_SHIELD
@@ -133,14 +134,33 @@ local recharge_behavior = {
 
 assert(order[1] == behavior_id, "The recharge behavior is registered by the first ability perk")
 local perks = {}
+-- Names and descriptions are the archive's own keys in Eclipse's English text.
+local ability_text = {
+    shadow_cloak = { "LynxAbil_invisibility", "InvisibilityDesc" },
+    hermit_storm = { "HermitAbil_storm", "StormDesc" },
+    earthquake = { "ButcherAbil_earthquake", "EarthquakeDesc" },
+    wasp_fly = { "WaspAbil_flight", "WallJumpDesc" },
+    teleportation = { "HuntressAbil_teleportation", "TeleportationDesc" },
+    assistants = { "ShogunAbil_calltoarms", "AssistantsDesc" },
+    rat_wave = { "RatAbil", "RatWaveDesc" },
+    war_whirl = { "WarAbil", "WarWhirlDesc" },
+    lightning_chain = { "LightningAbil", "LightningChainDesc" },
+    fear_ray = { "FearAbil", "FearRayDesc" },
+    power_field = { "PowerFieldAbil", "PowerFieldDesc" },
+    grasp_of_darkness = { "BlacknessHugAbility", "BlacknessHugDesc" },
+    titans_shield = { "TitanShield", "HexShieldDesc" },
+}
+local function ability_name(key) return words.get(ability_text[key][1]) end
+local function ability_description(key) return words.get(ability_text[key][2]) end
+
 local flags = {}
 local core_perks = {}
 for _, key in ipairs(order) do
     local ability = abilities[key]
     perks[key] = sf2.perks.register {
         id = key,
-        display_name = sf2.text.get("ability." .. key .. ".name"),
-        description = sf2.text.get("ability." .. key .. ".description"),
+        display_name = ability_name(key),
+        description = ability_description(key),
         icon = icon(key),
         kind = "combo",
         behavior = recharge_behavior,
@@ -178,8 +198,8 @@ local shield_behavior = {
 
 perks.titans_shield = sf2.perks.register {
     id = "titans_shield",
-    display_name = sf2.text.get("ability.titans_shield.name"),
-    description = sf2.text.get("ability.titans_shield.description"),
+    display_name = ability_name("titans_shield"),
+    description = ability_description("titans_shield"),
     icon = icon("titans_shield"),
     kind = "combo",
     behavior = shield_behavior,
@@ -257,8 +277,8 @@ local cloak_behavior = {
 
 perks.shadow_cloak = sf2.perks.register {
     id = "shadow_cloak",
-    display_name = sf2.text.get("ability.shadow_cloak.name"),
-    description = sf2.text.get("ability.shadow_cloak.description"),
+    display_name = ability_name("shadow_cloak"),
+    description = ability_description("shadow_cloak"),
     icon = icon("shadow_cloak"),
     kind = "combo",
     behavior = cloak_behavior,
@@ -302,8 +322,8 @@ local pace_perks = {}
 -- "<mod>:behaviors/boss_ability_pace:<key>" whichever cadence is created first. Nothing equips it.
 sf2.perks.register {
     id = pace_flag_behavior,
-    display_name = sf2.text.get("ability.hermit_storm.name"),
-    description = sf2.text.get("ability.hermit_storm.description"),
+    display_name = ability_name("hermit_storm"),
+    description = ability_description("hermit_storm"),
     behavior = pace_behavior,
     parameters = { id = pace_flag_behavior, key = "hermit_storm", frames = 0, initial_frames = 0 },
 }
@@ -315,8 +335,8 @@ local function pace_perk(key, initial, frames, moves)
         pace_moves[id] = set_of(moves)
         pace_perks[id] = sf2.perks.register {
             id = id,
-            display_name = sf2.text.get("ability." .. key .. ".name"),
-            description = sf2.text.get("ability." .. key .. ".description"),
+            display_name = ability_name(key),
+            description = ability_description(key),
             behavior = pace_behavior,
             parameters = { id = id, key = key, frames = frames, initial_frames = initial },
         }

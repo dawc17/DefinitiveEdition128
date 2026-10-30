@@ -4,6 +4,7 @@ local sf2 = require("sf2")
 -- offline by Tools/GenerateDE128Underworld.py; this module only registers it.
 local data = require("content.underworld_data")
 local text = require("content.underworld_text")
+local words = require("content.text")
 local wasp_fly = require("content.wasp_fly")
 local butcher_earthquake = require("content.butcher_earthquake")
 local hermit_storm = require("content.hermit_storm")
@@ -201,6 +202,10 @@ local function install(raid_charge_rule)
         local zone_id = "underworld_tier_" .. tier
         local art = sf2.assets.sprite("sprites/underworld/maps/tier" .. tier)
         local zone = sf2.map.register { id = zone_id, art = art, underworld = true }
+        -- The map footer names a page by the text registered as zones/<page id>: the game's
+        -- own raid tier name (ZONE_RAID, ZONE_RAID1 ...).
+        sf2.text.register { id = "zones/" .. zone_id, language = "eng",
+            value = words.read(tier == 1 and "ZONE_RAID" or "ZONE_RAID" .. (tier - 1)) }
         zones[tier] = zone
         for _, spec in ipairs(zone_spec.battles) do
             local battle_id = "uw_" .. lower_id(spec.name)

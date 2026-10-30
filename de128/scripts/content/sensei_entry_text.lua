@@ -1,5 +1,5 @@
-local sf2 = require("sf2")
--- Text lives in localizations/<language>.toml.
+local words = require("content.text")
+-- Text lives in Eclipse's localizations/eng.toml, under the game's keys.
 local text = {}
 for _, key in ipairs({
     "ActScreenSensei1",
@@ -70,6 +70,6 @@ for _, key in ipairs({
     "character_Sister",
     "dlgStoryBtnFight",
 }) do
-    text[key] = sf2.text.get("sensei.entry." .. key)
+    text[key] = words.get(key)
 end
 return text

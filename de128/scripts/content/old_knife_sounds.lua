@@ -1,4 +1,5 @@
 local sf2 = require("sf2")
+local words = require("content.text")
 
 -- Optional: knives and daggers swing with the older Shadow Fight 2 knife sounds instead of
 -- the sword swishes their moves play. Only the exact subtypes Knives and Daggers are
@@ -6,8 +7,8 @@ local sf2 = require("sf2")
 -- needs no audio files of its own. The swap follows the switch live, with no restart.
 local old_knives = sf2.settings.toggle {
     id = "old_knife_sounds",
-    label = "Old knife sounds",
-    description = "Knives and daggers use the old knife swing sounds.",
+    label = words.read("de128.old_knife_sounds.label"),
+    description = words.read("de128.old_knife_sounds.description"),
     group = "Audio",
     default = false,
 }

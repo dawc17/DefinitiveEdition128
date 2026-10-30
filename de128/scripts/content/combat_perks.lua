@@ -1,11 +1,9 @@
 local sf2 = require("sf2")
+local words = require("content.text")
 
 -- Authority: Assets/DExml/perks.xml, PERK_MASTER_OF_STYLE / PERK_RELENTLESS;
 -- rank payloads: Assets/DExml/CharacterProgress.xml, Progress/Perks.
 -- The archive is research input only. This module executes no XML.
-local function text(id, value)
-    return sf2.text.register { id = id, language = "eng", value = value }
-end
 
 local master_icon = sf2.assets.sprite("core:ui/skills/IconMasterOfStyle")
 local master_buff = sf2.assets.sprite("core:ui/skills/IconMasterOfStyle_Blue")
@@ -111,32 +109,28 @@ local relentless_behavior = {
 
 local master_upgrades, relentless_upgrades = {}, {}
 for rank = 1, 5 do
-    -- Original English descriptions, with native %% escapes resolved for Lua text.
+    -- The game's description templates with this rank's value filled in.
     master_upgrades[rank] = {
         level = rank,
-        description = text("perk.master_of_style.rank_" .. rank,
-            "Upon reaching Aggressive or higher style, your next melee attack within 5 seconds will reduce enemy health by " ..
-            (rank * 2) .. "% of their maximum health."),
+        description = words.fill("perk.master_of_style.rank_" .. rank, "PERKDESCRIPTION_MASTER_OF_STYLE", rank * 2),
         parameters = { drain = rank * 0.02 },
     }
     relentless_upgrades[rank] = {
         level = rank,
-        description = text("perk.relentless.rank_" .. rank,
-            "After landing a combo of 3 or more hits, your next attack within 5 seconds deals +" .. rank ..
-            "% damage per combo hit, up to 15 stacks."),
+        description = words.fill("perk.relentless.rank_" .. rank, "PERKDESCRIPTION_RELENTLESS", rank),
         parameters = { damage_per_stack = rank * 0.01 },
     }
 end
 
 local master = sf2.perks.register {
     id = "master_of_style", behavior = master_behavior,
-    display_name = text("perk.master_of_style.name", "Master of Style"),
+    display_name = words.get("PERK_MASTER_OF_STYLE"),
     description = master_upgrades[5].description, icon = master_icon,
     upgrades = master_upgrades, initial_upgrade = 1,
 }
 local relentless = sf2.perks.register {
     id = "relentless", behavior = relentless_behavior,
-    display_name = text("perk.relentless.name", "Relentless"),
+    display_name = words.get("PERK_RELENTLESS"),
     description = relentless_upgrades[1].description, icon = relentless_icon,
     upgrades = relentless_upgrades, initial_upgrade = 1,
 }

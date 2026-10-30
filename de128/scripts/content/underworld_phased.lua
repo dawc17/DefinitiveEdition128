@@ -1,4 +1,5 @@
 local sf2 = require("sf2")
+local words = require("content.text")
 local widow_teleportation = require("content.widow_teleportation")
 local boss_abilities = require("content.boss_abilities")
 
@@ -20,12 +21,15 @@ local BURN_AFTER = 120      -- frames without landing a hit before the burn star
 local BURN_EVERY = 20       -- frames between burn ticks
 local BURN_DAMAGE = 0.006   -- player health per tick (0.018 per second)
 
-local PHASES = {
-    { name = "DUEL", hint = "Break the seal." },
-    { name = "SCORCHED EARTH", hint = "Keep landing hits or the ground burns you." },
-    { name = "MOLTEN ARMOUR", hint = "Hit him while he attacks. Plain hits barely scratch him." },
-    { name = "ERUPTION", hint = "Everything hits twice as hard. Finish him." },
-}
+-- Words from Eclipse's English text (de128.uw_phased.*), read once while loading.
+local PHASES = {}
+for i = 1, 4 do
+    local key = "de128.uw_phased.phase_" .. i
+    PHASES[i] = { name = words.read(key .. ".name"), hint = words.read(key .. ".hint") }
+end
+local SEAL_LABEL = words.read("de128.uw_phased.seal")
+local SEAL_HOLDS = words.read("de128.uw_phased.seal_holds")
+local SHIELD_LEFT = words.read("de128.uw_phased.shield_left")
 
 local function threshold(seal) return SHIELD - SEAL_SIZE * (seal + 1) end
 
@@ -43,7 +47,7 @@ local function open_hud(seal)
         root = { kind = "column", width = 520, height = 92, gap = 2,
             style = { background_color = "#140c08c8" }, children = {
                 { id = "phase", kind = "text", width = 520, height = 34,
-                    text = "SEAL " .. (seal + 1) .. " / " .. SEALS .. "  ·  " .. phase.name,
+                    text = SEAL_LABEL:gsub("{0}", tostring(seal + 1)):gsub("{1}", tostring(SEALS)) .. "  ·  " .. phase.name,
                     style = { text_color = "#f2c46b", font_size = 22 } },
                 { id = "hint", kind = "text", width = 520, height = 26, text = phase.hint,
                     style = { text_color = "#ecd1a1", font_size = 15 } },
@@ -73,8 +77,8 @@ local controller = {
         local remaining = view.opponent.health - threshold(seal)
         if hud and sf2.ui.is_open(hud) then
             sf2.ui.update(hud, "left", { text = seal + 1 < SEALS
-                and string.format("Seal holds for %.1f more bars", math.max(0, remaining))
-                or string.format("%.1f bars of shield left", math.max(0, view.opponent.health)) })
+                and (SEAL_HOLDS:gsub("{0}", string.format("%.1f", math.max(0, remaining))))
+                or (SHIELD_LEFT:gsub("{0}", string.format("%.1f", math.max(0, view.opponent.health)))) })
         end
         -- The last seal ends with the shield itself: the knockout wins the round natively.
         if seal + 1 < SEALS and remaining <= 0 and not self.state.requested then
@@ -125,7 +129,7 @@ local controller = {
 }
 
 local function install(underworld, raid_charge_rule)
-    local text = function(key) return sf2.text.get("uw_phased." .. key) end
+    local text = function(key) return words.get("de128.uw_phased." .. key) end
     local zone = assert(underworld.zones[1], "Underworld tier 1 is missing")
     local volcano = assert(underworld.templates["Man_Volcano"], "Volcano's template is missing")
     local tactic = widow_teleportation.normal

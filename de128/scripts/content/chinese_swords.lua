@@ -1,10 +1,9 @@
 local sf2 = require("sf2")
+local words = require("content.text")
 local data = require("content.chinese_swords_data")
 local animation = sf2.assets.binary("animations/chinese_swords_super_slash_old")
 
-data.profile.display_name = sf2.text.register {
-    id = "move.chinese_swords_super_slash", language = "eng", value = "Super Slash",
-}
+data.profile.display_name = words.get("PERK_SUPER_SLASH")
 
 for _, move in ipairs(data.item_lock_extensions) do
     sf2.moves.patch {

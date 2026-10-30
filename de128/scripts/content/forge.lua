@@ -1,4 +1,5 @@
 local sf2 = require("sf2")
+local words = require("content.text")
 
 -- Historical forge.xml splits the twelve existing Complex candidates into
 -- three equal pools. The two new pools use the unchanged core Complex prices.
@@ -13,11 +14,11 @@ local equipment = {
 local complex = sf2.forge.get("Complex")
 local simple = sf2.forge.get("Simple")
 local pools = {
-    { id = "complex_2", text = "forge.complex_2", perks = {
+    { id = "complex_2", text = "forgeRecipeComplex2", perks = {
         "PERK_SKANDA_SET_KARMA", "PERK_GUST_SET_WIND_MAKER",
         "PERK_DIRECTOR_SET_PLOT_TWIST", "PERK_TIME_SHIFT_SET_TIME_SHIFTER",
     } },
-    { id = "complex_3", text = "forge.complex_3", perks = {
+    { id = "complex_3", text = "forgeRecipeComplex3", perks = {
         "PERK_ARCANE_MARTIAL_ART_SET_NEO_WANDERER", "PERK_CORDYCEPS_FUNGUS_SET",
         "PERK_MAGMA_VOLCANO_SET", "PERK_KARCER_HUNGER_SET",
     } },
@@ -37,7 +38,7 @@ for _, pool in ipairs(pools) do
         end
     end
     registered[pool.id] = sf2.forge.register {
-        id = pool.id, alias = sf2.mod.id .. ":localization/" .. pool.text,
+        id = pool.id, alias = words.key(pool.text),
         profile = complex, items = items, candidates = candidates,
     }
 end
@@ -46,9 +47,9 @@ end
 -- "Enchantment", no deviation, no variation conditions, in archived order.
 local abilities = require("content.boss_abilities").perks
 local special_recipes = {
-    { id = "abilities_1", text = "forge.abilities_1", perks = { "shadow_cloak", "hermit_storm", "earthquake", "wasp_fly" } },
-    { id = "abilities_2", text = "forge.abilities_2", perks = { "teleportation", "assistants", "rat_wave", "war_whirl" } },
-    { id = "abilities_3", text = "forge.abilities_3",
+    { id = "abilities_1", text = "forgeRecipeAbilities", perks = { "shadow_cloak", "hermit_storm", "earthquake", "wasp_fly" } },
+    { id = "abilities_2", text = "forgeRecipeAbilities2", perks = { "teleportation", "assistants", "rat_wave", "war_whirl" } },
+    { id = "abilities_3", text = "forgeRecipeAbilities3",
         perks = { "lightning_chain", "fear_ray", "power_field", "grasp_of_darkness", "titans_shield" } },
 }
 for _, recipe in ipairs(special_recipes) do
@@ -60,7 +61,7 @@ for _, recipe in ipairs(special_recipes) do
         end
     end
     registered[recipe.id] = sf2.forge.register {
-        id = recipe.id, alias = sf2.mod.id .. ":localization/" .. recipe.text,
+        id = recipe.id, alias = words.key(recipe.text),
         profile = complex, items = items, candidates = candidates,
     }
 end

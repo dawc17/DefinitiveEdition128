@@ -1,4 +1,5 @@
 local sf2 = require("sf2")
+local words = require("content.text")
 
 -- Optional: story fights use the Shadow Fight 2 Special Edition version of their stage.
 -- The SE stages ship with the game as core:locations/<name>_se (versus offers them as well);
@@ -6,8 +7,8 @@ local sf2 = require("sf2")
 -- keeps the default dojo.
 local se_locations = sf2.settings.toggle {
     id = "se_locations",
-    label = "Special Edition locations",
-    description = "Story fights use the Shadow Fight 2 Special Edition version of their location.",
+    label = words.read("de128.se_locations.label"),
+    description = words.read("de128.se_locations.description"),
     group = "Visuals",
     default = false,
 }

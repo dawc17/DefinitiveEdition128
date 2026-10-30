@@ -1,4 +1,5 @@
 local sf2 = require("sf2")
+local words = require("content.text")
 
 -- Archived choices keep the DE order; every installed location whose params
 -- declare Dojo="1" is offered too, next to its series. new_year_china_dojo
@@ -25,7 +26,7 @@ local choices = {
 
 for _, choice in ipairs(choices) do
     choice.preview = sf2.assets.sprite("sprites/dojo_changer/" .. choice.location)
-    choice.name = sf2.text.get("dojo." .. choice.label)
+    choice.name = words.get(choice.label)
 end
 -- Eclipse draws the picker (a large medallion with a gliding strip) and hosts its
 -- button in the dojo menu, below the disciple toggle's slot.
@@ -33,7 +34,7 @@ sf2.world.dojo_picker {
     id = "dojo_changer",
     button = sf2.assets.sprite("sprites/dojo_changer/button"),
     button_pressed = sf2.assets.sprite("sprites/dojo_changer/button_pressed"),
-    title = sf2.text.get("dojo.DojoChangerTitle"),
+    title = words.get("DojoChangerTitle"),
     choices = (function()
         local list = {}
         for i, choice in ipairs(choices) do

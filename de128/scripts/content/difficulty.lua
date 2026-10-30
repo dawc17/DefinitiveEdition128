@@ -1,24 +1,22 @@
 local sf2 = require("sf2")
+local words = require("content.text")
 
 -- Four difficulties, chosen per save on the title screen. Medium is DE128 as it plays
 -- without this file. The dojo's Difficulty button changes or locks it later.
 local OPTION = "difficulty"
 
-local CHOICES = {
-    { id = "easy", title = "Easy", subtitle = "Give Me Grace",
-      description = "200-second rounds, weaker foes, cheaper shop and upgrades." },
-    { id = "medium", title = "Medium", subtitle = "Give Me Balance",
-      description = "Definitive Edition as designed." },
-    { id = "hard", title = "Hard", subtitle = "Give Me a Challenge",
-      description = "99-second rounds; stronger, smarter, enchanted foes; fewer Survival coins; items sell for less." },
-    { id = "very_hard", title = "Very Hard", subtitle = "Give Me Shadow Fight",
-      description = "Hard, with far smarter foes, more enchantments, dearer shop prices and no selling." },
-}
+-- Their words are in Eclipse's English text under de128.difficulty.<id>.
+local CHOICES = {}
+for i, id in ipairs({ "easy", "medium", "hard", "very_hard" }) do
+    local key = "de128.difficulty." .. id
+    CHOICES[i] = { id = id, title = words.read(key .. ".title"), subtitle = words.read(key .. ".subtitle"),
+        description = words.read(key .. ".description") }
+end
 
 sf2.saves.option {
     id = OPTION,
-    title = "Choose your difficulty",
-    description = "Change it any time from the dojo's Difficulty button, or lock it for good.",
+    title = words.read("de128.difficulty.title"),
+    description = words.read("de128.difficulty.description"),
     default = "medium",
     lockable = true,
     choices = CHOICES,

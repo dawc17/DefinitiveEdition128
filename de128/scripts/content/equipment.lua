@@ -1,11 +1,8 @@
 local sf2 = require("sf2")
+local words = require("content.text")
 
--- Each translation belongs to DE128 and is authored through the public Lua API.
-local title = sf2.text.register {
-    id = "item.titans_desolator",
-    language = "eng",
-    value = "Titan's Desolator",
-}
+-- The name is the game's own, from Eclipse's English text.
+local title = words.get("WEAPON_TITAN_GIANT_SWORD")
 
 local desolator = sf2.items.register {
     category = "weapon",

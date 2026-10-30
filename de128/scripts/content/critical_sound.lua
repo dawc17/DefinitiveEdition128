@@ -1,4 +1,5 @@
 local sf2 = require("sf2")
+local words = require("content.text")
 
 -- Optional: a clean critical hit plays the DE critical sting (snd_crit). The archived DE
 -- moves played it from their CriticalEffect trigger; the shipped moves only carry the
@@ -6,8 +7,8 @@ local sf2 = require("sf2")
 -- Blocked criticals stay silent, and title-screen sparring never fires it.
 local critical_sound = sf2.settings.toggle {
     id = "critical_sound",
-    label = "Critical hit sound",
-    description = "Critical hits play the Definitive Edition critical sound.",
+    label = words.read("de128.critical_sound.label"),
+    description = words.read("de128.critical_sound.description"),
     group = "Audio",
     default = true,
 }

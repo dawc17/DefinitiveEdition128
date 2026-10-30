@@ -1,4 +1,5 @@
 local sf2 = require("sf2")
+local words = require("content.text")
 -- Definitive Edition's additions to the default (unarmed) moveset, restored
 -- from the archived moves.xml (Assets/DExml, identical in the DE128 drop):
 --   FrontJumpScissorsKick  Up-Forward + Kick, Kick
@@ -17,8 +18,8 @@ local sf2 = require("sf2")
 -- named native move of similar timing and range; the tables have no rows of
 -- their own for these moves (nor did the Definitive Edition's).
 local function name(id) return "de128:moves/" .. id end
--- Profile titles copied from the archive by Tools/GenerateDE128MoveNames.py.
-local function title(archived) return sf2.text.get("moves." .. archived) end
+-- Profile titles are the archived move names in Eclipse's English text.
+local function title(archived) return words.get(archived) end
 
 local moves = {}
 local function register(id, value)

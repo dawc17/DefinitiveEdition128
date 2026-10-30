@@ -1,4 +1,5 @@
 local sf2 = require("sf2")
+local words = require("content.text")
 
 -- Deterministic forge: every recipe DE128 ships or uses lets the player pick the
 -- exact enchantment and a strength tier instead of rolling one (selection
@@ -15,9 +16,9 @@ assert(type(sf2.forge.patch) == "function", "DE128 requires the public sf2.forge
 local registered = require("content.forge")
 
 local tiers = {
-    { id = "low", name = sf2.text.get("forge.tier.low"), strength = 0.0, price = 0.5 },
-    { id = "mid", name = sf2.text.get("forge.tier.mid"), strength = 0.5, price = 1.0 },
-    { id = "high", name = sf2.text.get("forge.tier.high"), strength = 1.0, price = 2.0 },
+    { id = "low", name = words.get("de128.forge_tier.low"), strength = 0.0, price = 0.5 },
+    { id = "mid", name = words.get("de128.forge_tier.mid"), strength = 0.5, price = 1.0 },
+    { id = "high", name = words.get("de128.forge_tier.high"), strength = 1.0, price = 2.0 },
 }
 
 -- Core recipes (vanillaXml/forge.xml Simple, Medium, Complex) are patched by
