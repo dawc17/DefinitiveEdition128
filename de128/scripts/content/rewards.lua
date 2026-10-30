@@ -48,4 +48,10 @@ sf2.battles.patch {
     },
 }
 
+-- The fight reward tally pays gems as well as coins for perfect rounds, a 10-hit combo
+-- and Fantastic style. Survival fights pay coins only.
+sf2.game.economy {
+    reward_gems = { perfect = 3, combo = 3, fantastic = 3, except = { "survival" } },
+}
+
 return { titans_desolator = desolator_reward }

@@ -1,5 +1,8 @@
 local sf2 = require("sf2")
 
+-- Story and raid maps keep their art pixels crisp (nearest filtering) instead of blurring.
+sf2.game.enable { "sharp_maps" }
+
 -- Every core battle whose map placement the owner stages.xml changes from vanilla.
 -- The archive moves Act 6's Duel clear of Sensei's Old Wounds entry.
 local moves = {
