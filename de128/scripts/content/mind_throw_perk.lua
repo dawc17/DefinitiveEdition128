@@ -16,6 +16,6 @@ local behavior = {
 }
 return sf2.perks.register {
     id = "mind_throw", behavior = behavior,
-    display_name = words.get("MAGIC_MIND_THROW_NORMAL"),
-    description = words.get("de128.mind_throw.description"),
+    display_name = words.own("perk.mind_throw.name", "MAGIC_MIND_THROW_NORMAL"),
+    description = words.own("perk.mind_throw.description", "de128.mind_throw.description"),
 }

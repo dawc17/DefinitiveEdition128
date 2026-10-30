@@ -24,7 +24,7 @@ for _, row in ipairs(definitions) do
     local item = sf2.items.register {
         category = "weapon",
         id = row[1],
-        display_name = words.get(row[2]),
+        display_name = words.own("item." .. row[1], row[2]),
         icon = sf2.assets.sprite("core:UI/Items/" .. row[3]),
         model = sf2.assets.model("core:gamedata/models/" .. row[4]), subtype = row[5],
         initial_stats = row[11],

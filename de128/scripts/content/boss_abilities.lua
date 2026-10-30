@@ -150,8 +150,14 @@ local ability_text = {
     grasp_of_darkness = { "BlacknessHugAbility", "BlacknessHugDesc" },
     titans_shield = { "TitanShield", "HexShieldDesc" },
 }
-local function ability_name(key) return words.get(ability_text[key][1]) end
-local function ability_description(key) return words.get(ability_text[key][2]) end
+-- Perks must own their text, so each perk registers its copy once (pace perks share them).
+local owned = {}
+local function own(id, key)
+    owned[id] = owned[id] or words.own(id, key)
+    return owned[id]
+end
+local function ability_name(key) return own("ability." .. key .. ".name", ability_text[key][1]) end
+local function ability_description(key) return own("ability." .. key .. ".description", ability_text[key][2]) end
 
 local flags = {}
 local core_perks = {}

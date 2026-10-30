@@ -124,13 +124,13 @@ end
 
 local master = sf2.perks.register {
     id = "master_of_style", behavior = master_behavior,
-    display_name = words.get("PERK_MASTER_OF_STYLE"),
+    display_name = words.own("perk.master_of_style.name", "PERK_MASTER_OF_STYLE"),
     description = master_upgrades[5].description, icon = master_icon,
     upgrades = master_upgrades, initial_upgrade = 1,
 }
 local relentless = sf2.perks.register {
     id = "relentless", behavior = relentless_behavior,
-    display_name = words.get("PERK_RELENTLESS"),
+    display_name = words.own("perk.relentless.name", "PERK_RELENTLESS"),
     description = relentless_upgrades[1].description, icon = relentless_icon,
     upgrades = relentless_upgrades, initial_upgrade = 1,
 }

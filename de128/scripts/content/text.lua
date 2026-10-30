@@ -19,6 +19,12 @@ function text.read(key)
     return sf2.text.read(text.get(key))
 end
 
+-- Items and perks must name text the mod owns: this registers the game text under the
+-- mod's own id, read while loading (so edits to eng.toml show after a restart).
+function text.own(id, key)
+    return sf2.text.register { id = id, language = "eng", value = text.read(key) }
+end
+
 -- A game text with its {0} filled in and the original %% escapes resolved, registered under
 -- this mod's own id (for texts the game keeps as one template for several ranks).
 function text.fill(id, key, value)

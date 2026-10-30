@@ -2,7 +2,7 @@ local sf2 = require("sf2")
 local words = require("content.text")
 
 -- The name is the game's own, from Eclipse's English text.
-local title = words.get("WEAPON_TITAN_GIANT_SWORD")
+local title = words.own("item.titans_desolator", "WEAPON_TITAN_GIANT_SWORD")
 
 local desolator = sf2.items.register {
     category = "weapon",

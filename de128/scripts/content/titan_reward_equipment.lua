@@ -1,12 +1,12 @@
 local sf2 = require("sf2")
-local names = require("content.titan_reward_text")
+local words = require("content.text")
 
 -- The final Eclipse Titan reward is a player-owned copy of these hidden
 -- opponent items. Separate identities leave Titan's own loadout unchanged.
 local form = sf2.items.register {
     category = "armor",
     id = "titans_form",
-    display_name = names.BODY_TITAN,
+    display_name = words.own("titan_reward.BODY_TITAN", "BODY_TITAN"),
     icon = sf2.assets.sprite("core:UI/Items/UnknownItems.img_armor_unknown"),
     model = sf2.assets.model("models/titan/mdl_body_titan"),
     initial_stats = { body_defense = 1, unarmed_damage = 1 },
@@ -14,7 +14,7 @@ local form = sf2.items.register {
 local helm = sf2.items.register {
     category = "helm",
     id = "titans_helm",
-    display_name = names.HEAD_TITAN,
+    display_name = words.own("titan_reward.HEAD_TITAN", "HEAD_TITAN"),
     icon = sf2.assets.sprite("core:UI/Items/UnknownItems.img_helm_unknown"),
     model = sf2.assets.model("models/titan/mdl_head_titan"),
     initial_stats = { head_defense = 1 },
@@ -22,7 +22,7 @@ local helm = sf2.items.register {
 local harpoon = sf2.items.register {
     category = "ranged",
     id = "titans_harpoon",
-    display_name = names.RANGED_TITANS_HARPOON,
+    display_name = words.own("titan_reward.RANGED_TITANS_HARPOON", "RANGED_TITANS_HARPOON"),
     icon = sf2.assets.sprite("core:UI/Items/UnknownItems.img_ranged_unknown"),
     model = sf2.assets.model("models/titan/mdl_ranged_titans_harpoon"),
     subtype = "TitansHarpoon",
@@ -31,7 +31,7 @@ local harpoon = sf2.items.register {
 local mind_throw = sf2.items.register {
     category = "magic",
     id = "titans_mind_throw",
-    display_name = names.MAGIC_MIND_THROW,
+    display_name = words.own("titan_reward.MAGIC_MIND_THROW", "MAGIC_MIND_THROW"),
     icon = sf2.assets.sprite("core:UI/Items/UnknownItems.img_magic_unknown"),
     model = sf2.assets.model("models/titan/mdl_magic_fireball"),
     subtype = "MindThrow",
