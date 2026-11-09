@@ -52,7 +52,8 @@ local function show_meter(self, fighter)
     local shown = math.floor(value * 1000)
     if shown == s.shown then return end
     s.shown = shown
-    fighter:set_meter(METER_KEY, { value = value, segments = 1, color = METER_COLOR })
+    fighter:set_meter(METER_KEY, { value = value, segments = 1, color = METER_COLOR,
+        label = not s.active and s.hits .. "/" .. HITS or nil })
 end
 
 local function stop(self, fighter)

@@ -2,8 +2,6 @@ local sf2 = require("sf2")
 local actors = require("content.call_to_arms_actors")
 local recharge = require("content.ability_recharge")
 
-local stack_icon = sf2.assets.sprite("core:ui/skills/IconFurious_Blue")
-
 local PRESENCE_BONUS = 1.5
 local STACK_BONUS = 0.25
 local MAX_STACKS = 5
@@ -20,11 +18,8 @@ local summons = {
 }
 
 local function show(fighter, stacks)
-    if stacks > 0 then
-        fighter:show_status_icon("call_to_arms", stack_icon, 300, stacks)
-    else
-        fighter:clear_status_icon("call_to_arms")
-    end
+    fighter:set_meter("call_to_arms", { value = stacks / MAX_STACKS, segments = MAX_STACKS, color = "#D8452E",
+        label = stacks .. "/" .. MAX_STACKS })
 end
 
 -- The assistant is gone (time, defeat or a failed spawn): the buffs end, the cooldown begins.
@@ -33,7 +28,7 @@ local function leave(self, fighter)
     self.state.seen = false
     self.state.waited = 0
     self.state.stacks = 0
-    show(fighter, 0)
+    fighter:clear_meter("call_to_arms")
     recharge(self, fighter, self.params.frames)
 end
 
@@ -75,6 +70,7 @@ return {
             return
         end
         self.state.active = true
+        show(fighter, 0)
         -- Greys the button until the assistant leaves, when the real cooldown starts.
         fighter:clear_flag(self.params.key)
         fighter:set_flag(self.params.key, 900)

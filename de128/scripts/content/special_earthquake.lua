@@ -5,9 +5,6 @@ local MOVE = "de128:moves/butcher_earthquake_player"
 local MAX_STACKS = 5
 local STACK_BONUS = 0.2     -- per stack, on the earthquake's own hit
 local FALL_BONUS = 1.3      -- every hit while the enemy is in a Fall animation
-local ICON_FRAMES = 36000   -- stacks never expire; the icon is simply refreshed
-
-local stack_icon = sf2.assets.sprite("core:ui/skills/IconFallenTree_Blue")
 
 -- Tags and moves that leave the enemy off the ground.
 local AIRBORNE = { "Jump", "Wall", "de128:moves/wasp_fly_150", "de128:moves/wasp_fly_200",
@@ -21,18 +18,19 @@ local function airborne(fighter)
 end
 
 local function show(fighter, stacks)
-    if stacks > 0 then
-        fighter:show_status_icon("stacks", stack_icon, ICON_FRAMES, stacks)
-    else
-        fighter:clear_status_icon("stacks")
-    end
+    fighter:set_meter("stacks", { value = stacks / MAX_STACKS, segments = MAX_STACKS, color = "#E0A030",
+        label = stacks .. "/" .. MAX_STACKS })
 end
 
 return {
-    state = { stacks = 0, spent = 0, was_down = false },
+    state = { stacks = 0, spent = 0, was_down = false, meter = false },
 
     -- A stack for each transition into a Fall animation, not for hits on an enemy already down.
     on_tick = function(self, fighter)
+        if not self.state.meter then
+            self.state.meter = true
+            show(fighter, self.state.stacks)
+        end
         local down = fighter:animation_is("Fall", "opponent")
         if down and not self.state.was_down and self.state.stacks < MAX_STACKS then
             self.state.stacks = self.state.stacks + 1

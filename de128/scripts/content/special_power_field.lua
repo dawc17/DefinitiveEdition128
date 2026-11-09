@@ -10,11 +10,17 @@ local NO_FALL_START = 60        -- an enemy that never falls (armored) starts th
 
 local charge_icon = sf2.assets.sprite("core:ui/skills/IconLightning_Blue")
 
+local function show_hits(fighter, hits)
+    fighter:set_meter("static_charge", { value = hits / HITS_NEEDED, segments = HITS_NEEDED, color = "#4FC3F7",
+        label = hits .. "/" .. HITS_NEEDED })
+end
+
 local function clear(self, fighter)
     self.state.marked = false
     self.state.window_end = 0
     self.state.hits = 0
     fighter:clear_status_icon("static_charge")
+    fighter:clear_meter("static_charge")
 end
 
 return {
@@ -33,6 +39,7 @@ return {
                 state.window_end = event.frame + WINDOW_FRAMES
                 state.hits = 0
                 fighter:show_status_icon("static_charge", charge_icon, WINDOW_FRAMES)
+                show_hits(fighter, 0)
             end
         elseif state.window_end > 0 and event.frame >= state.window_end then
             clear(self, fighter)
@@ -52,6 +59,7 @@ return {
         if source:find(SURGE, 1, true) then
             state.marked, state.saw_fall, state.mark_frame, state.window_end, state.hits = true, false, state.now, 0, 0
             fighter:clear_status_icon("static_charge")
+            fighter:clear_meter("static_charge")
             return
         end
         if state.window_end == 0 or event.blocked or event.ranged or event.magic
@@ -60,6 +68,8 @@ return {
         if state.hits >= HITS_NEEDED then
             fighter:set_hit_reaction("Electrocution")
             clear(self, fighter)
+        else
+            show_hits(fighter, state.hits)
         end
     end,
 }
