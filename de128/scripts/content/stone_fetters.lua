@@ -2,8 +2,9 @@ local sf2 = require("sf2")
 local words = require("content.text")
 
 -- Stone Fetters (mythical, kind = "combo"): eight melee hits, each within 3.5 s of the last,
--- trigger a draining meter. While it lasts the ground shakes under the enemy, the enemy is
--- staggered every 3 s (never a boss) and the player takes hits armored. Bosses never use it.
+-- trigger a draining meter. While it lasts the ground shakes under the enemy, the enemy recoils
+-- every 3 s whether or not a hit lands (never a boss) and the player takes hits armored. Bosses
+-- never use it.
 -- Plan: Stone Fetters Mythical Enchantment Concept Plan.
 
 local HITS = 8
@@ -12,10 +13,37 @@ local FULL = 360                          -- frames a full bar lasts (6 s)
 local REFILL = 36                         -- each landed hit refills 10%
 local STAGGER_EVERY = 180                 -- 3 s
 local SHAKE_REFRESH = 30                  -- frames between renewals of the tremble
-local STAGGER_REACTION = "MiddleHitHeavy" -- native heavy recoil used as the stagger
 local METER_KEY = "stone_fetters"
 local METER_COLOR = "#8E9AAF"
 local TINT = "#9FB0C8"
+
+-- The native heavy recoil (MiddleHitHeavy) as a move Lua can start with no hit behind it. It has
+-- no events, so normal move selection never picks it.
+local stagger_move = sf2.moves.register {
+    id = "stone_fetters_stagger", animation = sf2.assets.binary("animations/middle_hit_heavy"),
+    inherit = { "Recoil", "NotTitan", "Hit" },
+    frames_per_sample = 2, first_sample = 1, priority = 500,
+    align = "pelvis", face = "enemy",
+    windows = {
+        uninterruptible = { to_sample = 21 },
+        unstable = { from_sample = 4, to_sample = 6 },
+        block = { from_sample = 22 },
+        throwable = { from_sample = 22 },
+    },
+    only_for = { rig = "Skeleton" },
+}
+
+-- States a recoil must not cut into: a body in the air or on the floor, a throw in progress on
+-- either side, an ability, or a reaction that is already playing. The stagger waits for them.
+local NO_STAGGER = { "Physical", "Fall", "Jump", "Wall", "Throw", "ThrowFall", "ThrowProfile",
+    "BossAbility", "Ability", "Recoil" }
+
+local function can_stagger(fighter)
+    for _, name in ipairs(NO_STAGGER) do
+        if fighter:animation_is(name, "opponent") then return false end
+    end
+    return true
+end
 
 -- Bosses carry the anti-shock perk; raid bosses also have several health bars.
 local function is_boss(fighter, view)
@@ -90,11 +118,17 @@ local behavior = {
         end
         local view = fighter:snapshot()
         if view and view.round_active then
-            local stagger = s.now >= s.next_stagger
-            if stagger or s.now % SHAKE_REFRESH == 0 then shake_ground(fighter, view, stagger) end
-            if stagger then
+            if s.now >= s.next_stagger then
                 s.next_stagger = s.now + STAGGER_EVERY
                 s.stagger_due = not is_boss(fighter, view)
+            end
+            if s.stagger_due and fighter.opponent and can_stagger(fighter) then
+                s.stagger_due = false
+                shake_ground(fighter, view, true)
+                local request = fighter.opponent:play_move(stagger_move)
+                if request.status == "failed" then sf2.log.warn("Stone Fetters stagger failed: " .. tostring(request.error)) end
+            elseif s.now % SHAKE_REFRESH == 0 then
+                shake_ground(fighter, view, false)
             end
         end
         if s.now % 30 == 0 then fighter:set_model_color(TINT, 60) end
@@ -102,13 +136,9 @@ local behavior = {
     end,
     on_hit_pre_crit = function(self, fighter, event)
         local s = self.state
-        if not s.active then return end
-        if event.target == "self" then
+        if s.active and event.target == "self" then
             -- Armor: damage is taken, no stagger or interruption.
             fighter:set_hit_armored(true)
-        elseif s.stagger_due and not event.blocked then
-            fighter:set_hit_reaction(STAGGER_REACTION)
-            s.stagger_due = false
         end
     end,
     on_post_hit = function(self, fighter, event)
