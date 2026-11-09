@@ -52,15 +52,15 @@ sf2.moves.patch {
 }
 abilities.extend_lock("fear_ray", "PerkFearRayPlayer")
 
--- Shogun's four Call to Arms casts: DE moves.xml binds them to RaidCharge.
+-- Shogun's four Call to Arms casts: DE moves.xml binds them to RaidCharge. Only bosses cast
+-- them; the player's Call to Arms special summons through its direction pad instead
+-- (content.special_assistants), so these moves keep just their core PERK_ASSISTANTS lock.
 for _, move in ipairs({ "AssistantLongKatanaPlayer", "AssistantBigNaginataPlayer",
     "AssistantBigMagariYariPlayer", "AssistantUniqGlaivePlayer" }) do
     sf2.moves.patch {
         move = move,
         input = { expected = "super", value = "raid_charge" },
-        when = { not_mod = abilities.ready("assistants") },
     }
-    abilities.extend_lock("assistants", move)
 end
 
 local function tactic(id, moves, initial, cooldown, advance_for_range)

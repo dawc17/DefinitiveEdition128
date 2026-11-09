@@ -78,9 +78,9 @@ local finish = sf2.moves.patch {
             throwable = { from = 60 },
         },
         attacks = { {
-            from = 9, to = 14,
-            edges = { "EForearm_1", "EHand_1", "EFingers_1", "EArm_1", "EArm_2",
-                "EForearm_2", "EHand_2", "EFingers_2", "EChest" },
+            -- A direct attack is a magic-style hit region: it reaches the enemy without
+            -- touching the player's hands, so stepping back does not dodge it.
+            from = 9, to = 14, direct = true,
             damage = { amount = 0.28, weapon = 0, unarmed = -10 },
             impulse = { x = -245, y = -245 }, hit = "High",
             ignores_block = true,

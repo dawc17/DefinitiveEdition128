@@ -14,6 +14,19 @@ local function whirl(name, sequence, looped, time_scale)
     } }
 end
 
+local WEAPON_BASE, TICK_SHARE = 0.10, 0.4
+
+local function whirl_hit(from, to, amount, hit, impulse)
+    return {
+        from = from, to = to,
+        edges = { "EHand_1", "EFingers_1", "EArm_1", "EArm_2", "EForearm_2", "EHand_2", "EFingers_2", "EChest" },
+        damage = { amount = amount, weapon = 0, unarmed = -25 },
+        impulse = impulse, hit = hit,
+        no_critical = true, body_part = "body", defense = { "body" },
+        ignores_block = true, ignores_invulnerable = { "Evade", "Recovery", "Dash" },
+    }
+end
+
 -- Game frames: the move starts at sample 1 with 3 frames per sample, so sample N is frames
 -- 3N .. 3N + 2 (sample 3 is frame 9, 13 is 39, 14 is 42, 60 is 180, 70 ends on frame 212,
 -- 80 on frame 242).
@@ -38,14 +51,15 @@ local move = sf2.moves.register {
     } },
 
     windows = { uninterruptible = { to = 242 } },
-    attacks = { {
-        from = 42, to = 212,
-        edges = { "EHand_1", "EFingers_1", "EArm_1", "EArm_2", "EForearm_2", "EHand_2", "EFingers_2", "EChest" },
-        damage = { amount = 0.40, magic = 0, unarmed = -25 },
-        impulse = { x = 150, y = -600 }, hit = "Physycal",
-        no_critical = true, body_part = "body", defense = { "body" },
-        ignores_block = true, ignores_invulnerable = { "Evade", "Recovery", "Dash" },
-    } },
+    -- One weapon-scaled hit on first contact, then a tick each second the enemy stays inside.
+    -- Native move damage is base * the attacker's weapon attribute, so a normal weapon hit's
+    -- base (0.1) is "100%" and a tick is 40% of it.
+    attacks = {
+        whirl_hit(42, 101, WEAPON_BASE, "Physycal", { x = 150, y = -600 }),
+        whirl_hit(102, 104, WEAPON_BASE * TICK_SHARE, "NoReaction"),
+        whirl_hit(162, 164, WEAPON_BASE * TICK_SHARE, "NoReaction"),
+        whirl_hit(222, 224, WEAPON_BASE * TICK_SHARE, "NoReaction"),
+    },
 
     on = {
         [9] = { whirl("MagicWarWhirlffectStart", "mgc_war_ability_start", false, 3), { sound = { "snd_blade_fury" } } },

@@ -17,11 +17,17 @@ local pools = {
     { id = "complex_2", text = "forgeRecipeComplex2", perks = {
         "PERK_SKANDA_SET_KARMA", "PERK_GUST_SET_WIND_MAKER",
         "PERK_DIRECTOR_SET_PLOT_TWIST", "PERK_TIME_SHIFT_SET_TIME_SHIFTER",
-    } },
+    }, scripted = { "searing_luminary" } },
     { id = "complex_3", text = "forgeRecipeComplex3", perks = {
         "PERK_ARCANE_MARTIAL_ART_SET_NEO_WANDERER", "PERK_CORDYCEPS_FUNGUS_SET",
         "PERK_MAGMA_VOLCANO_SET", "PERK_KARCER_HUNGER_SET",
-    } },
+    }, scripted = { "stone_fetters" } },
+}
+
+-- DE128's own mythicals (kind = "combo" scripted perks) join the pool beside the core ones.
+local mythicals = {
+    searing_luminary = require("content.searing_luminary"),
+    stone_fetters = require("content.stone_fetters"),
 }
 
 -- Handles of the recipes registered here, for content.forge_choice.
@@ -35,6 +41,9 @@ for _, pool in ipairs(pools) do
             local perk = sf2.perks.get("core:perks/" .. name)
             sf2.forge.patch { profile = complex, perk = perk, equipment = category, exclude = true }
             candidates[#candidates + 1] = { perk = perk, equipment = category }
+        end
+        for _, key in ipairs(pool.scripted or {}) do
+            candidates[#candidates + 1] = { perk = mythicals[key], equipment = category }
         end
     end
     registered[pool.id] = sf2.forge.register {
@@ -50,7 +59,7 @@ local special_recipes = {
     { id = "abilities_1", text = "forgeRecipeAbilities", perks = { "shadow_cloak", "hermit_storm", "earthquake", "wasp_fly" } },
     { id = "abilities_2", text = "forgeRecipeAbilities2", perks = { "teleportation", "assistants", "rat_wave", "war_whirl" } },
     { id = "abilities_3", text = "forgeRecipeAbilities3",
-        perks = { "lightning_chain", "fear_ray", "power_field", "grasp_of_darkness", "titans_shield" } },
+        perks = { "lightning_chain", "fear_ray", "power_field", "grasp_of_darkness" } },
 }
 for _, recipe in ipairs(special_recipes) do
     local items, candidates = {}, {}

@@ -49,6 +49,13 @@ for recipe, names in pairs(mythical) do
     end
 end
 
+-- DE128's two scripted mythicals (content.forge adds them to Complex II and III), priced like the others.
+for recipe, module in pairs({
+    [registered.complex_2] = "content.searing_luminary", [registered.complex_3] = "content.stone_fetters",
+}) do
+    sf2.forge.patch { recipe = recipe, perk = require(module), price = 2.0 }
+end
+
 -- Boss abilities. Each unlocks after a win against any warrior that IS its
 -- boss. The mapping follows the archived perk aliases (DExml/perks.xml:
 -- LynxAbil_invisibility, HermitAbil_storm, ButcherAbil_earthquake,
@@ -90,14 +97,13 @@ local function install(underworld)
         fear_ray = young("Man_Tenebris"),
         power_field = young("Cyborg_Gatekeeper"),
         grasp_of_darkness = young("Girl_Blackness"),
-        titans_shield = story("man_z7_titan"),
     }
 
     local abilities = require("content.boss_abilities").perks
     local recipe_perks = {
         abilities_1 = { "shadow_cloak", "hermit_storm", "earthquake", "wasp_fly" },
         abilities_2 = { "teleportation", "assistants", "rat_wave", "war_whirl" },
-        abilities_3 = { "lightning_chain", "fear_ray", "power_field", "grasp_of_darkness", "titans_shield" },
+        abilities_3 = { "lightning_chain", "fear_ray", "power_field", "grasp_of_darkness" },
     }
     for id, keys in pairs(recipe_perks) do
         for _, key in ipairs(keys) do
@@ -108,6 +114,9 @@ local function install(underworld)
             }
         end
     end
+
+    -- Hex Shield is a Medium enchantment now (content.hex_shield), offered after the first win against Titan.
+    sf2.forge.patch { recipe = "Medium", perk = require("content.hex_shield"), unlock = { defeated = story("man_z7_titan") } }
 end
 
 return { install = install }

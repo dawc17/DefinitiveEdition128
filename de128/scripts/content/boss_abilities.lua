@@ -21,14 +21,13 @@ local words = require("content.text")
 -- flag. A boss's is its core perk's native flag, plus, for DE128's own boss tactics,
 -- a pacing flag that follows the tactic's cadence (see pace_perk below).
 
--- One behavior table drives every ability enchantment below. A behavior is registered
--- under the ID of the first perk that uses it, which is the first entry of `order`
--- (asserted where the perks are registered), so that perk's ID names the timed flags.
-local behavior_id = "hermit_storm"
+-- Each ability enchantment has its own behavior table, registered under its perk's ID, so
+-- its special rules (content.specials.*) can keep their own state beside the recharge.
+local specials = require("content.specials")
 
 -- Flag names seen by native move conditions: <qualified behavior ID>:<key>.
 local function flag(key)
-    return sf2.mod.id .. ":behaviors/" .. behavior_id .. ":" .. key
+    return sf2.mod.id .. ":behaviors/" .. key .. ":" .. key
 end
 
 -- Owner-supplied enchantment icons (Tools/Recovery/ImportDE128AbilityIcons.py):
@@ -47,19 +46,18 @@ end
 -- hit_moves: begin the recharge when hit during these instead (Hermit Storm's
 -- PostHit Player="Me" trigger).
 local abilities = {
-    hermit_storm = { core = "PERK_HERMITSTORM", native = "HermitStormRecharge", frames = 600, initial_frames = 300,
+    hermit_storm = { core = "PERK_HERMITSTORM", native = "HermitStormRecharge", frames = 420, initial_frames = 300,
         hit_moves = { "de128:moves/hermit_storm_player", "de128:moves/hermit_storm_idle" } },
-    earthquake = { core = "PERK_EARTHQUAKE", native = "EarthquakeRecharge", frames = 600,
+    earthquake = { core = "PERK_EARTHQUAKE", native = "EarthquakeRecharge", frames = 420, recharge_on_end = true,
         triggers = { "de128:moves/butcher_earthquake_player" } },
     wasp_fly = { core = "PERK_WASPFLY", native = "WaspFlyRecharge", frames = 600,
         triggers = { "de128:moves/wasp_fly_150", "de128:moves/wasp_fly_200",
             "de128:moves/wasp_fly_300", "de128:moves/wasp_fly_370" } },
-    teleportation = { core = "PERK_TELEPORTATION", native = "TeleportationRecharge", frames = 600,
+    teleportation = { core = "PERK_TELEPORTATION", native = "TeleportationRecharge", frames = 360,
         triggers = { "WidowTeleportationStart" } },
-    assistants = { core = "PERK_ASSISTANTS", native = "AssistantsRecharge", frames = 550,
-        triggers = { "AssistantLongKatanaPlayer", "AssistantBigNaginataPlayer",
-            "AssistantBigMagariYariPlayer", "AssistantUniqGlaivePlayer" } },
-    rat_wave = { core = "PERK_RAT_WAVE", native = "RatWaveRecharge", frames = 600,
+    -- Summoned by content.special_assistants, which starts this recharge when the assistant leaves.
+    assistants = { core = "PERK_ASSISTANTS", native = "AssistantsRecharge", frames = 480, triggers = {} },
+    rat_wave = { core = "PERK_RAT_WAVE", native = "RatWaveRecharge", frames = 420,
         triggers = { "RatWavePlayer" } },
     war_whirl = { core = "PERK_WAR_WHIRL", native = "WarRecharge", frames = 600,
         triggers = { "de128:moves/war_whirl_player" } },
@@ -67,7 +65,7 @@ local abilities = {
         triggers = { "LightingChainPlayer" } },
     fear_ray = { core = "PERK_FEAR_RAY", native = "FearRecharge", frames = 600,
         triggers = { "PerkFearRayPlayer" } },
-    power_field = { core = "PERK_POWER_FIELD", native = "GateKeeperPowerFieldCD", frames = 600,
+    power_field = { core = "PERK_POWER_FIELD", native = "GateKeeperPowerFieldCD", frames = 420,
         triggers = { "de128:moves/gatekeeper_power_field" } },
     grasp_of_darkness = { core = "PERK_GRASP_OF_DARKNESS", native = "GraspOfDarknessCD", frames = 600,
         triggers = { "de128:moves/blackness_grasp_player" } },
@@ -92,47 +90,68 @@ end
 -- cooldowns need a processing round, which round-begin callbacks precede.
 -- The flag is timed, so native modifier expiry ends the recharge and the
 -- recharge indicator sweeps the greyed icon over its remaining frames.
-local function recharge(self, fighter, frames)
-    local key = self.params.key
-    fighter:clear_flag(key)
-    fighter:set_flag(key, frames)
-    fighter:set_button_cooldown("raid_charge", frames)
-end
+local recharge = require("content.ability_recharge")
 
-local recharge_behavior = {
-    parameters = {
-        key = { type = "string" },
-        frames = { type = "integer" },
-        initial_frames = { type = "integer" },
-    },
-    state = { lifetime = "round", fields = {
-        started = false,
-    } },
-    on_tick = function(self, fighter)
-        if self.state.started then return end
-        self.state.started = true
-        recharge(self, fighter, self.params.initial_frames)
-        -- DE quests.xml ShowRaidChargeButton: an active ability shows RaidCharge
-        -- outside raids too. Opponents have no button; the call is then a no-op.
-        fighter:set_control_visible("raid_charge", true)
-    end,
-    on_animation_start = function(self, fighter, event)
-        if event.target == "self" and abilities[self.params.key].trigger_set[event.animation_name] then
-            recharge(self, fighter, self.params.frames)
-        end
-    end,
-    on_post_hit = function(self, fighter, event)
-        local hit_set = abilities[self.params.key].hit_set
-        if event.target ~= "self" or next(hit_set) == nil then return end
-        local snapshot = fighter:snapshot()
-        local animation = snapshot and snapshot.self and snapshot.self.animation
-        if animation and hit_set[animation.name] then
-            recharge(self, fighter, self.params.frames)
-        end
-    end,
+local recharge_parameters = {
+    key = { type = "string" },
+    frames = { type = "integer" },
+    initial_frames = { type = "integer" },
 }
 
-assert(order[1] == behavior_id, "The recharge behavior is registered by the first ability perk")
+-- The recharge, plus whatever the ability's content.specials module adds. A special's
+-- `state` fields sit beside `started`; its callbacks run after the recharge's own.
+local function ability_behavior(key)
+    local special = specials[key] or {}
+    local fields = { started = false }
+    for name, default in pairs(special.state or {}) do fields[name] = default end
+    local behavior = {
+        parameters = recharge_parameters,
+        state = { lifetime = "round", fields = fields },
+    }
+    local base = {
+        on_tick = function(self, fighter)
+            if self.state.started then return end
+            self.state.started = true
+            recharge(self, fighter, self.params.initial_frames)
+            -- DE quests.xml ShowRaidChargeButton: an active ability shows RaidCharge
+            -- outside raids too. Opponents have no button; the call is then a no-op.
+            fighter:set_control_visible("raid_charge", true)
+        end,
+        on_animation_start = function(self, fighter, event)
+            local ability = abilities[self.params.key]
+            if event.target == "self" and not ability.recharge_on_end and ability.trigger_set[event.animation_name] then
+                recharge(self, fighter, self.params.frames)
+            end
+        end,
+        on_animation_end = function(self, fighter, event)
+            local ability = abilities[self.params.key]
+            if event.target == "self" and ability.recharge_on_end and ability.trigger_set[event.animation_name] then
+                recharge(self, fighter, self.params.frames)
+            end
+        end,
+        on_post_hit = function(self, fighter, event)
+            local hit_set = abilities[self.params.key].hit_set
+            if event.target ~= "self" or next(hit_set) == nil then return end
+            local snapshot = fighter:snapshot()
+            local animation = snapshot and snapshot.self and snapshot.self.animation
+            if animation and hit_set[animation.name] then
+                recharge(self, fighter, self.params.frames)
+            end
+        end,
+    }
+    for name, callback in pairs(base) do behavior[name] = callback end
+    for name, callback in pairs(special) do
+        if name ~= "state" then
+            local first = behavior[name]
+            behavior[name] = first and function(self, fighter, event)
+                first(self, fighter, event)
+                callback(self, fighter, event)
+            end or callback
+        end
+    end
+    return behavior
+end
+
 local perks = {}
 -- Names and descriptions are the archive's own keys in Eclipse's English text.
 local ability_text = {
@@ -169,7 +188,7 @@ for _, key in ipairs(order) do
         description = ability_description(key),
         icon = icon(key),
         kind = "combo",
-        behavior = recharge_behavior,
+        behavior = ability_behavior(key),
         parameters = { key = key, frames = ability.frames, initial_frames = ability.initial_frames or ability.frames },
     }
     flags[key] = flag(key)
@@ -243,6 +262,7 @@ local cloak_behavior = {
         frames = { type = "integer" },
         invisibility_frames = { type = "integer" },
         initial_frames = { type = "integer" },
+        safe_frames = { type = "integer" },
     },
     state = { lifetime = "round", fields = {
         started = false,
@@ -271,12 +291,36 @@ local cloak_behavior = {
             fighter:set_cloak(frames)
             fighter:show_status_icon("cloak", cloak_buff, frames)
             fighter:set_flag("active", frames)
+            fighter:set_flag("safe", self.params.safe_frames)
             self.state.cloaked = true
         end
     end,
     on_hit_pre_crit = function(self, fighter, event)
         if event.target == "opponent" and event.blocked and fighter:has_flag("active") then
             fighter:set_hit_blocked(false)
+        end
+    end,
+    on_hit_post_crit = function(self, fighter, event)
+        if event.target == "opponent" and event.ranged and not event.blocked and not event.critical
+            and fighter:has_flag("active") and sf2.random.number("shadow_cloak_crit") < 0.5 then
+            fighter:set_hit_critical(true)
+        end
+    end,
+    -- Revised plan: unblockable hits, a 50% crit chance on ranged hits, +3 base damage on
+    -- normal attacks, the ranged passive rising from 50% to 75%; hits landed on the cloaked
+    -- player after its first 8 seconds reveal it, blocked hits do not.
+    on_post_hit = function(self, fighter, event)
+        local active = fighter:has_flag("active")
+        if event.target == "opponent" then
+            if event.ranged then
+                fighter:scale_outgoing_damage(active and 1.75 or 1.5)
+            elseif active and not event.magic then
+                fighter:add_outgoing_damage(0.03)
+            end
+        elseif active and not event.blocked and not fighter:has_flag("safe") then
+            fighter:clear_flag("active")
+            fighter:clear_cloak()
+            fighter:clear_status_icon("cloak")
         end
     end,
 }
@@ -288,7 +332,7 @@ perks.shadow_cloak = sf2.perks.register {
     icon = icon("shadow_cloak"),
     kind = "combo",
     behavior = cloak_behavior,
-    parameters = { frames = 600, invisibility_frames = 650, initial_frames = 300 },
+    parameters = { frames = 480, invisibility_frames = 960, initial_frames = 300, safe_frames = 480 },
 }
 flags.shadow_cloak = cloak_flag("recharge")
 
