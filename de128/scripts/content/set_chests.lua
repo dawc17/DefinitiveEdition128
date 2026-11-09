@@ -33,8 +33,10 @@ local chests = {
         extra = { "PERK_ITEM_SPECIAL_OVERHEAT_WEAPON", "PERK_ITEM_SPECIAL_REGENERATION_ARMOR",
             "PERK_ITEM_SPECIAL_DAMAGE_ABSORPTION_HEAD_HELM", "PERK_ITEM_SPECIAL_ENFEEBLE_RANGED", "PERK_ITEM_SPECIAL_BLOODRAGE_MAGIC" } },
       pieces = { "WEAPON_C2_Z3_SENTINEL_SPEAR", "ARMOR_C2_Z3_SENTINEL", "HELM_C2_Z3_SENTINEL", "RANGED_C2_Z3_SENTINEL_SHURIKEN", "MAGIC_C2_Z3_SENTINEL_DRAGON" } },
+    -- Neo's pieces sit in a raid shop group the player never unlocks, so they need the shop policy
+    -- that lists a piece once it is owned.
     { id = "neo_set_chest", name = "NeoSetChest", text = "NeoChestDesc", icon = "img_neo_wanderer",
-      level = 19, group = "ACT_4", gems = 345, scaled = {
+      level = 19, group = "ACT_4", gems = 345, list_owned = true, scaled = {
         set = "PERK_ARCANE_MARTIAL_ART_SET_NEO_WANDERER",
         extra = { "PERK_ITEM_SPECIAL_TIME_BOMB_WEAPON", "PERK_ITEM_SPECIAL_MAGIC_PAIN_RECHARGE_ARMOR",
             "PERK_ITEM_SPECIAL_SHIELDING_HELM", "PERK_ITEM_SPECIAL_LIFESTEAL_RANGED", "PERK_ITEM_SPECIAL_TIME_BOMB_MAGIC" } },
@@ -73,6 +75,7 @@ local function register()
         for index, path in ipairs(paths) do
             hidden[chest.pieces[index]] = true
             local item = sf2.items.get(path)
+            if chest.list_owned then sf2.items.patch { item = item, visibility = "force_hidden" } end
             if chest.scaled then
                 contents[index] = {
                     item = item, scale_to_player = true,
