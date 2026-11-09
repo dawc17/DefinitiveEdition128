@@ -7,11 +7,14 @@ sf2.game.enable { "shop_search", "shop_sort" }
 -- The generated table contains static data; no XML is read by the mod in game.
 -- Core identity stays base-owned. Prices, art, starting profiles, legacy paid
 -- markers and changed enchantments are reversible catalog patches.
+local set_chests = require("content.set_chests")
+set_chests.register()
+
 for _, row in ipairs(require("content.shop_data")) do
     local item = sf2.items.get("core:items/" .. row[1] .. "/" .. row[2])
     local patch = {
         item = item,
-        visibility = "force_visible",
+        visibility = set_chests.hidden[row[2]] and "force_hidden" or "force_visible",
         minimum_level = row[3],
         required_group = row[4],
         initial_profile = {
