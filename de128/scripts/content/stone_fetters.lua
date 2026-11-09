@@ -1,13 +1,13 @@
 local sf2 = require("sf2")
 local words = require("content.text")
 
--- Stone Fetters (mythical, kind = "combo"): eight melee hits, each within 1.5 s of the last,
+-- Stone Fetters (mythical, kind = "combo"): eight melee hits, each within 3.5 s of the last,
 -- trigger a draining meter. While it lasts the ground shakes under the enemy, the enemy is
 -- staggered every 3 s (never a boss) and the player takes hits armored. Bosses never use it.
 -- Plan: Stone Fetters Mythical Enchantment Concept Plan.
 
 local HITS = 8
-local WINDOW = 90                         -- frames allowed between hits (1.5 s)
+local WINDOW = 210                        -- frames allowed between hits (3.5 s)
 local FULL = 360                          -- frames a full bar lasts (6 s)
 local REFILL = 36                         -- each landed hit refills 10%
 local STAGGER_EVERY = 180                 -- 3 s
