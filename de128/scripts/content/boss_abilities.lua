@@ -119,10 +119,11 @@ local function ability_behavior(key)
         end,
         on_animation_start = function(self, fighter, event)
             local ability = abilities[self.params.key]
-            if event.target == "self" and not ability.recharge_on_end and ability.trigger_set[event.animation_name] then
+            if event.target == "self" and ability.trigger_set[event.animation_name] then
                 recharge(self, fighter, self.params.frames)
             end
         end,
+        -- An interrupted move may send no end event, so this only restarts the cooldown begun above.
         on_animation_end = function(self, fighter, event)
             local ability = abilities[self.params.key]
             if event.target == "self" and ability.recharge_on_end and ability.trigger_set[event.animation_name] then
@@ -250,6 +251,7 @@ local function cloak_flag(key)
 end
 local cloak_move = sf2.mod.id .. ":moves/shadow_cloak_player"
 local cloak_buff = sf2.assets.sprite("core:ui/skills/IconInvisibility_Blue")
+local cloak_crit_roll = sf2.random.stream("de128", "shadow_cloak_crit")
 
 local function cloak_recharge(fighter, frames)
     fighter:clear_flag("recharge")
@@ -302,7 +304,7 @@ local cloak_behavior = {
     end,
     on_hit_post_crit = function(self, fighter, event)
         if event.target == "opponent" and event.ranged and not event.blocked and not event.critical
-            and fighter:has_flag("active") and sf2.random.number("shadow_cloak_crit") < 0.5 then
+            and fighter:has_flag("active") and cloak_crit_roll:number() < 0.5 then
             fighter:set_hit_critical(true)
         end
     end,

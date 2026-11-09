@@ -27,7 +27,7 @@ return {
         fighter:change_health(combat.self.max_health - combat.self.health)
         self.state.used = true
         self.state.burning = true
-        fighter:show_status_icon("glory", glory_icon, 36000)
+        fighter:show_status_icon("glory", glory_icon, 3600)
     end,
 
     on_post_hit = function(self, fighter, event)

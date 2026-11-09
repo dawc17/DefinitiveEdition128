@@ -9,6 +9,7 @@ local ARMOR_CHANCE = 0.15
 local NO_FALL_START = 60        -- an enemy that never falls (armored) starts the window anyway
 
 local charge_icon = sf2.assets.sprite("core:ui/skills/IconLightning_Blue")
+local armor_roll = sf2.random.stream("de128", "power_field_armor")
 
 local function show_hits(fighter, hits)
     fighter:set_meter("static_charge", { value = hits / HITS_NEEDED, segments = HITS_NEEDED, color = "#4FC3F7",
@@ -50,7 +51,7 @@ return {
         local state = self.state
         if event.target == "self" then
             if not event.ranged and not event.magic and not fighter:animation_is("BossAbility", "opponent")
-                and sf2.random.number("power_field_armor") < ARMOR_CHANCE then
+                and armor_roll:number() < ARMOR_CHANCE then
                 fighter:set_hit_armored(true)
             end
             return

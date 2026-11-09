@@ -21,6 +21,8 @@ local function chance(strength, damage)
     return CHANCE_FACTOR * damage * (POWER_LOW + (POWER_HIGH - POWER_LOW) * strength)
 end
 
+local shock_roll = sf2.random.stream("de128", "shocking_strike")
+
 local behavior = {
     -- A state table makes self.strength available.
     state = { lifetime = "round", fields = { shocks = 0 } },
@@ -28,7 +30,7 @@ local behavior = {
         if event.target ~= "opponent" or event.blocked or not event.weapon or event.damage <= 0 then return end
         -- Already knocked down: another shock would only waste the chance.
         if fighter:animation_is("Fall", "opponent") then return end
-        if sf2.random.number("shocking_strike") >= chance(self.strength, event.damage) then return end
+        if shock_roll:number() >= chance(self.strength, event.damage) then return end
         if fighter:has_perk("PERK_ANTI_SHOCK", "opponent") then
             fighter:force_hit_shock { disarm = true, weapon_returns_after = RETURN_FRAMES }
         else

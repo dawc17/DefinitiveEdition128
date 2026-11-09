@@ -70,8 +70,8 @@ local cast = sf2.moves.register {
         [39] = { effect = {
             name = "ElectroEffect", core_sequence = "mgc_effect_shocker",
             scale = 0.75, time_scale = 2, on_background = true,
-            attach = { of = "self", root_point = "MacroBodyGatekeeper-Node975",
-                attach_point = "MacroBodyGatekeeper-Node445",
+            -- Body points every rig has: this also plays on the player, not only on Gatekeeper.
+            attach = { of = "self", root_point = "stomach", attach_point = "chest",
                 offset_x = -54, offset_y = -12, start_rotation = -78 },
         } },
         [60] = { projectile = {
@@ -82,6 +82,27 @@ local cast = sf2.moves.register {
     },
     events = "controlled",
     face = "enemy",
+}
+
+-- The native Electrocution reaction is only a convulsion; the sparks belong to the attacker's
+-- Shocker Claws move. This reaction outranks it (500) and plays the sparks on the victim, so
+-- Static Charge's fourth hit reads as an electrocution. Same clip, timing and conditions.
+sf2.moves.register {
+    id = "electrocution_hit", animation = sf2.assets.binary("animations/hit_electrocution"),
+    inherit = { "Recoil", "Hit" },
+    frames_per_sample = 2, first_sample = 3, priority = 510,
+    align = "pelvis",
+    events = { { hit = "Electrocution" } },
+    when = { not_mod = "MOD_TITAN", not_animation = "Physical", not_window = "TitanUnhittable" },
+    windows = { uninterruptible = true },
+    only_for = { rig = "Skeleton" },
+    face = "reverse_impulse",
+    on = {
+        [0] = { effect = {
+            name = "ElectrocutionSparks", core_sequence = "mgc_effect_shocker", scale = 1.68, time_scale = 0.9,
+            looped = false, position = { node = "pelvis", of = "self", x = 0, y = 40 }, follow = true,
+        } },
+    },
 }
 
 -- Seconds between fields; recorded as the boss's pacing for its HUD icon.

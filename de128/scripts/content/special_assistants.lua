@@ -2,6 +2,8 @@ local sf2 = require("sf2")
 local actors = require("content.call_to_arms_actors")
 local recharge = require("content.ability_recharge")
 
+local absorb_roll = sf2.random.stream("de128", "call_to_arms_absorb")
+
 local PRESENCE_BONUS = 1.5
 local STACK_BONUS = 0.25
 local MAX_STACKS = 5
@@ -93,7 +95,7 @@ return {
     on_hit_post_crit = function(self, fighter, event)
         if event.target ~= "self" then return end
         self.state.absorb = not event.magic and not fighter:animation_is("BossAbility", "opponent")
-            and sf2.random.number("call_to_arms_absorb") < ABSORB_CHANCE
+            and absorb_roll:number() < ABSORB_CHANCE
     end,
     on_damage_resolving = function(self, fighter)
         if not self.state.absorb then return end
