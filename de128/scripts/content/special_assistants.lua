@@ -41,7 +41,8 @@ local function spawn_x(fighter, summon)
     local from = combat.self.position.x
     local to = combat.opponent and combat.opponent.position.x or from
     local toward = to >= from and 1 or -1
-    return summon.ahead and toward * summon.distance or -toward * summon.distance
+    if summon.behind_enemy then return to - from + toward * summon.behind_enemy end
+    return -toward * summon.behind_player
 end
 
 return {
