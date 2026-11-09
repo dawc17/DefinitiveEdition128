@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="128.webp" alt="Definitive Edition 128" width="640">
+<img src="128.webp" alt="Definitive Edition 128" width="420">
 
 # Definitive Edition 128
 
