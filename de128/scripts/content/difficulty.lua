@@ -22,7 +22,8 @@ sf2.saves.option {
     choices = CHOICES,
 }
 
-sf2.game.economy { option = OPTION, choice = "easy", shop_coins = 0.85, shop_gems = 0.85, upgrade_coins = 0.7 }
+sf2.game.economy { option = OPTION, choice = "easy", shop_coins = 0.85, shop_gems = 0.85,
+    upgrade_coins = 0.7, upgrade_gems = 0.7 }
 sf2.game.economy { option = OPTION, choice = "hard", reward_coins = { survival = 0.9 } }
 sf2.game.economy { option = OPTION, choice = "very_hard", shop_coins = 1.1, shop_gems = 1.1,
     reward_coins = { survival = 0.9 } }
