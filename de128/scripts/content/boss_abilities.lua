@@ -156,17 +156,17 @@ end
 local perks = {}
 -- Names and descriptions are the archive's own keys in Eclipse's English text.
 local ability_text = {
-    shadow_cloak = { "LynxAbil_invisibility", "InvisibilityDesc" },
+    shadow_cloak = { "LynxAbil_invisibility", "special.shadow_cloak.description" },
     hermit_storm = { "HermitAbil_storm", "StormDesc" },
-    earthquake = { "ButcherAbil_earthquake", "EarthquakeDesc" },
+    earthquake = { "ButcherAbil_earthquake", "special.earthquake.description" },
     wasp_fly = { "WaspAbil_flight", "WallJumpDesc" },
-    teleportation = { "HuntressAbil_teleportation", "TeleportationDesc" },
-    assistants = { "ShogunAbil_calltoarms", "AssistantsDesc" },
-    rat_wave = { "RatAbil", "RatWaveDesc" },
-    war_whirl = { "WarAbil", "WarWhirlDesc" },
+    teleportation = { "HuntressAbil_teleportation", "special.teleportation.description" },
+    assistants = { "ShogunAbil_calltoarms", "special.assistants.description" },
+    rat_wave = { "RatAbil", "special.rat_wave.description" },
+    war_whirl = { "WarAbil", "special.war_whirl.description" },
     lightning_chain = { "LightningAbil", "LightningChainDesc" },
     fear_ray = { "FearAbil", "FearRayDesc" },
-    power_field = { "PowerFieldAbil", "PowerFieldDesc" },
+    power_field = { "PowerFieldAbil", "special.power_field.description" },
     grasp_of_darkness = { "BlacknessHugAbility", "BlacknessHugDesc" },
     titans_shield = { "TitanShield", "HexShieldDesc" },
 }

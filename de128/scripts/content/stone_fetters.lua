@@ -11,6 +11,7 @@ local WINDOW = 210                        -- frames allowed between hits (3.5 s)
 local FULL = 360                          -- frames a full bar lasts (6 s)
 local REFILL = 36                         -- each landed hit refills 10%
 local STAGGER_EVERY = 180                 -- 3 s
+local SHAKE_REFRESH = 30                  -- frames between renewals of the tremble
 local STAGGER_REACTION = "MiddleHitHeavy" -- native heavy recoil used as the stagger
 local METER_KEY = "stone_fetters"
 local METER_COLOR = "#8E9AAF"
@@ -21,29 +22,10 @@ local function is_boss(fighter, view)
     return not view or not view.opponent or view.opponent.max_health > 1 or fighter:has_perk("PERK_ANTI_SHOCK", "opponent")
 end
 
-local marker                              -- fallback ground marker; art only, not saved state
-
-local function drop_marker()
-    if marker then sf2.world.remove_marker(marker) end
-    marker = nil
-end
-
--- Ground shake under the enemy only. fighter:shake is the engine primitive; without it a
--- jittering strip of rubble at the enemy's feet stands in.
-local function shake_ground(fighter, view, tick)
+-- The ground shakes under the enemy only: a steady tremble, harder on each stagger.
+local function shake_ground(fighter, view, stagger)
     if not view.opponent then return end
-    if fighter.shake then
-        if tick % STAGGER_EVERY == 0 then fighter:shake("opponent", 60) end
-        return
-    end
-    local jitter = (tick % 6) < 3 and 2 or 6
-    local position = view.opponent.position
-    local rect = { x = position.x - 110, y = position.y - jitter, width = 220, height = jitter + 6 }
-    if marker and sf2.world.is_marker_active(marker) then
-        sf2.world.try_set_marker(marker, { rect = rect })
-    else
-        marker = fighter:mark_rect(rect, "#6B5A4AAA")
-    end
+    fighter:shake(SHAKE_REFRESH + 6, "opponent", stagger and 12 or 4)
 end
 
 local function show_meter(self, fighter)
@@ -59,7 +41,6 @@ end
 local function stop(self, fighter)
     local s = self.state
     s.active, s.charge, s.hits, s.stagger_due = false, 0, 0, false
-    drop_marker()
     fighter:clear_model_color()
     show_meter(self, fighter)
 end
@@ -90,7 +71,6 @@ local behavior = {
         show_meter(self, fighter)
     end,
     on_round_end = function(_, fighter)
-        drop_marker()
         fighter:clear_meter(METER_KEY)
     end,
     on_tick = function(self, fighter, event)
@@ -110,8 +90,9 @@ local behavior = {
         end
         local view = fighter:snapshot()
         if view and view.round_active then
-            shake_ground(fighter, view, s.now)
-            if s.now >= s.next_stagger then
+            local stagger = s.now >= s.next_stagger
+            if stagger or s.now % SHAKE_REFRESH == 0 then shake_ground(fighter, view, stagger) end
+            if stagger then
                 s.next_stagger = s.now + STAGGER_EVERY
                 s.stagger_due = not is_boss(fighter, view)
             end

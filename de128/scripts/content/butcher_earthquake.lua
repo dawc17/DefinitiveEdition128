@@ -26,7 +26,7 @@ local start = sf2.moves.register {
     attacks = { {
         from = 6, edges = { "Edge1" }, damage = { amount = 0.41, magic = 0, unarmed = -25 },
         impulse = { x = 150, y = -300 }, hit = "Earthquake",
-        no_effect = true, no_critical = true, body_part = "body",
+        no_effect = true, no_critical = true, no_perk_bonus = true, body_part = "body",
         defense = { "body" }, ignores_block = true,
         ignores_invulnerable = { "Evade", "Recovery", "Dash" },
     } },
