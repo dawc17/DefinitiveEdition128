@@ -42,7 +42,7 @@ return sf2.perks.register {
     id = "shocking_strike",
     display_name = words.own("special.shocking_strike.name", "ENCHANTMENT_SHOCK"),
     description = words.own("special.shocking_strike.description", "special.shocking_strike.description"),
-    icon = sf2.assets.sprite("core:ui/skills/IconMasterOfStyle"),
+    icon = sf2.assets.sprite("core:ui/skills/EnchantmentShock"),
     behavior = behavior,
     enchantment = { recipe = "medium", item_types = { "weapon" } },
 }
