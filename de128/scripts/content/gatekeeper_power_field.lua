@@ -12,6 +12,8 @@ sf2.moves.patch { move = "AbilityGateKeeperPowerField", disable = true }
 -- Frames: surge has 2 frames per sample from sample 1 (sample 2 is frames 4-5, sample 5
 -- is 10-11); the cast has 3 frames per sample from sample 1 (sample 8 is frame 24,
 -- 13 is 39, 20 is 60, and its sample 26 starts on frame 78 and ends on frame 80).
+-- The native effects draw behind the fighters, where a dark silhouette hides them, so these
+-- draw in front.
 local surge = sf2.moves.register {
     id = "gatekeeper_power_surge",
     animation = sf2.assets.binary("animations/ability_power_surge"),
@@ -35,12 +37,12 @@ local surge = sf2.moves.register {
     on = {
         [0] = { { effect = {
             name = "PowerFieldEffect", core_sequence = "effect_electricity",
-            scale = 1.5, time_scale = 2, on_background = true,
+            scale = 1.5, time_scale = 2,
             attach = { of = "parent", root_point = "stomach", attach_point = "chest",
                 offset_x = 15, offset_y = -15 },
         } }, { effect = {
             name = "PowerFieldEffect2", core_sequence = "effect_electricity",
-            scale = 1.5, time_scale = 2, on_background = true,
+            scale = 1.5, time_scale = 2,
             attach = { of = "parent", root_point = "stomach", attach_point = "chest",
                 offset_x = 15, offset_y = -15, start_rotation = 330 },
         } } },
@@ -69,7 +71,7 @@ local cast = sf2.moves.register {
     on = {
         [39] = { effect = {
             name = "ElectroEffect", core_sequence = "mgc_effect_shocker",
-            scale = 0.75, time_scale = 2, on_background = true,
+            scale = 0.75, time_scale = 2,
             -- Body points every rig has: this also plays on the player, not only on Gatekeeper.
             attach = { of = "self", root_point = "stomach", attach_point = "chest",
                 offset_x = -54, offset_y = -12, start_rotation = -78 },
