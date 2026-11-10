@@ -39,5 +39,6 @@ for _, row in ipairs(definitions) do
     }
     equipment[row[1]] = item
 end
-sf2.items.patch { item = equipment.mind_throw, perks = { { perk = require("content.mind_throw_perk") } } }
+-- The archived item's innate perk: the game's MindThrowNormal drives the Mind Throw graph.
+sf2.items.patch { item = equipment.mind_throw, perks = { { perk = sf2.perks.get("core:perks/MindThrowNormal") } } }
 return equipment

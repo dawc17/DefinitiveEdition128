@@ -1,13 +1,8 @@
 local sf2 = require("sf2")
 
 -- The core blaster graph already contains Saturn's pistol, both bullets, the
--- close-range strike and their cleanup. The reviewed DE caster changes only
--- its input and priority; patch it in place to preserve those native links.
-sf2.moves.patch {
-    move = "SaturnBlasterAbilityPlayer",
-    input = { expected = "super", value = "raid_charge" },
-    priority = { expected = 1000, value = 200 },
-}
+-- close-range strike and their cleanup. The reviewed DE caster's RaidCharge input and
+-- priority 200 are in the game's moves.xml, so the move needs no patch.
 
 local function register_tactic(id, cooldown)
     return sf2.ai.register {

@@ -12,56 +12,20 @@ sf2.items.patch {
     model = sf2.assets.model("models/underworld/mdl_small_collision_box"),
 }
 
--- Keep the original native move graphs; the reviewed boss casts use the
--- RaidCharge button, and Hunter's four wall-range variants have lower priority.
-sf2.moves.patch {
-    move = "HoaxenSpikeStrikePlayer",
-    input = { expected = "super", value = "raid_charge" },
-}
-for _, range in ipairs({ "150", "200", "300", "370" }) do
-    sf2.moves.patch {
-        move = "HunterFly_" .. range,
-        input = { expected = "super", value = "raid_charge" },
-        priority = { expected = 1110, value = 200 },
-    }
-end
-sf2.moves.patch {
-    move = "AbilityRootPotionPlayer",
-    input = { expected = "super", value = "raid_charge" },
-}
--- The reviewed Arkhos and Tenebris casts name different packaged binaries.
--- Replace the loaded clip on the original move so its perk cooldown and
--- native projectile graph keep referring to the same caster identity.
+-- The game's moves.xml already has the reviewed boss casts: the RaidCharge button on
+-- Hoaxen's, Hunter's, the Root Potion's, Arkhos's, Tenebris's and Shogun's four Call to Arms
+-- casts, Hunter's wall-range variants at priority 110, Arkhos's and Tenebris's packaged clips
+-- and no Evade window on the Fear Ray. Only the DE128 recharge gates remain.
 sf2.moves.patch {
     move = "RatWavePlayer",
-    input = { expected = "up", value = "raid_charge" },
-    animation = { expected = "rats_wave.bytes",
-        value = sf2.assets.binary("animations/magic_water_wave_player") },
     when = { not_mod = { "Stun", abilities.ready("rat_wave") } },
 }
 abilities.extend_lock("rat_wave", "RatWavePlayer")
 sf2.moves.patch {
     move = "PerkFearRayPlayer",
-    input = { expected = "super", value = "raid_charge" },
-    animation = { expected = "boss_fear_ability.bytes",
-        value = sf2.assets.binary("animations/chest_laser_ray_player") },
-    -- The native Evade window runs from sample 0, before the move's first sample (1), so only a
-    -- sample bound can name it.
-    windows = { remove = { invulnerable = { name = "Evade", from_sample = 0, to_sample = 47 } } },
     when = { not_mod = { "Stun", abilities.ready("fear_ray") } },
 }
 abilities.extend_lock("fear_ray", "PerkFearRayPlayer")
-
--- Shogun's four Call to Arms casts: DE moves.xml binds them to RaidCharge. Only bosses cast
--- them; the player's Call to Arms special summons through its direction pad instead
--- (content.special_assistants), so these moves keep just their core PERK_ASSISTANTS lock.
-for _, move in ipairs({ "AssistantLongKatanaPlayer", "AssistantBigNaginataPlayer",
-    "AssistantBigMagariYariPlayer", "AssistantUniqGlaivePlayer" }) do
-    sf2.moves.patch {
-        move = move,
-        input = { expected = "super", value = "raid_charge" },
-    }
-end
 
 local function tactic(id, moves, initial, cooldown, advance_for_range)
     return sf2.ai.name(sf2.ai.register {

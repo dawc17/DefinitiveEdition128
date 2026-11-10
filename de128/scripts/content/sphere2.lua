@@ -1,7 +1,13 @@
 local sf2 = require("sf2")
--- Complete archived Sphere2 graph, authored with typed Lua definitions.
+-- Sphere2 (Medium Charge of Darkness). The fight moves (Sphere2Player cast, Sphere2Start,
+-- Sphere2Middle and Sphere2Wall) are in the game's moves.xml, restricted until enabled here.
+-- This file keeps DE128's shop preview and try-on moves, which the game does not have.
 -- Game frames: every move has 3 frames per sample. With first_sample F, the first sample
 -- is frames 0-5 and sample N > F is frames (N - F + 1) * 3 .. (N - F + 1) * 3 + 2.
+for _, move in ipairs({ "Sphere2Player", "Sphere2Start", "Sphere2Middle", "Sphere2Wall" }) do
+    sf2.moves.patch { move = move, enable = true }
+end
+
 local animation = {
     player = sf2.assets.binary("animations/fireball_player"),
     start = sf2.assets.binary("animations/fireball_start"),
@@ -20,100 +26,12 @@ local function only_for(player, shop)
     }
 end
 
--- from: first game frame of the attack window (nil: the whole move).
-local function attack(from, shroud)
-    local ignores = { "Evade", "Recovery", "Dash" }
-    if shroud then table.insert(ignores, "ShroudInterval") end
-    return {
-        from = from,
-        edges = { "Magic-Edge2_1", "lightningEdge2", "lightningEdge1" }, damage = { amount = 0.45, magic = 0, unarmed = -25 },
-        impulse = { x = 600 }, hit = "High",
-        no_effect = true, no_critical = true, body_part = "body",
-        defense = { "body" }, ignores_block = true, ignores_invulnerable = ignores,
-    }
-end
-
 local function register(id, definition)
     definition.id = id
     moves[id] = sf2.moves.register(definition)
     return moves[id]
 end
 
-register("sphere2_player", {
-    animation = animation.player, inherit = { "1key", "MagicPlayer", "Controlled", "SoundStrike" },
-    type = "attack", first_sample = 2, priority = 110, tactic_weapon = "Sphere2",
-    tactic_distance = { axis = "x", min = 400, from = { pivot = "self" }, to = { node = "pelvis", of = "enemy" } },
-    align = "right_heel",
-    when = {
-        keys = "magic",
-        bullets = { type = "magic", min = 1 },
-        not_mod = { "Concussion", "Stun" },
-        controllable = true,
-    },
-    only_for = only_for(true), windows = { uninterruptible = { to = 92 } },
-    on = {
-        [0] = { projectile = {
-        name = "Sphere2", core_skeleton = "SkeletonMagic", copy_parent_type = "magic",
-    } },
-        [18] = { add_bullets = "magic", amount = -1 },
-        strike = { sound = { "snd_hit1", "snd_hit2", "snd_hit3", "snd_hit4", "snd_hit5", "snd_hit6" } },
-    },
-    events = "controlled", face = "enemy",
-})
-local start_actions = {
-        [6] = { effect = {
-            name = "EnergyballStart", core_sequence = ("mgc_magic_mid_sphere_" .. string.lower("Start")),
-            scale = 1, time_scale = 1.1, looped = false,
-            position = { node = "Magic-Node2_1", of = "self", x = 25, y = 0 }, follow = true,
-        } },
-        finish = { effect = {
-            name = "EnergyballMiddle", core_sequence = ("mgc_magic_mid_sphere_" .. string.lower("Middle")),
-            scale = 1, time_scale = 1, looped = true,
-            position = { node = "Magic-Node2_1", of = "self", x = 5, y = 0 }, follow = true,
-        } },
-        [0] = { sound = { "snd_midsphere_start" } },
-        [33] = { sound = { "snd_midsphere_middle" } },
-    }
-start_actions.strike = {
-    { sound = { "snd_midsphere_end" } }, { delete_actor = "self" },
-    { effect = { name = "EnergyballEnd", core_sequence = "mgc_magic_mid_sphere1_end",
-        scale = 1.5, time_scale = 1, looped = false,
-        position = { node = "Magic-Node2_1", of = "self", x = 5, y = 0 }, follow = false } },
-}
-
-register("sphere2_start", {
-    animation = animation.start,
-    inherit = { "MagicMissileStart", "MagicMissile", "MissileStart", "MagicMissileFly", family },
-    first_sample = 2, priority = 500, no_wall_repulsion = true, no_interpolation_frames = true, no_magic_recharge = true,
-    face = "with_parent",
-    align = { axes = { "x", "z" }, pivot = { animation = true }, position = { animation = "parent" } },
-    events = { "birth" }, attacks = { attack(36, true) }, on = start_actions,
-    when = { parent = { not_animation = "StanceShop" }, actor = "Sphere2" }, only_for = only_for(false),
-})
-register("sphere2_middle", {
-    animation = animation.middle, inherit = { "MagicMissileFly", "MagicMissile", family },
-    first_sample = 1, priority = 500, no_magic_recharge = true, velocity = { x = 30 },
-    align = { axes = { "x", "y", "z" }, pivot = { node = "Magic-Node2_1" }, position = { node = "Magic-Node2_1", of = "self" } },
-    events = { "finish" }, when = { any = {
-        { animation = name("sphere2_start") }, { animation = name("sphere2_middle") },
-    }, actor = "Sphere2" }, attacks = { attack(nil, true) }, on = {
-        strike = { { sound = { "snd_midsphere_end" } }, { delete_actor = "self" }, { effect = {
-            name = "EnergyballEnd", core_sequence = ("mgc_magic_mid_sphere1_end"),
-            scale = 1.5, time_scale = 1, looped = false,
-            position = { node = "Magic-Node2_1", of = "self", x = 5, y = 0 }, follow = false,
-        } } },
-    }, only_for = only_for(false),
-})
-register("sphere2_wall", {
-    animation = animation.middle, inherit = { "MagicMissileFly", "MagicMissile", family },
-    first_sample = 1, priority = 500, no_magic_recharge = true,
-    align = { axes = { "x", "y", "z" }, pivot = { node = "Magic-Node2_1" }, position = { node = "Magic-Node2_1", of = "self" } },
-    events = { "every_frame" }, when = { animation = name("sphere2_middle"),
-        distance = { axis = "x", max = -250, from = { node = "Magic-Node2_1" }, to = { wall = "front" } }, actor = "Sphere2" },
-    on = {
-        [0] = { delete_actor = "self" },
-    }, only_for = only_for(false),
-})
 register("shop_magic_sphere2", {
     animation = animation.start, inherit = { "MagicShop", "MagicMissileFly", "MagicMissile", family },
     first_sample = 2, priority = 1, no_wall_repulsion = true, no_interpolation_frames = true, no_magic_recharge = true,

@@ -1,18 +1,8 @@
 local sf2 = require("sf2")
 local perks = require("content.combat_perks")
 
--- The corresponding DE moves omit these direct perk locks. Suplex has separate
--- combat and profile moves. Preserve all skeleton, equipment and screen locks.
-for _, lock in ipairs({
-    { move = "DoubleJumpKick", perk = "PERK_DOUBLE_JUMP_KICK" },
-    { move = "ElbowStrike", perk = "PERK_ELBOW_STRIKE" },
-    { move = "TwoFootJumpKick", perk = "PERK_TWO_FOOT_JUMP_KICK" },
-    { move = "BackFlipKick", perk = "PERK_BACK_FLIP_KICK" },
-    { move = "ThrowSuplex", perk = "PERK_SUPLEX" },
-    { move = "ThrowSuplexProfile", perk = "PERK_SUPLEX" },
-}) do
-    sf2.moves.patch { move = lock.move, perk_locks = { remove = { sf2.perks.get("core:perks/" .. lock.perk) } } }
-end
+-- DoubleJumpKick, ElbowStrike, TwoFootJumpKick, BackFlipKick and both Suplex moves have no
+-- direct perk lock in the game's moves.xml any more, as in the DE moves.
 
 -- Assets/DExml/CharacterProgress.xml: PerkTree/Level Values 4,8,11,14,17.
 sf2.perks.patch {

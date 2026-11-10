@@ -2,14 +2,10 @@ local sf2 = require("sf2")
 local abilities = require("content.boss_abilities")
 
 -- Preserve the core caster identity: its CreatePlayer action and five linked
--- native chain phases already match the reviewed DE graph.
+-- native chain phases already match the reviewed DE graph. The game's moves.xml already
+-- gives the caster the DE RaidCharge input, priority 200 and an Uninterrupt window from 0.
 sf2.moves.patch {
     move = "LightingChainPlayer",
-    input = { expected = "super", value = "raid_charge" },
-    priority = { expected = 9000, value = 200 },
-    -- The native Uninterrupt window starts at sample 9 (frame 24) and the new start is sample 0,
-    -- before the move's first sample (2), so these bounds are samples.
-    windows = { change = { uninterruptible = { expected = { from_sample = 9, to_sample = 39 }, value = { from_sample = 0 } } } },
     when = { not_mod = abilities.ready("lightning_chain") },
 }
 abilities.extend_lock("lightning_chain", "LightingChainPlayer")

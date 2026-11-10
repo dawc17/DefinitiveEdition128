@@ -12,8 +12,8 @@ local words = require("content.text")
 -- versions. A combo perk only takes effect while all five equipped pieces carry
 -- it, so at most one of them is active at a time.
 --
--- PERK_SHADOW_CLOAK has no core boss perk (Lynx's PERK_INVISIBILITY is a different,
--- Super-button ability), so it is registered below on its own; see shadow_cloak.
+-- PERK_SHADOW_CLOAK's player version is registered below on its own (Lynx's PERK_INVISIBILITY
+-- is a different, Super-button ability); content.shadow_cloak lets it unlock the game's move.
 --
 -- Readiness on the HUD: every fighter carrying one of these abilities shows its icon
 -- while it can be used and the greyed icon (with the remaining-time sweep) while it
@@ -249,7 +249,7 @@ local cloak_behavior_id = "shadow_cloak"
 local function cloak_flag(key)
     return sf2.mod.id .. ":behaviors/" .. cloak_behavior_id .. ":" .. key
 end
-local cloak_move = sf2.mod.id .. ":moves/shadow_cloak_player"
+local cloak_move = "ShadowCloakPlayer"
 local cloak_buff = sf2.assets.sprite("core:ui/skills/IconInvisibility_Blue")
 local cloak_crit_roll = sf2.random.stream("de128", "shadow_cloak_crit")
 
