@@ -40,6 +40,8 @@ require("content.dandy_lightning_chain")
 require("content.shop")
 require("content.underworld_equipment")
 require("content.titan_reward_equipment")
+-- Ranged throws recharge for 4 s and a ranged hit silences the opponent's magic for 5 s.
+require("content.ranged_recharge")
 require("content.rewards")
 require("content.progression")
 require("content.campaign_music")

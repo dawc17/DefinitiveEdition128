@@ -76,7 +76,7 @@ local cast = sf2.moves.register {
     events = { "key_pressed" },
     when = {
         keys = "raid_charge",
-        not_mod = { "GraspOfDarknessCD", abilities.ready("grasp_of_darkness") },
+        not_mod = { "GraspOfDarknessCD", abilities.ready("grasp_of_darkness"), "SilenceIcon" },
         controllable = true,
     },
     tactic_when = { distance = { axis = "x", min = 450, from = { pivot = "self" }, to = { node = "pelvis", of = "enemy" } } },

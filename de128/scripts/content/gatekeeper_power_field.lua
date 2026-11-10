@@ -65,7 +65,7 @@ local cast = sf2.moves.register {
         keys = "raid_charge",
         -- The core perk's own GateKeeperPowerFieldCD starts only on the disabled native move, so a
         -- boss is held to its cadence by its pacing flag (content.boss_abilities.paced).
-        not_mod = { "GateKeeperPowerFieldCD", abilities.ready("power_field"), abilities.paced("power_field") },
+        not_mod = { "GateKeeperPowerFieldCD", abilities.ready("power_field"), abilities.paced("power_field"), "SilenceIcon" },
         controllable = true,
     },
     only_for = { any = abilities.lock("power_field") },

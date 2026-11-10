@@ -30,7 +30,7 @@ local start = sf2.moves.patch {
         align = "left_heel",
         when = {
             keys = "raid_charge",
-            not_mod = { "TeleportationRecharge", abilities.ready("teleportation") },
+            not_mod = { "TeleportationRecharge", abilities.ready("teleportation"), "SilenceIcon" },
             enemy = {
                 not_animation = excluded_enemy_moves,
                 direction = { from = { node = "pelvis", of = "enemy" }, to = { node = "pelvis", of = "self" } },

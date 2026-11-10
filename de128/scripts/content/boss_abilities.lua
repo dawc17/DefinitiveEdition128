@@ -424,6 +424,17 @@ sf2.perks.patch { perk = perks.titans_shield, recharge_indicator = { flags = { s
 -- Greyed while cloaked too: the move cannot be cast again until the recharge ends.
 sf2.perks.patch { perk = perks.shadow_cloak, recharge_indicator = { flags = { cloak_flag("recharge"), cloak_flag("active") },
     ready = icon("shadow_cloak"), cooldown = cooldown_icon("shadow_cloak") } }
+-- Bosses carrying other core perks get the same player icons.
+-- Smoke-bomb invisibility (Lynx, Puppeteer): the core perk's recharge flag, and greyed while
+-- invisible, as above.
+sf2.perks.patch { perk = sf2.perks.get("core:perks/PERK_INVISIBILITY"),
+    recharge_indicator = { flags = { "InvisibilityRecharge", "Invisibility" },
+        ready = icon("shadow_cloak"), cooldown = cooldown_icon("shadow_cloak") } }
+-- Titan's shield: down while the core perk's timed CooldownIcon lasts (after each blocked hit
+-- and at the start of the round).
+sf2.perks.patch { perk = sf2.perks.get("core:perks/PERK_TITANS_SHIELD"),
+    recharge_indicator = { flags = { "CooldownIcon" },
+        ready = icon("titans_shield"), cooldown = cooldown_icon("titans_shield") } }
 
 -- Requirement for de128-registered ability moves: the core boss perk (opponents) or
 -- the player's enchantment. A list for `any`, so a move writes
