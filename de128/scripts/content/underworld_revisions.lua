@@ -2,10 +2,10 @@
 -- from the reviewed archive, so later design changes live here and are applied, once, before
 -- content.underworld registers anything.
 
--- Gauntlet (Survival_DEMON): every boss has 15% more power and the core shock protection
--- (archive form: <Perk Name="PERK_ANTI_SHOCK" ApplyTo="Bot" />).
+-- Gauntlet (Survival_DEMON): every boss has the core shock protection (archive form:
+-- <Perk Name="PERK_ANTI_SHOCK" ApplyTo="Bot" />). A 15% WarriorPower rise made them one-shot
+-- the player (owner playtest 2026-11-10), so their power stays as archived.
 local GAUNTLET = "Survival_DEMON"
-local GAUNTLET_POWER = 1.15
 -- In Power Mode the gauntlet fields the regular demons (the story bosses' core templates,
 -- with the same equipment) instead of DE's young ones. Their DE128 tactics are the young
 -- ones' (`tactic_of`). The Power Mode twin is otherwise the same fight.
@@ -17,10 +17,12 @@ local REGULAR_DEMONS = {
     Boss_Widow_Young = "core:Huntress_Fan",
     Boss_Shogun_Young = "core:Shogun_Katana",
 }
--- The Prince (Man_Haunted_Prince) also summons Shogun's bodyguards: the core boss perk unlocks
--- the native Call to Arms casts, as it does for Shogun.
+-- The Prince (Man_Haunted_Prince) summons Shogun's bodyguards instead of teleporting: Call to
+-- Arms takes Teleportation's place, and the core boss perk unlocks the native casts as it does
+-- for Shogun. Without Teleportation he keeps his row's own tactic.
 local PRINCE_BATTLE, PRINCE = "BOSS_HAUNTED_PRINCE", "Man_Haunted_Prince"
 local ASSISTANTS = "core:perks/PERK_ASSISTANTS"
+local TELEPORTATION = "core:perks/PERK_TELEPORTATION"
 
 local function copy(source)
     local result = {}
@@ -45,10 +47,7 @@ local function revise_gauntlet(data)
     local warriors, regular = {}, {}
     for position, row in ipairs(fight.warriors) do
         local attributes = copy(assert(row.attributes, "Gauntlet boss without attributes"))
-        local power = assert(attributes.WarriorPower, "Gauntlet boss without WarriorPower")
-        attributes.WarriorPower = math.floor(power * GAUNTLET_POWER + 0.5)
         warriors[position] = copy(row)
-        warriors[position].attributes = attributes
         regular[position] = copy(warriors[position])
         regular[position].template = assert(REGULAR_DEMONS[row.template],
             "No regular demon for Gauntlet boss " .. tostring(row.template))
@@ -76,12 +75,17 @@ local function revise_prince(data)
     for _, fight in ipairs(battle.fights) do
         for position, row in ipairs(fight.warriors) do
             if row.template == PRINCE then
-                local perks = {}
+                local perks, replaced = {}, false
                 for index, perk in ipairs(row.perks or {}) do
                     assert(perk.perk ~= ASSISTANTS, "The Prince already has Call to Arms")
-                    perks[index] = perk
+                    if perk.perk == TELEPORTATION then
+                        perks[index] = { perk = ASSISTANTS }
+                        replaced = true
+                    else
+                        perks[index] = perk
+                    end
                 end
-                perks[#perks + 1] = { perk = ASSISTANTS }
+                assert(replaced, "The Prince is expected to have Teleportation")
                 local revised = copy(row)
                 revised.perks = perks
                 fight.warriors[position] = revised
