@@ -38,4 +38,9 @@ local mind_throw = sf2.items.register {
     initial_stats = { magic_damage = 1 },
 }
 
+-- The dojo disciple's sparring fight never borrows Titan's gear.
+for _, item in ipairs { form, helm, harpoon, mind_throw } do
+    sf2.items.patch { item = item, borrowable = false }
+end
+
 return { form = form, helm = helm, harpoon = harpoon, mind_throw = mind_throw }

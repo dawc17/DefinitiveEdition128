@@ -2,7 +2,8 @@ local sf2 = require("sf2")
 -- DE Underworld: eight tiers of offline boss fights (archive raid_stages_default.xml)
 -- registered as Underworld map pages, with Power Mode twins. Data is generated
 -- offline by Tools/GenerateDE128Underworld.py; this module only registers it.
-local data = require("content.underworld_data")
+-- DE128's later changes to the generated rows (content.underworld_revisions) apply first.
+local data = require("content.underworld_revisions").apply(require("content.underworld_data"))
 local text = require("content.underworld_text")
 local words = require("content.text")
 local wasp_fly = require("content.wasp_fly")
@@ -244,19 +245,22 @@ local function install(raid_charge_rule)
                 local prefix = battle_id .. "_" .. fight_name
                 local opponents = {}
                 for index, w in ipairs(fight_spec.warriors) do
-                    local tactic = w.template == "Boss_Wasp_Young" and wasp_fly.tactic or
-                        (w.template == "Boss_Butcher_Young" and butcher_earthquake.tactic or
-                        (w.template == "Boss_Hermit_Young" and hermit_storm.tactic or
-                        (w.template == "Girl_Drakaina" and war_whirl.tactic or
-                        (w.template == "Cyborg_Gatekeeper" and gatekeeper_power_field.tactic or
-                        (w.template == "Girl_Blackness" and blackness_tactic(w) or
-                        (w.template == "Girl_Saturn" and saturn_tactic(w) or
-                        (w.template == "Man_Dandy" and dandy_tactic(w) or
-                        (w.template == "Man_Hoaxen" and raid_boss_abilities.hoaxen or
-                        (w.template == "Man_Stalker" and hunter_tactic(w) or
-                        (w.template == "Man_Berstuuk" and raid_boss_abilities.berstuuk or w.tactic))))))))))
-                    if w.template == "Man_Arkhos" then tactic = raid_boss_abilities.arkhos end
-                    if w.template == "Man_Tenebris" then tactic = raid_boss_abilities.tenebris end
+                    -- A revised row can borrow another template's DE128 tactic (the Power Mode
+                    -- Gauntlet's regular demons take their young versions').
+                    local kind = w.tactic_of or w.template
+                    local tactic = kind == "Boss_Wasp_Young" and wasp_fly.tactic or
+                        (kind == "Boss_Butcher_Young" and butcher_earthquake.tactic or
+                        (kind == "Boss_Hermit_Young" and hermit_storm.tactic or
+                        (kind == "Girl_Drakaina" and war_whirl.tactic or
+                        (kind == "Cyborg_Gatekeeper" and gatekeeper_power_field.tactic or
+                        (kind == "Girl_Blackness" and blackness_tactic(w) or
+                        (kind == "Girl_Saturn" and saturn_tactic(w) or
+                        (kind == "Man_Dandy" and dandy_tactic(w) or
+                        (kind == "Man_Hoaxen" and raid_boss_abilities.hoaxen or
+                        (kind == "Man_Stalker" and hunter_tactic(w) or
+                        (kind == "Man_Berstuuk" and raid_boss_abilities.berstuuk or w.tactic))))))))))
+                    if kind == "Man_Arkhos" then tactic = raid_boss_abilities.arkhos end
+                    if kind == "Man_Tenebris" then tactic = raid_boss_abilities.tenebris end
                     tactic = teleport_tactic(w) or tactic
                     -- A DE128 boss tactic's cadence drives the boss's ability icon.
                     local perks = perk_rows(w.perks)

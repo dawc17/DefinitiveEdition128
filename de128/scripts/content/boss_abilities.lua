@@ -437,6 +437,15 @@ local function ready(key)
     return flags[key]
 end
 
+-- Flag name for a move's `not_mod` list: a boss's DE128 pacing flag for this ability. The core
+-- perks re-arm their native flags only on their native moves' start, and DE128's casts replace
+-- those moves, so without this a cast is gated only at round start and whichever AI picks it
+-- (the Lua tactic or the native fallback while it waits) can repeat it at once.
+local function paced(key)
+    assert(abilities[key], "Unknown boss ability " .. tostring(key))
+    return sf2.mod.id .. ":behaviors/" .. pace_flag_behavior .. ":" .. key
+end
+
 -- Flag name for a move's `not_mod` list: the Shadow Cloak is not active (the archive's UnblockableActive).
 local function uncloaked()
     return cloak_flag("active")
@@ -453,6 +462,7 @@ return {
     core_perks = core_perks,
     lock = lock,
     ready = ready,
+    paced = paced,
     uncloaked = uncloaked,
     extend_lock = extend_lock,
     pace = pace,

@@ -79,7 +79,7 @@ local player = sf2.moves.register {
     align = "left_heel",
     when = {
         keys = "raid_charge",
-        not_mod = { "HermitStormRecharge", abilities.ready("hermit_storm") },
+        not_mod = { "HermitStormRecharge", abilities.ready("hermit_storm"), abilities.paced("hermit_storm") },
         controllable = true,
     },
     only_for = { any = abilities.lock("hermit_storm"), rig = "Skeleton" },

@@ -53,7 +53,7 @@ local player = sf2.moves.register {
     align = "left_heel",
     when = {
         keys = "raid_charge",
-        not_mod = { "EarthquakeRecharge", abilities.ready("earthquake") },
+        not_mod = { "EarthquakeRecharge", abilities.ready("earthquake"), abilities.paced("earthquake") },
         controllable = true,
     },
     only_for = { any = abilities.lock("earthquake") },

@@ -41,7 +41,7 @@ local move = sf2.moves.register {
 
     when = {
         keys = "raid_charge",
-        not_mod = { "WarRecharge", abilities.ready("war_whirl"), "Concussion", "Stun" },
+        not_mod = { "WarRecharge", abilities.ready("war_whirl"), abilities.paced("war_whirl"), "Concussion", "Stun" },
         controllable = true,
     },
     only_for = { any = abilities.lock("war_whirl"), rig = "Skeleton" },

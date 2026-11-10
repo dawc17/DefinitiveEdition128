@@ -19,6 +19,8 @@ sf2.items.patch {
         { perk = sf2.perks.get("core:perks/PERK_TITAN") },
         { perk = sf2.perks.get("core:perks/PERK_ANTI_SHOCK") },
     },
+    -- The dojo disciple's sparring fight never borrows Titan's gear.
+    borrowable = false,
 }
 
 -- The final Eclipse Titan reward configures the level and Lifesteal on acquisition.

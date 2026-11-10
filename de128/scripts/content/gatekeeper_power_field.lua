@@ -63,7 +63,9 @@ local cast = sf2.moves.register {
     align = "left_heel",
     when = {
         keys = "raid_charge",
-        not_mod = { "GateKeeperPowerFieldCD", abilities.ready("power_field") },
+        -- The core perk's own GateKeeperPowerFieldCD starts only on the disabled native move, so a
+        -- boss is held to its cadence by its pacing flag (content.boss_abilities.paced).
+        not_mod = { "GateKeeperPowerFieldCD", abilities.ready("power_field"), abilities.paced("power_field") },
         controllable = true,
     },
     only_for = { any = abilities.lock("power_field") },
@@ -107,22 +109,29 @@ sf2.moves.register {
     },
 }
 
--- Seconds between fields; recorded as the boss's pacing for its HUD icon.
+-- Seconds between fields; recorded as the boss's pacing for its HUD icon, and the cast's
+-- recharge for a boss (its pacing flag lasts this long from each cast's start).
 local FIELD_EVERY = 6
-local tactic = sf2.ai.register {
-    id = "gatekeeper_power_field", template = "Aggressive",
-    on_decide = function(memory, event)
-        if event.seconds < (memory.next_field or 0) then return nil end
-        for _, action in ipairs(event.actions) do
-            if action.name == "de128:moves/gatekeeper_power_field" then
-                memory.next_field = event.seconds + FIELD_EVERY
-                return action
+-- template: the native tactic that decides while the field recharges.
+local function field_tactic(id, template)
+    local tactic = sf2.ai.register {
+        id = id, template = template,
+        on_decide = function(memory, event)
+            if event.seconds < (memory.next_field or 0) then return nil end
+            for _, action in ipairs(event.actions) do
+                if action.name == "de128:moves/gatekeeper_power_field" then
+                    memory.next_field = event.seconds + FIELD_EVERY
+                    return action
+                end
             end
-        end
-        return nil
-    end,
-}
+            return nil
+        end,
+    }
+    return abilities.pace(sf2.ai.name(tactic), "power_field", 0, FIELD_EVERY * 60,
+        { "de128:moves/gatekeeper_power_field" })
+end
 
 return { cast = cast, surge = surge,
-    tactic = abilities.pace(sf2.ai.name(tactic), "power_field", 0, FIELD_EVERY * 60,
-        { "de128:moves/gatekeeper_power_field" }) }
+    tactic = field_tactic("gatekeeper_power_field", "Aggressive"),
+    -- For a fighter that keeps the Standard tactic between fields (Cronos).
+    standard_tactic = field_tactic("power_field_standard", "Standard") }

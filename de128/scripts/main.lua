@@ -15,6 +15,8 @@ require("content.shocking_strike")
 require("content.hex_shield")
 require("content.equipment")
 require("content.combat_equipment")
+-- Rifle and Musket Super Slash recharge for 3 seconds; the Musket ball flies faster.
+require("content.rifle_musket")
 require("content.chinese_swords")
 require("content.restored_weapons")
 require("content.sphere1")
@@ -31,6 +33,7 @@ require("content.butcher_earthquake")
 require("content.hermit_storm")
 require("content.war_whirl")
 require("content.gatekeeper_power_field")
+require("content.cronos_power_field")
 require("content.blackness_grasp")
 require("content.saturn_blaster")
 require("content.dandy_lightning_chain")
@@ -41,7 +44,11 @@ require("content.rewards")
 require("content.progression")
 require("content.campaign_music")
 require("content.map_positions")
+-- Owner stages.xml (2026-11) deltas for core battles.
+require("content.stages_2026_11")
 require("content.dojo_changer")
+-- After the story Titan: a dojo button to change the player's portrait.
+require("content.avatar_changer")
 -- Options > Mod settings: knives and daggers can use the old knife swing sounds.
 require("content.old_knife_sounds")
 -- Options > Mod settings: critical hits can play the DE critical sound.

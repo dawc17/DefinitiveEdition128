@@ -209,7 +209,8 @@ return sf2.perks.register {
     id = "searing_luminary",
     display_name = words.own("special.searing_luminary.name", "special.searing_luminary.name"),
     description = words.own("special.searing_luminary.description", "special.searing_luminary.description"),
-    icon = sf2.assets.sprite("core:ui/skills/IconMasterOfStyle"),
+    -- The game's own Searing Luminary orb (PERK_HEAVEN_SET_BURN, Enchantments.EnchantmentBurn).
+    icon = sf2.assets.sprite("core:ui/atlases/enchantments.enchantmentburn"),
     kind = "combo",
     behavior = behavior,
 }
