@@ -7,8 +7,8 @@ local words = require("content.text")
 -- Monk, Sentinel and Neo-wanderer keep the prices DE gave them: their pieces are level-1
 -- shop-hidden items whose own prices mean nothing.
 
--- Replace these as set art arrives.
-local PLACEHOLDER = "UnknownItems.img_weapon_unknown"
+-- Chests without their own art show this mod sprite. Replace it per chest as set art arrives.
+local PLACEHOLDER = false
 
 local SLOTS = { "weapon", "armor", "helm", "ranged", "magic" }
 
@@ -94,7 +94,8 @@ local function register()
             category = "chest", id = chest.id,
             display_name = words.own("chest." .. chest.id .. ".name", chest.name),
             description = words.own("chest." .. chest.id .. ".description", chest.text),
-            icon = sf2.assets.sprite("core:UI/Items/" .. chest.icon),
+            icon = chest.icon and sf2.assets.sprite("core:UI/Items/" .. chest.icon)
+                or sf2.assets.sprite("sprites/chests/placeholder"),
             shop = { level = chest.level, group = chest.group, price = { gems = chest.gems } },
             contents = contents,
         }
