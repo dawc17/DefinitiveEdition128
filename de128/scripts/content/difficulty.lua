@@ -73,6 +73,7 @@ local TIERS = {
 local UNCHANGED = { tutorial = true, raid = true, other = true }
 
 -- Enchantments each slot can hold, by type. One enemy never gets the same type twice.
+-- Damage Return is left out on purpose (Seby, 2026-11-10).
 local POOLS = {
     weapon = { "bleeding", "bloodrage", "enfeeble", "frenzy", "intoxication", "lifesteal",
         "magic_damage_recharge", "overheat", "precision", "stun", "time_bomb", "weakness" },
@@ -80,13 +81,12 @@ local POOLS = {
         "overheat", "precision", "stun", "time_bomb", "weakness" },
     magic = { "bleeding", "bloodrage", "enfeeble", "frenzy", "intoxication", "lifesteal",
         "overheat", "stun", "time_bomb", "weakness" },
-    armor = { "damage_absorption_body", "damage_return", "frenzy_defense", "magic_pain_recharge",
+    armor = { "damage_absorption_body", "frenzy_defense", "magic_pain_recharge",
         "overheat_defense", "regeneration", "rejuvenation", "shielding" },
-    helm = { "critical_protection", "damage_absorption_head", "damage_return", "frenzy_defense",
+    helm = { "critical_protection", "damage_absorption_head", "frenzy_defense",
         "magic_pain_recharge", "overheat_defense", "regeneration", "rejuvenation", "shielding" },
 }
 local SLOT_ORDER = { "weapon", "ranged", "magic", "armor", "helm" }
-local HEALING = { lifesteal = true, regeneration = true, rejuvenation = true }
 local ENCHANTMENT_PREFIX = "core:perks/perk_item_special_"
 
 local PERKS = {}
@@ -105,7 +105,7 @@ local function enchanted(enemy)
 end
 
 -- Very Hard keeps 2-3 picks and Hard 1-2, both from the front of one ordered roll, so a
--- difficulty change only adds or removes enchantments. No pick pairs healing with Damage Return.
+-- difficulty change only adds or removes enchantments.
 -- The same save, fight and opponent always roll the same enchantments.
 local function roll(seed, fight_id, enemy, tier)
     local stream = sf2.random.stream(seed, fight_id, enemy.index)
@@ -123,20 +123,17 @@ local function roll(seed, fight_id, enemy, tier)
         local j = next_value(i)
         slots[i], slots[j] = slots[j], slots[i]
     end
-    local used, healing, damage_return, perks = {}, false, false, {}
+    local used, perks = {}, {}
     for _, slot in ipairs(slots) do
         if #perks >= count then break end
         -- Earlier picks never depend on count, so Hard's picks are the front of Very Hard's.
         local options = {}
         for _, kind in ipairs(POOLS[slot]) do
-            local blocked = used[kind] or (HEALING[kind] and damage_return) or (kind == "damage_return" and healing)
-            if not blocked then options[#options + 1] = kind end
+            if not used[kind] then options[#options + 1] = kind end
         end
         if #options > 0 then
             local kind = options[next_value(#options)]
             used[kind] = true
-            healing = healing or HEALING[kind] == true
-            damage_return = damage_return or kind == "damage_return"
             perks[#perks + 1] = PERKS[slot][kind]
         end
     end

@@ -154,7 +154,8 @@ return sf2.perks.register {
     id = "stone_fetters",
     display_name = words.own("special.stone_fetters.name", "special.stone_fetters.name"),
     description = words.own("special.stone_fetters.description", "special.stone_fetters.description"),
-    icon = sf2.assets.sprite("core:ui/skills/IconMasterOfStyle"),
+    -- The game's own Stone Fetters orb (PERK_DRAGON_SET_STONE, Enchantments.EnchantmentStone).
+    icon = sf2.assets.sprite("core:ui/atlases/enchantments.enchantmentstone"),
     kind = "combo",
     behavior = behavior,
 }

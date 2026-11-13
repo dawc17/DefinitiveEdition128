@@ -82,15 +82,15 @@ local function install(underworld)
     local function story(template) return { "core:warrior-templates/" .. template } end
 
     -- Core story bosses (vanillaXml stages.xml templates), Sensei's Story acts I Lynx,
-    -- II Hermit, III Butcher, IV Wasp, V Widow, VI Shogun, and the Underworld's young
-    -- variants and raid bosses that are the ability's namesake.
+    -- II Hermit, III Butcher, IV Wasp, V Widow, VI Shogun, and the Underworld raid bosses
+    -- that are the ability's namesake. (The young demons fought only in the scrapped Gauntlet.)
     local bosses = {
-        shadow_cloak = join(story("lynx_claws"), both(sensei[1]), young("Boss_Lynx_Young")),
-        hermit_storm = join(story("hermit_swords"), both(sensei[2]), young("Boss_Hermit_Young")),
-        earthquake = join(story("butcher_backswords"), both(sensei[3]), young("Boss_Butcher_Young")),
-        wasp_fly = join(story("wasp_naginata"), both(sensei[4]), young("Boss_Wasp_Young")),
-        teleportation = join(story("huntress_fan"), both(sensei[5]), young("Boss_Widow_Young")),
-        assistants = join(story("shogun_katana"), both(sensei[6]), young("Boss_Shogun_Young")),
+        shadow_cloak = join(story("lynx_claws"), both(sensei[1])),
+        hermit_storm = join(story("hermit_swords"), both(sensei[2])),
+        earthquake = join(story("butcher_backswords"), both(sensei[3])),
+        wasp_fly = join(story("wasp_naginata"), both(sensei[4])),
+        teleportation = join(story("huntress_fan"), both(sensei[5])),
+        assistants = join(story("shogun_katana"), both(sensei[6])),
         rat_wave = young("Man_Arkhos"),
         war_whirl = young("Girl_Drakaina"),
         lightning_chain = young("Man_Dandy"),

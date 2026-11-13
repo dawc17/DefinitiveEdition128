@@ -59,7 +59,6 @@ local OWNED_AVATARS = {
 local MAP_TIERS = 8
 local TIER8_PLACES = {
     BOSS_INVISIBLE = "BOSS_11", BOSS_HAUNTED_PRINCE = "BOSS_12",
-    Survival_MERCENARY = "BOSS_13", Survival_DEMON = "BOSS_ARCHITECT_2",
 }
 
 local function avatar(name)
@@ -245,9 +244,7 @@ local function install(raid_charge_rule)
                 local prefix = battle_id .. "_" .. fight_name
                 local opponents = {}
                 for index, w in ipairs(fight_spec.warriors) do
-                    -- A revised row can borrow another template's DE128 tactic (the Power Mode
-                    -- Gauntlet's regular demons take their young versions').
-                    local kind = w.tactic_of or w.template
+                    local kind = w.template
                     local tactic = kind == "Boss_Wasp_Young" and wasp_fly.tactic or
                         (kind == "Boss_Butcher_Young" and butcher_earthquake.tactic or
                         (kind == "Boss_Hermit_Young" and hermit_storm.tactic or

@@ -51,7 +51,7 @@ require("content.stages_2026_11")
 require("content.dojo_changer")
 -- After the story Titan: a dojo button to change the player's portrait.
 require("content.avatar_changer")
--- Options > Mod settings: knives and daggers can use the old knife swing sounds.
+-- Options > Mod settings: bladed weapons can use the old knife swing sounds.
 require("content.old_knife_sounds")
 -- Options > Mod settings: critical hits can play the DE critical sound.
 require("content.critical_sound")
