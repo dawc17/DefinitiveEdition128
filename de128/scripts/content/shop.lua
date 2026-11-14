@@ -8,6 +8,7 @@ sf2.game.enable { "shop_search", "shop_sort" }
 -- Core identity stays base-owned. Prices, art, starting profiles, legacy paid
 -- markers and changed enchantments are reversible catalog patches.
 local set_chests = require("content.set_chests")
+local shop_groups = require("content.shop_groups")
 set_chests.register()
 
 for _, row in ipairs(require("content.shop_data")) do
@@ -16,7 +17,7 @@ for _, row in ipairs(require("content.shop_data")) do
         item = item,
         visibility = set_chests.hidden[row[2]] and "force_hidden" or "force_visible",
         minimum_level = row[3],
-        required_group = row[4],
+        required_group = shop_groups.game(row[4]),
         initial_profile = {
             level = row[3], upgrade_level = row[5],
             upgrade_template = row[6], initial_stats = row[7],

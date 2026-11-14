@@ -297,7 +297,8 @@ local function install(raid_charge_rule)
                 id = battle_id, page = zone, type = BATTLE_TYPES[spec.type], x = place.x, y = place.y,
                 alias = text.key(spec.alias), title = text.key(spec.title), description = description,
                 icon = spec.icon, icon_atlas = (not icons) and spec.icon_atlas or nil, icons = icons,
-                preview = spec.preview, location = spec.location, music = music(spec.music),
+                preview = spec.preview_sprite and sf2.assets.sprite(spec.preview_sprite) or spec.preview,
+                location = spec.location, music = music(spec.music),
                 power_mode = spec.power_mode,
                 fights = fight_specs,
             }

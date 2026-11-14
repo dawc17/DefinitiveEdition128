@@ -53,10 +53,10 @@ require("content.dojo_changer")
 require("content.avatar_changer")
 -- Options > Mod settings: bladed weapons can use the old knife swing sounds.
 require("content.old_knife_sounds")
--- Options > Mod settings: critical hits can play the DE critical sound.
-require("content.critical_sound")
 -- Options > Mod settings: story fights can use the Special Edition locations.
 require("content.se_locations")
+-- Owner battle previews (2026-11) for single fights that share a stage picture.
+require("content.battle_previews")
 -- Per-save difficulty: Easy, Medium (DE128 as designed), Hard and Very Hard.
 require("content.difficulty")
 -- Sensei story: guard templates and RaidCharge availability are synthesized from

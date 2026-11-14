@@ -27,3 +27,28 @@ for _, stage in ipairs(stages) do
         setting = se_locations,
     }
 end
+
+-- The owner's Special Edition battle previews (core <atlas>_se.<member>, 2026-11 drop), shown
+-- on the map while the same switch is on.
+local se_previews = {
+    "preview_bosses.butcher", "preview_bosses.hermit", "preview_bosses.huntress", "preview_bosses.samurai",
+    "preview_bosses.titan", "preview_bosses.wasp",
+    "preview_main.autumn", "preview_main.bamboo_grove", "preview_main.battlefield", "preview_main.castle_and_bridge",
+    "preview_main.cave", "preview_main.dark_room", "preview_main.emerald_forest", "preview_main.flowers_field",
+    "preview_main.flying_rocks", "preview_main.graveyard_ships", "preview_main.heaven", "preview_main.ice_cave",
+    "preview_main.lamps_on_water", "preview_main.mountain", "preview_main.night_bridge", "preview_main.pink_lake",
+    "preview_main.ruins_village", "preview_main.sakura", "preview_main.shadow_gate", "preview_main.snowy_peak",
+    "preview_main.swamp", "preview_main.volcano", "preview_main.waterfall",
+    "preview_main_i.capsules", "preview_main_i.eggs", "preview_main_i.factory", "preview_main_i.spaceship",
+    "preview_main_i.stone_forest",
+    "preview_start.arena", "preview_start.lynx",
+}
+
+for _, preview in ipairs(se_previews) do
+    local atlas, member = preview:match("^([^.]+)%.(.+)$")
+    sf2.battles.replace_preview {
+        preview = preview,
+        replacement = atlas .. "_se." .. member,
+        setting = se_locations,
+    }
+end

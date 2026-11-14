@@ -12,8 +12,9 @@ end
 -- RangedHeavyPlayer's Uninterrupt window covers the whole move in the game's moves.xml
 -- (expected = {}: no start, no end); the archive ends it at sample 40. The sound frame is
 -- in game frames:
--- ShopRangedTryOnHeavyPlayer starts at sample 3 with 3 frames per sample, so sample 18
--- is frame 48 and sample 16 is frame 42.
+-- ShopRangedTryOnHeavyPlayer starts at sample 3 with 2 frames per sample (the speed of
+-- RangedHeavyPlayer and the thrown chakram), so sample 18 is frame 32 and sample 16 is
+-- frame 28.
 sf2.moves.patch {
     move = "RangedHeavyPlayer",
     windows = { change = { uninterruptible = { expected = {}, value = { to_sample = 40 } } } },
@@ -24,5 +25,5 @@ sf2.moves.patch {
 }
 sf2.moves.patch {
     move = "ShopRangedTryOnHeavyPlayer",
-    sound_frame = { name = "snd_disk", expected = 48, value = 42 },
+    sound_frame = { name = "snd_disk", expected = 32, value = 28 },
 }

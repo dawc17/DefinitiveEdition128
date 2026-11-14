@@ -27,9 +27,10 @@ local function avatar(name)
     return name
 end
 
--- Only the pvp arena previews are absent from core; preview_main.* stays native.
+-- Each act has the owner's own preview (2026-11, sprites/sensei/act<n>); the pvp arena
+-- previews are absent from core; preview_main.* stays native.
 local function preview(name)
-    if name:find("^preview_pvp_") then return sf2.assets.sprite("sprites/sensei/" .. name) end
+    if name:find("^act%d$") or name:find("^preview_pvp_") then return sf2.assets.sprite("sprites/sensei/" .. name) end
     return name
 end
 

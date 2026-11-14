@@ -140,16 +140,26 @@ local function roll(seed, fight_id, enemy, tier)
     return perks
 end
 
+-- Old Wounds: Sensei opponents lose their shift (content.sensei_balance); the save's difficulty still applies on top.
+local sensei_strength = require("content.sensei_balance").strength
+
+-- Fight strength stays within what on_prepare accepts (0.25..8).
+local function clamp_strength(value)
+    return math.max(0.25, math.min(8, value))
+end
+
 sf2.battles.on_prepare(function(fight)
+    local even = sensei_strength(fight.id)
     local tier = TIERS[sf2.saves.get(OPTION)]
-    if tier == nil then return nil end
+    if tier == nil then return even ~= 1 and { strength = clamp_strength(even) } or nil end
     -- The arrow shows the save's difficulty in every fight, the dojo's sparring included;
     -- the fights the difficulty leaves alone get only the arrow.
     if fight.mode == "dojo" or fight.underworld or UNCHANGED[fight.mode] then
-        return { arrow_color = tier.arrow }
+        return { arrow_color = tier.arrow, strength = even ~= 1 and clamp_strength(even) or nil }
     end
-    if fight.preview then return { strength = tier.strength, minimum_ratio = tier.minimum_ratio } end
-    local plan = { round_time = tier.round_time, strength = tier.strength, minimum_ratio = tier.minimum_ratio,
+    local strength = clamp_strength((tier.strength or 1) * even)
+    if fight.preview then return { strength = strength, minimum_ratio = tier.minimum_ratio } end
+    local plan = { round_time = tier.round_time, strength = strength, minimum_ratio = tier.minimum_ratio,
         ai = tier.ai, ai_add = tier.ai_add, arrow_color = tier.arrow }
     if tier.enchantments then
         local seed, enemies = sf2.saves.seed(), {}

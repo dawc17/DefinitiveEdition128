@@ -1,5 +1,6 @@
 local sf2 = require("sf2")
 local words = require("content.text")
+local shop_groups = require("content.shop_groups")
 
 -- Every mythical five-piece set is sold as one chest, the way DE sold the Monk, Sentinel,
 -- Neo-wanderer and Chronos sets. A chest unlocks at the level its set belongs to and costs
@@ -96,7 +97,7 @@ local function register()
             description = words.own("chest." .. chest.id .. ".description", chest.text),
             icon = chest.icon and sf2.assets.sprite("core:UI/Items/" .. chest.icon)
                 or sf2.assets.sprite("sprites/chests/placeholder"),
-            shop = { level = chest.level, group = chest.group, price = { gems = chest.gems } },
+            shop = { level = chest.level, group = shop_groups.game(chest.group), price = { gems = chest.gems } },
             contents = contents,
         }
     end

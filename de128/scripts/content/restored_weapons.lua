@@ -31,7 +31,7 @@ for _, row in ipairs(definitions) do
         shop = { level = row[6], price = { gems = row[7] } },
     }
     sf2.items.patch {
-        item = item, required_group = row[8], minimum_level = row[6],
+        item = item, required_group = require("content.shop_groups").game(row[8]), minimum_level = row[6],
         enchantments = { { perk = sf2.perks.get("core:perks/PERK_ITEM_SPECIAL_" .. row[9] .. "_WEAPON"), aspect = row[10] } },
     }
     weapons[row[1]] = item
