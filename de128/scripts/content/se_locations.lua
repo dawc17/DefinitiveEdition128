@@ -52,3 +52,6 @@ for _, preview in ipairs(se_previews) do
         setting = se_locations,
     }
 end
+
+-- Other modules gate their own Special Edition art on the same switch.
+return { setting = se_locations }

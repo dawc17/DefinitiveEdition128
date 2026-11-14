@@ -72,6 +72,24 @@ local TIERS = {
 -- Fight kinds left as they are. The Underworld is excluded separately.
 local UNCHANGED = { tutorial = true, raid = true, other = true }
 
+-- May (C3_FightWithMay and its Eclipse twin, before Titan) always plays at Medium, with the
+-- native arrow, whatever the save's difficulty (Seby, 2026-11-14).
+local function always_medium(id)
+    return tostring(id):lower():find("c3_fightwithmay", 1, true) ~= nil
+end
+
+-- DE64 banned these perks against May because their drains and returned damage ignore armour.
+-- Here they are allowed, but against her that damage goes through her body armour like a
+-- weapon hit (Seby, 2026-11-14). Enchantment variants (the Damage Return helm and armour
+-- perks) count through their template.
+local MAY_ARMORED_AGAINST = {}
+for i, name in ipairs({ "PERK_CORDYCEPS_FUNGUS_SET", "PERK_ITEM_SPECIAL_DAMAGE_RETURN", "PERK_ROCK",
+    "PERK_TIME_SHIFT_SET_TIME_SHIFTER", "PERK_WARLOCK_SET_CURSE", "PERK_SENTINEL_SET_SUPER_RETURN",
+    "PERK_SKANDA_SET_KARMA" }) do
+    MAY_ARMORED_AGAINST[i] = sf2.perks.get("core:perks/" .. name)
+end
+local MAY_PLAN = { armored_against = MAY_ARMORED_AGAINST }
+
 -- Enchantments each slot can hold, by type. One enemy never gets the same type twice.
 -- Damage Return is left out on purpose (Seby, 2026-11-10).
 local POOLS = {
@@ -149,6 +167,7 @@ local function clamp_strength(value)
 end
 
 sf2.battles.on_prepare(function(fight)
+    if always_medium(fight.id) then return MAY_PLAN end
     local even = sensei_strength(fight.id)
     local tier = TIERS[sf2.saves.get(OPTION)]
     if tier == nil then return even ~= 1 and { strength = clamp_strength(even) } or nil end

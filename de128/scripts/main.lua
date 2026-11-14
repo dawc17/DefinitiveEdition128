@@ -55,6 +55,8 @@ require("content.avatar_changer")
 require("content.old_knife_sounds")
 -- Options > Mod settings: story fights can use the Special Edition locations.
 require("content.se_locations")
+-- Options > Mod settings: eight tracks can play their Special Edition versions (off by default).
+require("content.se_music")
 -- Owner battle previews (2026-11) for single fights that share a stage picture.
 require("content.battle_previews")
 -- Per-save difficulty: Easy, Medium (DE128 as designed), Hard and Very Hard.

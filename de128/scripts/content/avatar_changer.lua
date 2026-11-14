@@ -15,11 +15,13 @@ sf2.profile.avatar_picker {
         { avatar = "avatar_hero", name = words.get("NAME_SHADOW") },
         { avatar = "avatar_masked", name = words.get("de128.avatar_changer.masked") },
         { avatar = "avatar_human", name = words.get("de128.avatar_changer.human") },
-        -- The five fights before the Titan himself (c3_boss_titan/1-5).
-        { avatar = "character_assasin", name = words.get("characterAssasin") },
-        { avatar = "character_master", name = words.get("characterMaster") },
-        { avatar = "character_guru", name = words.get("characterGuru") },
-        { avatar = "character_corsair", name = words.get("characterCorsair") },
-        { avatar = "character_emperor", name = words.get("characterEmperor") },
+        -- The five fights before the Titan himself (c3_boss_titan/1-5). A bodyguard's portrait
+        -- also takes the bodyguard's name on the fight HUD (Seby, 2026-11-14); the Shadow
+        -- portraits above give the player's own name back.
+        { avatar = "character_assasin", name = words.get("characterAssasin"), rename = true },
+        { avatar = "character_master", name = words.get("characterMaster"), rename = true },
+        { avatar = "character_guru", name = words.get("characterGuru"), rename = true },
+        { avatar = "character_corsair", name = words.get("characterCorsair"), rename = true },
+        { avatar = "character_emperor", name = words.get("characterEmperor"), rename = true },
     },
 }
