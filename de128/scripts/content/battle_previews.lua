@@ -27,6 +27,13 @@ local MAY = { preview = "preview_fights.may", challenger = words.read("de128.bat
 local se_locations = require("content.se_locations").setting
 local ACT3_SE = sf2.assets.sprite("sprites/sensei/act3_se")
 local ACT3 = { ["de128:battles/sensei_act_3_normal"] = true, ["de128:battles/sensei_act_3_eclipse"] = true }
+-- Four Challengers fight on stages the same switch swaps (mountain, sakura, pink_lake,
+-- waterfall); Seby's pictures of them on the Special Edition stage (2026-11-15) show with it.
+-- Fisher, Outcast and Nova keep theirs. The battles come from content.challengers.
+local CHALLENGERS_SE = {}
+for _, key in ipairs({ "trickster", "hawk", "rose", "ronin" }) do
+    CHALLENGERS_SE["de128:battles/challenger_" .. key] = sf2.assets.sprite("sprites/challenger/preview_" .. key .. "_se")
+end
 local TITAN = {
     ["core:battles/zone_7/c3_boss_titan"] = { may = "core:fights/zone_7/c3_fightwithmay/1" },
     ["core:battles/zone_7/c3_boss_titan_eclipsemode"] = { may = "core:fights/zone_7/c3_fightwithmay_eclipsemode/1", replayable = true },
@@ -34,6 +41,8 @@ local TITAN = {
 
 sf2.battles.on_preview(function(battle)
     if ACT3[battle.id] then return sf2.settings.get(se_locations) and ACT3_SE or nil end
+    local challenger = CHALLENGERS_SE[battle.id]
+    if challenger then return sf2.settings.get(se_locations) and challenger or nil end
     local titan = TITAN[battle.id]
     if titan == nil or battle.fight == nil then return nil end
     if battle.index <= 5 then return "preview_fights.titan_bodyguards" end

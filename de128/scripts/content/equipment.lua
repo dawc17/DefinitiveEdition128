@@ -23,6 +23,15 @@ sf2.items.patch {
     borrowable = false,
 }
 
+-- Nor the story bosses' weapons, the ones the SE dojo shows on its stands (Seby, 2026-11-15).
+for _, name in ipairs({
+    "weapon_lynx_claws", "weapon_lynx_claws_paid", "weapon_butcher_knives", "weapon_butcher_knives_paid",
+    "weapon_widow_fans", "weapon_wasp_naginata", "weapon_shogun_katana",
+    "weapon_hermit_swords", "weapon_hermit_swords_paid", "weapon_titan_giant_sword",
+}) do
+    sf2.items.patch { item = sf2.items.get("core:items/weapon/" .. name), borrowable = false }
+end
+
 -- The final Eclipse Titan reward configures the level and Lifesteal on acquisition.
 -- Equipment remains unlisted and has no purchase price.
 return { titans_desolator = desolator }
