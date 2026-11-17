@@ -59,7 +59,7 @@ local special_recipes = {
     { id = "abilities_1", text = "forgeRecipeAbilities", perks = { "shadow_cloak", "hermit_storm", "earthquake", "wasp_fly" } },
     { id = "abilities_2", text = "forgeRecipeAbilities2", perks = { "teleportation", "assistants", "rat_wave", "war_whirl" } },
     { id = "abilities_3", text = "forgeRecipeAbilities3",
-        perks = { "lightning_chain", "fear_ray", "power_field", "grasp_of_darkness" } },
+        perks = { "lightning_chain", "power_field" } },
 }
 for _, recipe in ipairs(special_recipes) do
     local items, candidates = {}, {}

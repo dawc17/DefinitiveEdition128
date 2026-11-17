@@ -94,16 +94,14 @@ local function install(underworld)
         rat_wave = young("Man_Arkhos"),
         war_whirl = young("Girl_Drakaina"),
         lightning_chain = young("Man_Dandy"),
-        fear_ray = young("Man_Tenebris"),
         power_field = young("Cyborg_Gatekeeper"),
-        grasp_of_darkness = young("Girl_Blackness"),
     }
 
     local abilities = require("content.boss_abilities").perks
     local recipe_perks = {
         abilities_1 = { "shadow_cloak", "hermit_storm", "earthquake", "wasp_fly" },
         abilities_2 = { "teleportation", "assistants", "rat_wave", "war_whirl" },
-        abilities_3 = { "lightning_chain", "fear_ray", "power_field", "grasp_of_darkness" },
+        abilities_3 = { "lightning_chain", "power_field" },
     }
     for id, keys in pairs(recipe_perks) do
         for _, key in ipairs(keys) do
