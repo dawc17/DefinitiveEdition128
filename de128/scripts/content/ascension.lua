@@ -66,7 +66,7 @@ for step = 1, 5 do
     -- The fight ID is <battle id>_<name>: ascension_trial_<step>.
     fight_specs[step] = {
         name = "trial_" .. step, power = 0,
-        rounds = 1, round_time = 150, replays = 1, location = "core:locations/statue", music = "halls_of_the_dead_heroes",
+        rounds = 1, round_time = 150, replays = 1, location = "core:locations/statue", music = "fight34_halls_of_the_dead_heroes",
         description = overview, opponents = { opponents[step][1] },
         rules = trial.base, rewards = { [0] = { items = {} }, [1] = { items = {} } },
     }
@@ -74,7 +74,7 @@ end
 local battle = sf2.battles.register {
     id = "ascension", page = zone, x = -374, y = 50,
     title = title, description = overview, icon = "ascension",
-    preview = "preview_main.statue", location = "core:locations/statue", music = "halls_of_the_dead_heroes",
+    preview = "preview_main.statue", location = "core:locations/statue", music = "fight34_halls_of_the_dead_heroes",
     fights = fight_specs,
 }
 local fights = battle.fights

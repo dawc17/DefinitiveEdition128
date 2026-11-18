@@ -441,10 +441,12 @@ sf2.perks.patch { perk = perks.shadow_cloak, recharge_indicator = { flags = { cl
 -- Bosses carrying other core perks get DE's icons too.
 -- Smoke-bomb invisibility (Lynx, Puppeteer): the core perk's recharge flag, and greyed while
 -- invisible, as above. DE's PERK_INVISIBILITY names only IconInvisibility; the _Red twin
--- marks the recharge, as for the abilities above.
+-- marks the recharge, as for the abilities above. Shown on the player's side only: on an
+-- opponent the icons would give away when it is cloaked or can cloak again.
 sf2.perks.patch { perk = sf2.perks.get("core:perks/PERK_INVISIBILITY"),
     recharge_indicator = { flags = { "InvisibilityRecharge", "Invisibility" },
-        ready = skill("IconInvisibility"), cooldown = skill("IconInvisibility_Red") } }
+        ready = skill("IconInvisibility"), cooldown = skill("IconInvisibility_Red") },
+    opponent_icons = false }
 -- Titan's shield: down while the core perk's timed CooldownIcon lasts (after each blocked hit
 -- and at the start of the round). DE's ShieldIcon and CooldownIcon pictures.
 sf2.perks.patch { perk = sf2.perks.get("core:perks/PERK_TITANS_SHIELD"),

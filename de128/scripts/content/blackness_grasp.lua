@@ -2,7 +2,9 @@ local sf2 = require("sf2")
 local abilities = require("content.boss_abilities")
 
 -- The archived Grasp casts a hidden BlackHand, then tells that same child to
--- enter its attacking phase eight frames later. Keep the full native graph.
+-- enter its attacking phase eight samples later. Keep the full native graph, except
+-- that the hand starts its attack on its own: the cast's PlayAnimation was lost when
+-- the caster was hit between the two, leaving the hand lingering without a strike.
 
 local hand_item = sf2.items.get("core:items/magic/MAGIC_ACID_CLOUD")
 -- Spawned Eclipse actors carry the two hidden items but not parent perk slots;
@@ -20,6 +22,10 @@ end
 -- Frames: hand_attack starts at sample 3 with 5 frames per sample (sample 7 is frame 25,
 -- sample 12 is frame 50); hand_start and the cast start at sample 2 with 3 frames per
 -- sample (sample 3 is frame 6, 6 is 15, 9 is 24, 17 is 48, and the cast's sample 39 ends on frame 116).
+-- The cast creates the hand on its frame 24 and the native cast played the attack on its frame
+-- 48, so the hand waits 24 frames: its GraspHandWait window covers frames 0 to 23 and the
+-- attack starts when that window ends, whatever happens to the caster meanwhile.
+local HAND_WAIT = "GraspHandWait"
 local hand_attack = sf2.moves.register {
     id = "blackness_grasp_hand_attack",
     animation = sf2.assets.binary("animations/magic_empty"),
@@ -27,6 +33,7 @@ local hand_attack = sf2.moves.register {
     frames_per_sample = 5, first_sample = 3, last_sample = 14, priority = 500,
     no_interpolation_frames = true, no_magic_recharge = true,
     align = { axes = { "x", "z" }, pivot = { animation = true }, position = { animation = "self" } },
+    events = { { interval_end = HAND_WAIT } },
     when = {
         animation = "de128:moves/blackness_grasp_hand_start",
         actor = "BlackHand",
@@ -54,6 +61,7 @@ local hand_start = sf2.moves.register {
     face = "with_parent",
     when = { actor = "BlackHand" },
     only_for = hand_only_for,
+    windows = { [HAND_WAIT] = { to = 23 } },
     on = {
         [6] = { effect = {
             name = "BlackHandEFX", core_sequence = "mgc_effect_black_hand",
@@ -82,11 +90,11 @@ local cast = sf2.moves.register {
     tactic_when = { distance = { axis = "x", min = 450, from = { pivot = "self" }, to = { node = "pelvis", of = "enemy" } } },
     windows = { uninterruptible = { to = 116 } },
     on = {
+        -- The hand moves into hand_attack by itself 24 frames later (frame 48 of this cast).
         [24] = { projectile = {
             name = "BlackHand", core_skeleton = "SkeletonMagic", item = hand_item,
             start = hand_start,
         } },
-        [48] = { play = hand_attack, target = "child", child = "BlackHand" },
     },
 }
 

@@ -43,4 +43,19 @@ for _, item in ipairs { form, helm, harpoon, mind_throw } do
     sf2.items.patch { item = item, borrowable = false }
 end
 
+-- Titan's Mind Throw is the game's MindThrowPlayer, which only Titan's sword unlocks (an item
+-- lock on WEAPON_TITAN_GIANT_SWORD or WEAPON_DESOLATOR by name). DE128's reward Desolator is
+-- its own item, so it is added beside that sword: the player can cast the Mind Throw only while
+-- holding the Desolator. Titan himself keeps the game's sword and lock. The game's and DE's
+-- MAGIC_MIND_THROW carry the MindThrow perk, which starts the throw's second phase
+-- (MindThrowPlayer2); the reward copy carries it too.
+sf2.moves.patch {
+    move = "MindThrowPlayer",
+    item_locks = { add = { {
+        source_item = "core:items/weapon/WEAPON_TITAN_GIANT_SWORD",
+        item = require("content.equipment").titans_desolator,
+    } } },
+}
+sf2.items.patch { item = mind_throw, perks = { { perk = sf2.perks.get("core:perks/MindThrow") } } }
+
 return { form = form, helm = helm, harpoon = harpoon, mind_throw = mind_throw }

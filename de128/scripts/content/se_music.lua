@@ -13,16 +13,16 @@ local se_music = sf2.settings.toggle {
     default = false,
 }
 
--- The game's track name (as stages and fights give it) and the SE file under audio/se_music.
+-- The game's track file name (as stages and fights give it) and the SE file under audio/se_music.
 local tracks = {
     { music = "fight37_Titan_Epic_Fight", file = "titan_epic_fight_se" },
-    { music = "black_warrior", file = "black_warrior_se" },
-    { music = "burning_town", file = "burning_town_se" },
-    { music = "heavenly_clouds", file = "heavenly_clouds_se" },
-    { music = "old_sensei", file = "old_sensei_se" },
-    { music = "shadow_lady", file = "shadow_lady_se" },
-    { music = "ship_battle", file = "ship_battle_se" },
-    { music = "sparring", file = "sparring_se" },
+    { music = "fight10_black_warrior", file = "black_warrior_se" },
+    { music = "fight23_burning_town", file = "burning_town_se" },
+    { music = "fight22_heavenly_clouds", file = "heavenly_clouds_se" },
+    { music = "fight13_old_sensei", file = "old_sensei_se" },
+    { music = "fight15_shadow_lady", file = "shadow_lady_se" },
+    { music = "fight14_ship_battle", file = "ship_battle_se" },
+    { music = "fight6_sparring", file = "sparring_se" },
 }
 
 for _, track in ipairs(tracks) do
