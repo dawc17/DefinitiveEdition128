@@ -26,32 +26,38 @@ local METER_COLOR = "#FF7A1A"
 
 local kinds = { "ranged", "magic", "crit", "throw", "kick", "super", "dodge" }
 
--- Aura art: 400x400 px sprites, played start -> loop -> end by swapping the marker's sprite.
+-- Aura art (Seby, 2026-11-19): the phoenix aura with the phoenix bird inside it, both centred on
+-- the body. 800x800 px pictures drawn 400 units square; each layer plays start -> loop -> end by
+-- swapping its marker's sprite, with its own frame counts.
 local SIZE = 400
 local STEP = 3                            -- ticks per art frame
-local function frames(name, count)
+local function frames(art, name, count)
     local list = {}
     for index = 1, count do
-        list[index] = sf2.assets.sprite(string.format("sprites/searing_aura/mgc_fenix_aura_effect_%s_%02d", name, index))
+        list[index] = sf2.assets.sprite(string.format("sprites/searing_aura/mgc_fenix_%s_effect_%s_%02d", art, name, index))
     end
     return list
 end
-local start_frames, loop_frames, end_frames = frames("start", 3), frames("loop", 10), frames("end", 4)
+-- Drawn in this order: the bird over the aura.
+local LAYERS = {
+    { start = frames("aura", "start", 3), loop = frames("aura", "loop", 10), finish = frames("aura", "end", 4) },
+    { start = frames("bird", "start", 5), loop = frames("bird", "loop", 10), finish = frames("bird", "end", 4) },
+}
 
-local function aura_sprite(phase, tick)
+local function layer_sprite(layer, phase, tick)
     local index = math.floor(tick / STEP)
     if phase == 1 then
-        if index < #start_frames then return start_frames[index + 1] end
-        return loop_frames[(index - #start_frames) % #loop_frames + 1]
+        if index < #layer.start then return layer.start[index + 1] end
+        return layer.loop[(index - #layer.start) % #layer.loop + 1]
     end
-    return end_frames[index + 1]          -- nil once the end frames are done
+    return layer.finish[index + 1]        -- nil once the end frames are done
 end
 
-local marker                              -- aura marker handle; art only, not saved state
+local markers = {}                        -- marker handle per layer; art only, not saved state
 
 local function drop_marker()
-    if marker then sf2.world.remove_marker(marker) end
-    marker = nil
+    for _, marker in pairs(markers) do sf2.world.remove_marker(marker) end
+    markers = {}
 end
 
 local function has_interval(animation, kind)
@@ -103,20 +109,38 @@ end
 local function draw_aura(self, fighter, view)
     local s = self.state
     if s.aura_phase == 0 then return end
-    local sprite = aura_sprite(s.aura_phase, s.aura_tick)
-    if not sprite then
+    local sprites, any = {}, false
+    for index, layer in ipairs(LAYERS) do
+        sprites[index] = layer_sprite(layer, s.aura_phase, s.aura_tick)
+        any = any or sprites[index] ~= nil
+    end
+    if not any then
         drop_marker()
         s.aura_phase = 0
         return
     end
     s.aura_tick = s.aura_tick + 1
-    -- Positions are at the feet, y down: the art is centered on the body.
-    local position = view.self.position
-    local rect = { x = position.x - SIZE / 2, y = position.y - SIZE, width = SIZE, height = SIZE }
-    if marker and sf2.world.is_marker_active(marker) then
-        sf2.world.try_set_marker(marker, { rect = rect, sprite = sprite })
-    else
-        marker = fighter:mark_sprite(sprite, rect)
+    -- Centred on the player's body: the markers follow the stomach node (x and y are measured
+    -- from it), through crouches, jumps and knockdowns.
+    local rect = { x = -SIZE / 2, y = -SIZE / 2, width = SIZE, height = SIZE }
+    -- A lost marker redraws both, aura first, so the bird stays on top.
+    for index in ipairs(LAYERS) do
+        if sprites[index] and not (markers[index] and sf2.world.is_marker_active(markers[index])) then
+            drop_marker()
+            break
+        end
+    end
+    for index in ipairs(LAYERS) do
+        local sprite, marker = sprites[index], markers[index]
+        if not sprite then
+            if marker then sf2.world.remove_marker(marker) end
+            markers[index] = nil
+        elseif marker then
+            sf2.world.try_set_marker(marker, { rect = rect, sprite = sprite })
+        else
+            markers[index] = fighter:mark_sprite(sprite,
+                { node = "stomach", x = rect.x, y = rect.y, width = rect.width, height = rect.height })
+        end
     end
 end
 

@@ -7,11 +7,16 @@ local sf2 = require("sf2")
 --   AirPunch               Down-Forward + Punch
 --   ThrowLegPush           Back + Kick (or Forward + Punch facing a wall) in throw range
 -- plus the throw's victim, stand-up and profile-preview moves.
+-- moves.xml gives Wall Run High Punch's picture in the profile's move list; Seby drew it its own
+-- (sprites/moves/wall_run, from Tools/Recovery/ImportDE128AbilityIcons.py).
+local profile_icons = {
+    WallRunUp = { expected = "Trick5.high_punch", value = sf2.assets.sprite("sprites/moves/wall_run") },
+}
 for _, move in ipairs({
     "FrontJumpScissorsKick", "AxeKickOld", "WallRunUp", "AirPunch",
     "ThrowLegPush", "ThrowLegPushV", "StandupAfterLegFall", "ThrowLegPushProfile", "ThrowLegPushVProfile",
 }) do
-    sf2.moves.patch { move = move, enable = true }
+    sf2.moves.patch { move = move, enable = true, profile_icon = profile_icons[move] }
 end
 
 -- The second Kick of a double kick reaches Wall Run while BackKick is outside Uninterrupt

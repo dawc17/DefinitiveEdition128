@@ -58,6 +58,8 @@ local abilities = require("content.boss_abilities").perks
 local special_recipes = {
     { id = "abilities_1", text = "forgeRecipeAbilities", perks = { "shadow_cloak", "hermit_storm", "earthquake", "wasp_fly" } },
     { id = "abilities_2", text = "forgeRecipeAbilities2", perks = { "teleportation", "assistants", "rat_wave", "war_whirl" } },
+    -- lightning_chain is DE128's own Lightning Chain special (content.lightning_chain) under
+    -- the old enchantment's ID, so forged and saved Lightning Chain pieces carry the new special.
     { id = "abilities_3", text = "forgeRecipeAbilities3",
         perks = { "lightning_chain", "power_field" } },
 }

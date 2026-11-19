@@ -8,4 +8,5 @@ return {
     teleportation = require("content.special_teleportation"),
     rat_wave = require("content.special_rat_wave"),
     assistants = require("content.special_assistants"),
+    lightning_chain = require("content.special_lightning_chain"),
 }

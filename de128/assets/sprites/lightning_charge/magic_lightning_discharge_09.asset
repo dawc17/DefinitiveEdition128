@@ -1,0 +1,3 @@
+type=sprite
+texture=textures/lightning_charge/magic_lightning_discharge_09.png
+pixels_per_unit=100

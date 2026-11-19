@@ -16,20 +16,23 @@ local STACK = 9
 --   iron_skin   removes IRON_SKIN of the damage the player takes,   } for SECONDS of fight time,
 --   fury        multiplies the player's damage by FURY,             } from the start of the
 --   clear_mind  lifts the seal's rule (the seal's rule-free phase). } next seal.
--- Words: de128.uw_seals.elixir.<text>.name and .description in Eclipse's English text.
+-- They carry the names and pictures of the original game's elixirs (owner, 2026-11-19), though
+-- their effects are DE128's: `vanilla` is the game's text key for the name (Healing Vine, Crag,
+-- The Explosive Vigor, Star Clarity). Words: de128.uw_seals.elixir.<text>.name, .description and
+-- .short in Eclipse's English text.
 local ELIXIRS = {
-    { id = "healing_elixir", text = "healing", effect = "heal", coins = 300 },
-    { id = "iron_skin_elixir", text = "iron_skin", effect = "iron_skin", coins = 450 },
-    { id = "fury_elixir", text = "fury", effect = "fury", coins = 450 },
-    { id = "clear_mind_elixir", text = "clear_mind", effect = "clear_mind", coins = 600 },
+    { id = "healing_elixir", text = "healing", vanilla = "PotionLife", effect = "heal", coins = 300 },
+    { id = "iron_skin_elixir", text = "iron_skin", vanilla = "PotionRock", effect = "iron_skin", coins = 450 },
+    { id = "fury_elixir", text = "fury", vanilla = "PotionBomb", effect = "fury", coins = 450 },
+    { id = "clear_mind_elixir", text = "clear_mind", vanilla = "PotionResistance", effect = "clear_mind", coins = 600 },
 }
 local HEAL = 0.3
 local IRON_SKIN = 0.5
 local FURY = 1.3
 local SECONDS = 10
 
--- Icons: the raid consumable flask (core RaidConsumables.empty_consumable1) tinted per elixir,
--- in assets/textures/elixirs.
+-- Icons: the game's raid potion pictures (RaidItems3.potion_life, potion_rock, potion_blood_bomb,
+-- potion_resistance) in assets/textures/elixirs, from Tools/Recovery/ImportDE128ElixirIcons.py.
 local candidates = {}
 for index, elixir in ipairs(ELIXIRS) do
     local key = "de128.uw_seals.elixir." .. elixir.text
@@ -39,7 +42,7 @@ for index, elixir in ipairs(ELIXIRS) do
     elixir.icon = sf2.assets.sprite("sprites/elixirs/" .. elixir.id)
     elixir.item = sf2.items.register {
         category = "consumable", id = elixir.id,
-        display_name = words.own("item." .. elixir.id, key .. ".name"),
+        display_name = words.own("item." .. elixir.id, elixir.vanilla),
         description = words.own("item." .. elixir.id .. ".description", key .. ".description"),
         icon = elixir.icon, stack = STACK,
         shop = { level = SHOP_LEVEL, price = { coins = elixir.coins } },

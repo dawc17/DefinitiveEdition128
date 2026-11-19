@@ -38,6 +38,8 @@ require("content.blackness_grasp")
 require("content.ability_magics")
 require("content.saturn_blaster")
 require("content.dandy_lightning_chain")
+-- The player's Lightning Chain special: its raid charge cast (bolts and numbers in content.lightning_chain).
+require("content.lightning_chain_cast")
 require("content.shop")
 require("content.underworld_equipment")
 require("content.titan_reward_equipment")

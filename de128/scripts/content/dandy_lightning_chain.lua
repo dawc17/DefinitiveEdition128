@@ -4,11 +4,8 @@ local abilities = require("content.boss_abilities")
 -- Preserve the core caster identity: its CreatePlayer action and five linked
 -- native chain phases already match the reviewed DE graph. The game's moves.xml already
 -- gives the caster the DE RaidCharge input, priority 200 and an Uninterrupt window from 0.
-sf2.moves.patch {
-    move = "LightingChainPlayer",
-    when = { not_mod = abilities.ready("lightning_chain") },
-}
-abilities.extend_lock("lightning_chain", "LightingChainPlayer")
+-- The caster stays Dandy's (the core perk's) only: the player's Lightning Chain enchantment
+-- is DE128's own special now (content.lightning_chain and content.special_lightning_chain).
 
 -- Eclipse's spawned magic actor has its hidden HERMIT_STORM item but no parent
 -- perk slot. Keep the five linked native phases exclusive to LightningChain.

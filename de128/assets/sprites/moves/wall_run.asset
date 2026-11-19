@@ -1,0 +1,3 @@
+type=sprite
+texture=textures/moves/wall_run.png
+pixels_per_unit=200

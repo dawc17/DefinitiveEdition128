@@ -33,28 +33,41 @@ for _, track in ipairs(tracks) do
     }
 end
 
--- The dojo theme (Seby, 2026-11-16): Normal, Special Edition, Shades or Shades pt. 2. "menu" is the
--- track the dojo, map, shop and profile play; all three switches off keeps the normal theme, and
--- turning one on turns the others off.
-local dojo_themes = {
-    { id = "dojo_music_se", file = "se_music/dojo_se" },
-    { id = "dojo_music_shades", file = "dojo_music/dojo_shades" },
-    { id = "dojo_music_shades_2", file = "dojo_music/dojo_shades_2" },
+-- The dojo theme (Seby, 2026-11-16; one picker since 2026-11-19): Normal keeps the game's own
+-- theme; Special Edition, Shades and Shades pt. 2 each replace "menu", the track the dojo, map,
+-- shop and profile play. Up to 0.59.0 these were three switches that turned each other off; each
+-- choice names its old switch (from_switch), so a player who had one on starts on its choice.
+local themes = {
+    { id = "special_edition", file = "se_music/dojo_se", from_switch = "dojo_music_se" },
+    { id = "shades", file = "dojo_music/dojo_shades", from_switch = "dojo_music_shades" },
+    { id = "shades_2", file = "dojo_music/dojo_shades_2", from_switch = "dojo_music_shades_2" },
 }
-local registered = {}
-for _, theme in ipairs(dojo_themes) do
-    local switch = sf2.settings.toggle {
+
+local choices = {
+    { id = "normal", label = words.read("de128.dojo_theme.normal") },
+}
+for _, theme in ipairs(themes) do
+    choices[#choices + 1] = {
         id = theme.id,
-        label = words.read("de128." .. theme.id .. ".label"),
-        description = words.read("de128." .. theme.id .. ".description"),
-        group = "Audio",
-        default = false,
-        excludes = #registered > 0 and registered or nil,
+        label = words.read("de128.dojo_theme." .. theme.id),
+        from_switch = theme.from_switch,
     }
-    registered[#registered + 1] = switch
+end
+
+local dojo_theme = sf2.settings.choice {
+    id = "dojo_theme",
+    label = words.read("de128.dojo_theme.label"),
+    description = words.read("de128.dojo_theme.description"),
+    group = "Audio",
+    choices = choices,
+    default = "normal",
+}
+
+for _, theme in ipairs(themes) do
     sf2.assets.replace {
         music = "menu",
         replacement = sf2.assets.audio("audio/" .. theme.file),
-        setting = switch,
+        setting = dojo_theme,
+        choice = theme.id,
     }
 end
