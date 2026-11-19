@@ -71,11 +71,11 @@ require("content.sensei_story").install_default()
 -- the archived intro (after Lynx 2), toggle gating and the 32 bosses' dialogues.
 local raid_charge = require("content.sensei_raid_charge").register(require("content.sensei_raid_charge_state").create())
 local underworld = require("content.underworld").install(raid_charge)
--- Sealed Underworld bosses (Arkhos first): seals, Prepare, elixirs and Momentum; saves each
--- boss's seal after its fights. Its pre-fight menu opens from the boss's entry in underworld_story.
+-- Sealed Underworld bosses (every boss's normal fight): seals, Prepare, elixirs and Momentum;
+-- saves each boss's seal after its fights. The pre-fight menu opens from the boss's entry in
+-- underworld_story, or straight away for the six bosses without a story. The old Volcano
+-- prototype (content.underworld_phased) is no longer installed: Volcano's own fight is sealed.
 require("content.underworld_seals").install(underworld)
--- Prototype: Volcano rebuilt as a phased Eternal (four seals, one twist each).
-require("content.underworld_phased").install(underworld, raid_charge)
 require("content.underworld_story").install(underworld)
 -- Challengers: seven post-Titan duels whose first win grants the opponent's weapon.
 require("content.challengers").install(raid_charge)
