@@ -11,7 +11,9 @@ local raid_boss_abilities = require("content.raid_boss_abilities")
 -- starts: the boss cannot be hurt and waits, gathering himself, and a small Prepare button opens the
 -- game's Prepare screen (sf2.ui.prepare; the fight pauses) to put on an Armory loadout and drink
 -- elixirs. Breaking the last seal wins. The pre-fight screen is the game's challenge screen
--- (sf2.ui.challenge). Both screens are drawn by Eclipse in the shop's art; this module fills them.
+-- (sf2.ui.challenge), and the fight's result shows on Eclipse's results screen (sf2.ui.results:
+-- the seals as they ended, the rewards counted up with Momentum, the elixir drop) instead of the
+-- game's tally. All three are drawn by Eclipse in the shop's art; this module fills them.
 --
 -- Momentum: +10% coins, gems and experience for every seal broken since Prepare was last opened;
 -- the last seal counts when the boss falls. A loss or surrender keeps the seal reached on Easy and
@@ -52,7 +54,8 @@ local GLOW = { 0x7C, 0xFF, 0x8A }
 local function say(key) return words.read("de128.uw_seals." .. key) end
 local TEXT = {}
 for _, key in ipairs({ "hud.prepare", "prepare.title", "prepare.subtitle", "prepare.hint", "prepare.momentum",
-    "menu.subtitle", "menu.momentum", "menu.elixirs_hint" }) do
+    "menu.subtitle", "menu.momentum", "menu.elixirs_hint", "results.won", "results.lost", "results.won_subtitle",
+    "results.lost_kept", "results.lost_back", "results.won_note", "results.momentum" }) do
     TEXT[key] = say(key)
 end
 
@@ -251,17 +254,59 @@ local function tick_fight(fighter, tick)
     if run.bonus ~= run.bonus_set and fighter:set_reward_bonus(run.bonus) then run.bonus_set = run.bonus end
 end
 
+-- How many times the player has beaten the boss's sealed fight (the profile's own count, which
+-- includes wins from before the seals).
+local function victories(boss)
+    return boss.fight and sf2.profile.fight(boss.fight).wins or 0
+end
+
+-- The fight's result on Eclipse's results screen, in place of the game's tally: the seals as they
+-- ended (broken ones cracked), where the next visit starts, and the rewards with Momentum, which
+-- the host fills in. A surrender goes straight to the map as before.
+local function show_results(boss, seal, won)
+    local stages = {}
+    for index, stage in ipairs(boss.seals) do
+        local broken = won or index < seal
+        stages[index] = { name = stage.title, text = stage.hint,
+            icon = broken and stage.sprites.broken or stage.sprites.intact,
+            state = broken and "done" or (index == seal and "next" or "locked") }
+    end
+    local subtitle
+    if won then
+        subtitle = fill(TEXT["results.won_subtitle"], #boss.seals)
+    else
+        -- The same rule the battle_result handler saves.
+        local restart = GO_BACK[sf2.saves.get("difficulty")] and math.max(1, seal - 1) or seal
+        subtitle = restart == seal and fill(TEXT["results.lost_kept"], seal) or fill(TEXT["results.lost_back"], seal, restart)
+    end
+    -- Mod Lua has no pcall: a refusal is logged by the host and the game's tally shows instead.
+    sf2.ui.results({
+        title = won and TEXT["results.won"] or TEXT["results.lost"],
+        subtitle = subtitle,
+        portrait = boss.picture,
+        stages = stages,
+        bonus = TEXT["results.momentum"],
+        note = won and TEXT["results.won_note"] or nil,
+        -- The profile counts this fight's result after on_fight_end, so a win is added here.
+        victories = victories(boss) + (won and 1 or 0),
+    })
+end
+
 local function end_fight(fighter, event)
     if not run then return end
+    local won = event.player_result == "win"
     -- The last seal breaks with the boss and counts for Momentum too.
-    if event.player_result == "win" then fighter:set_reward_bonus(MOMENTUM * (run.streak + 1)) end
-    reached[run.boss.key] = run.seal
+    if won then fighter:set_reward_bonus(MOMENTUM * (run.streak + 1)) end
+    local boss, seal = run.boss, run.seal
+    reached[boss.key] = seal
     hold.held = false
     hold.cooldown = nil
     close_view(prepare)
     close_view(intermission)
     intermission = nil
     run = nil
+    -- Last, so a refused screen cannot leave the run behind.
+    show_results(boss, seal, won)
 end
 
 -- The round controller on the player: one per boss.
@@ -379,7 +424,8 @@ local function open_menu(boss, request)
         title = boss.name,
         subtitle = fill(TEXT["menu.subtitle"], #boss.seals),
         portrait = boss.picture,
-        bar = { value = boss.seals[next_seal].top, max = boss.bars, marks = boss.marks },
+        -- The hanko on the portrait: stamped once per win, an empty ring before the first.
+        victories = victories(boss),
         stages = stages,
         items = held,
         items_note = TEXT["menu.elixirs_hint"],
@@ -414,6 +460,7 @@ local function install(underworld)
         local fight = assert(underworld.by_battle[battle] and underworld.by_battle[battle]["1"],
             "Missing sealed Underworld fight " .. battle)
         by_fight[fight.id] = boss
+        boss.fight = fight.id
     end
     sf2.story.on("battle_result", function(event)
         local boss = by_fight[event.fight]
