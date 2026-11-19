@@ -1,0 +1,3 @@
+type=sprite
+texture=textures/elixirs/clear_mind_elixir.png
+pixels_per_unit=100

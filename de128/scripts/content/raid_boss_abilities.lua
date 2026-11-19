@@ -27,15 +27,21 @@ sf2.moves.patch {
 }
 abilities.extend_lock("fear_ray", "PerkFearRayPlayer")
 
-local function tactic(id, moves, initial, cooldown, advance_for_range)
+-- A sealed Underworld fight (content.underworld_seals) shares this table with its boss's tactic:
+-- while `held` is set the boss waits between seals, and `cooldown` (frames, or nil) replaces the
+-- tactic's own ability cooldown for the save's difficulty. Only tactics built `sealed` read it.
+local seal_hold = { held = false, cooldown = nil }
+
+local function tactic(id, moves, initial, cooldown, advance_for_range, sealed)
     return sf2.ai.name(sf2.ai.register {
         id = id, template = "Aggressive",
         on_decide = function(memory, event)
+            if sealed and seal_hold.held then return "wait" end
             local ready = event.frame >= initial and event.frame >= (memory.next_ability_frame or 0)
             local retreat, advance, attacks = nil, nil, {}
             for _, action in ipairs(event.actions) do
                 if ready and moves[action.name] then
-                    memory.next_ability_frame = event.frame + cooldown
+                    memory.next_ability_frame = event.frame + (sealed and seal_hold.cooldown or cooldown)
                     return action
                 end
                 if action.name == "StepBack" then retreat = action end
@@ -78,6 +84,11 @@ return {
     berstuuk = tactic("berstuuk_root_potion", { AbilityRootPotionPlayer = true }, 300, 600),
     arkhos = abilities.pace(tactic("arkhos_rat_wave", { RatWavePlayer = true }, 600, 600),
         "rat_wave", 600, 600, { "RatWavePlayer" }),
+    -- His sealed normal fight: the same Rat Wave, held between seals, its cooldown set by the
+    -- fight. The same cadence as above, so he keeps the same pacing icon.
+    arkhos_sealed = abilities.pace(tactic("arkhos_rat_wave_sealed", { RatWavePlayer = true }, 600, 600, false, true),
+        "rat_wave", 600, 600, { "RatWavePlayer" }),
     tenebris = abilities.pace(tactic("tenebris_fear_ray", { PerkFearRayPlayer = true }, 600, 600),
         "fear_ray", 600, 600, { "PerkFearRayPlayer" }),
+    seal_hold = seal_hold,
 }

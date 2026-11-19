@@ -35,6 +35,9 @@ function result.register()
     -- the Challenger keys whose weapon-drop dialog is still due, as ",key,key,".
     fields.challengers_revealed = false
     fields.challenger_drops_pending = ","
+    -- Sealed Underworld bosses (underworld_seals.lua): the seal each starts at next, as
+    -- ",boss_6=2,"; a boss at seal 1 is not listed. A new field takes its default on old saves.
+    fields.uw_seal_progress = ","
     sf2.state.register { version = 1, fields = fields }
     registered = true
 end

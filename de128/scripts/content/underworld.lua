@@ -17,6 +17,8 @@ local dandy_lightning_chain = require("content.dandy_lightning_chain")
 local raid_boss_abilities = require("content.raid_boss_abilities")
 local widow_teleportation = require("content.widow_teleportation")
 local boss_abilities = require("content.boss_abilities")
+local seals = require("content.underworld_seals")
+local elixirs = require("content.underworld_elixirs")
 
 -- Event-raid map buttons absent from core art ship as DE128 sprites.
 -- Every archived Underworld battle music id is supplied by DE128, including
@@ -281,16 +283,21 @@ local function install(raid_charge_rule)
                 for index, r in ipairs(fight_spec.rewards) do
                     local reward = { prize_base = r.prize_base, experience = r.experience,
                         gems = r.gems, currencies = r.currencies }
+                    -- Every Underworld win (the last slot) also drops one random elixir.
+                    if index > 1 and index == #fight_spec.rewards then reward.choices = elixirs.drop end
                     -- An empty reward is a missing key: the slot still exists and pays nothing.
                     if next(reward) then rewards[index - 1] = reward end
                 end
                 local rules = {}
                 for index, rule in ipairs(fight_spec.rules) do rules[index] = rule_table(rule) end
-                fight_specs[#fight_specs + 1] = {
+                local fight = {
                     name = fight_name, power = fight_spec.power, rounds = fight_spec.rounds,
                     round_time = fight_spec.round_time, replays = fight_spec.replays,
                     health_recovery = fight_spec.health_recovery, opponents = opponents, rules = rules, rewards = rewards,
                 }
+                -- A sealed boss's normal fight gets its seals (content.underworld_seals).
+                seals.apply(spec.name, fight, rule_table)
+                fight_specs[#fight_specs + 1] = fight
                 fight_ids[#fight_ids + 1] = { name = fight_spec.name, id = sf2.mod.id .. ":fights/" .. prefix }
             end
             local battle = sf2.battles.register {

@@ -3,6 +3,7 @@ local story = require("content.underworld_story_data")
 local text = require("content.underworld_text")
 local shared = require("content.sensei_state")
 local sensei_art = require("content.sensei_art")
+local seals = require("content.underworld_seals")
 
 -- The archived Underworld quests (RaidIntro, RaidIntro2 and the 32 RaidEnter/
 -- RaidWinAfter/RaidLoseAfter bosses; see Tools/GenerateDE128Underworld.py) as mod
@@ -93,16 +94,25 @@ local function install(underworld)
         assert(fights and fights["1"], "Missing Underworld story fight " .. boss .. "|1")
         local key = boss:lower()
         results[fights["1"].id] = key
+        -- A sealed boss (content.underworld_seals) has a pre-fight menu: after the entry below the
+        -- first time, at once on later visits. Its Fight button lets the fight go ahead.
+        local sealed = seals.menu(boss)
         -- RaidEnter<Boss>: once per profile, the exact entry is held until the Fight button.
         sf2.story.before_fight(fights["1"].handle, function(request)
-            if has("entered", key) then return true end
+            if has("entered", key) then
+                if sealed then return sealed(request) end
+                return true
+            end
             local last = sequences.enter[#sequences.enter]
             assert(last and last.launch, "Underworld entry must end with its Fight button")
             local opened = sf2.story.play_sequence {
                 steps = sequence_steps(sequences.enter),
                 on_step = function() return sf2.story.fight_pending(request) end,
                 on_complete = function()
-                    if sf2.story.resume_fight(request) then add("entered", key)
+                    if sealed then
+                        add("entered", key)
+                        if sf2.story.fight_pending(request) then sealed(request) end
+                    elseif sf2.story.resume_fight(request) then add("entered", key)
                     else sf2.story.cancel_fight(request) end
                 end,
                 on_cancel = function() sf2.story.cancel_fight(request) end,
