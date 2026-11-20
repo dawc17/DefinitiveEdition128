@@ -40,6 +40,8 @@ function result.register()
     fields.uw_seal_progress = ","
     -- The sequence the sealed bosses' seal rules are rolled from, every run (underworld_seals.lua).
     fields.uw_seal_rng = 40961
+    -- Each sealed boss's Seal Codex and best pact (underworld_meta.lua), as ",boss_6=<codex>:<pact>,".
+    fields.uw_meta = ","
     sf2.state.register { version = 1, fields = fields }
     registered = true
 end

@@ -62,4 +62,5 @@ return {
     iron_skin = IRON_SKIN,
     fury = FURY,
     frames = SECONDS * 60,
+    stack = STACK,
 }

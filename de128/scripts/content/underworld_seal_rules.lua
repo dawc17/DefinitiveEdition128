@@ -365,11 +365,21 @@ RULES.moonless = { art = "purple", native = {
 
 -- Dispatch ---------------------------------------------------------------------------------------
 
-local M = { rules = RULES, active = nil }
+-- active: the rule of the seal being fought; pacts: a set of rules on for the whole fight while a
+-- seal is (content.underworld_seals sets both).
+local M = { rules = RULES, active = nil, pacts = nil }
+
+local function on(name) return M.active == name or (M.pacts ~= nil and M.pacts[name] == true) end
+
+-- Lua rules that can be a pact: those with handlers (the others are built-in, phase-bound rules).
+M.pactable = {}
 
 local ORDER = {}
 for name in pairs(RULES) do ORDER[#ORDER + 1] = name end
 table.sort(ORDER)
+for _, name in ipairs(ORDER) do
+    if RULES[name].player or RULES[name].opponent then M.pactable[#M.pactable + 1] = name end
+end
 
 -- Handler state by side and rule, fresh every fight (and every round for round rules).
 local states = { player = {}, opponent = {} }
@@ -406,17 +416,19 @@ local function dispatcher(side)
             for _, name in ipairs(ORDER) do
                 local handler = RULES[name][side]
                 if handler and handler.on_tick then
-                    handler.on_tick(state(side, name), fighter, tick, M.active == name)
+                    handler.on_tick(state(side, name), fighter, tick, on(name))
                 end
             end
         end,
     }
     for _, event_name in ipairs(EVENTS) do
         definition[event_name] = function(_, fighter, event)
-            local name = M.active
-            local handler = name and RULES[name][side]
-            local callback = handler and handler[event_name]
-            if callback then callback(state(side, name), fighter, event) end
+            if not M.active and not M.pacts then return end
+            for _, name in ipairs(ORDER) do
+                local handler = RULES[name][side]
+                local callback = handler and handler[event_name]
+                if callback and on(name) then callback(state(side, name), fighter, event) end
+            end
         end
     end
     return definition

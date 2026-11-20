@@ -3,6 +3,7 @@ local words = require("content.text")
 local elixirs = require("content.underworld_elixirs")
 local raid_boss_abilities = require("content.raid_boss_abilities")
 local own_rules = require("content.underworld_seal_rules")
+local meta = require("content.underworld_meta")
 
 -- Phased Underworld bosses (Eclipse Docs/Engineering/Modding/UNDERWORLD_PHASED_BOSSES_PLAN.md).
 -- A boss's health is split into seals, later ones larger, and each seal is a fight phase with its
@@ -27,6 +28,12 @@ local own_rules = require("content.underworld_seal_rules")
 -- leaving the challenge screen does not roll again. Rolls draw on the saved uw_seal_rng sequence.
 -- A sealed fight registers every rule, each limited to its own fight phase (PHASES); the
 -- controller moves the fight to the phase of the seal's rule, or to RULELESS between seals.
+--
+-- Each run also rolls three pacts, Lua rules the player may take on for every seal from the
+-- challenge screen (levels 0-3, +25% rewards each, beside Momentum). On the challenge screen an
+-- Omen rerolls a seal or pact (its row pressed) and Seal Shards brew elixirs (a slot pressed); a
+-- fight gives a shard per seal broken and an Omen on a win, and its broken rules join the boss's
+-- Seal Codex (content.underworld_meta).
 
 -- Seal rules by name: rule, the description key of a rule group the Underworld's Power Mode
 -- fights use (content.underworld_data), copied for the seal; title, de128.uw_seals.rule.<name>;
@@ -131,6 +138,9 @@ local BOSSES = {
 
 local INTERMISSION = 300   -- frames between seals (5 s of fight time)
 local MOMENTUM = 0.1       -- reward bonus per seal
+local PACT_BONUS = 0.25    -- reward bonus per pact level
+local PACTS = 3
+local ROMAN = { "I", "II", "III" }
 local FIELD = "uw_seal_progress"
 local ROLLS = "uw_seal_rng"
 local RESUME_SOUND = "snd_raid_fight_ready"
@@ -141,9 +151,16 @@ local GO_BACK = { hard = true, very_hard = true }
 local function say(key) return words.read("de128.uw_seals." .. key) end
 local TEXT = {}
 for _, key in ipairs({ "hud.prepare", "prepare.title", "prepare.subtitle", "prepare.hint", "prepare.momentum",
-    "menu.subtitle", "menu.momentum", "menu.elixirs_hint", "results.won", "results.lost", "results.won_subtitle",
+    "menu.subtitle", "menu.momentum", "results.won", "results.lost", "results.won_subtitle",
     "results.lost_kept", "results.lost_back", "results.won_note", "results.momentum" }) do
     TEXT[key] = say(key)
+end
+local META = {}
+for _, key in ipairs({ "menu.codex", "menu.best_pact", "menu.new", "menu.pact_row", "menu.pact_note", "menu.omens",
+    "menu.no_omens", "menu.shards", "menu.brew_hint", "menu.brewed", "menu.short", "menu.full", "menu.rerolled",
+    "menu.already_broken", "pact.0", "pact.1", "pact.2", "pact.3", "results.codex", "results.codex_new",
+    "results.bonus_pact" }) do
+    META[key] = words.read("de128.uw_meta." .. key)
 end
 
 -- "{0}", "{1}" ... in a text, filled in order.
@@ -165,6 +182,8 @@ local function sprites(art)
     end
     return seal_sprites[art]
 end
+
+for _, name in ipairs(ORDER) do assert(meta.in_codex(name), "Seal rule " .. name .. " has no codex place") end
 
 -- What the screens show of each rule. A copied Power Mode rule shows the game's own text; the
 -- Underworld's own rules their hint.
@@ -226,45 +245,62 @@ local function clashes(a, b)
     return false
 end
 
-local function fits(picks, name, seal)
-    if LAST_SEAL_ONLY[name] and seal ~= #SPLIT then return false end
+local function fits(picks, name)
     for _, picked in ipairs(picks) do
         if picked == name or clashes(picked, name) then return false end
     end
     return true
 end
 
--- Three different rules for one run, as SHOWN entries.
-local function roll()
-    local picks = {}
-    for seal = 1, #SPLIT do
-        -- Roll again until one fits; after 32 misses, the first that fits.
-        for _ = 1, 32 do
-            local name = ORDER[sf2.random.integer(ROLLS, 1, #ORDER)]
-            if fits(picks, name, seal) then
-                picks[seal] = name
-                break
-            end
-        end
-        if not picks[seal] then
-            for _, name in ipairs(ORDER) do
-                if fits(picks, name, seal) then
-                    picks[seal] = name
-                    break
-                end
-            end
-        end
-        assert(picks[seal], "No seal rule fits seal " .. seal)
+-- A rule from `pool` that fits beside `taken` (for a seal, its number; nil for a pact): rolled
+-- again until one fits, then after 32 misses the first that does.
+local function pick(taken, pool, seal)
+    local function ok(name)
+        if LAST_SEAL_ONLY[name] and seal ~= #SPLIT then return false end
+        return fits(taken, name)
     end
-    local rules = {}
-    for seal, name in ipairs(picks) do rules[seal] = SHOWN[name] end
-    return rules
+    for _ = 1, 32 do
+        local name = pool[sf2.random.integer(ROLLS, 1, #pool)]
+        if ok(name) then return name end
+    end
+    for _, name in ipairs(pool) do if ok(name) then return name end end
+    error("No seal rule fits")
 end
 
--- The rules rolled for a boss's next run, by boss key, until a fight with them ends.
-local rolled = {}
-local function rules_for(boss)
-    rolled[boss.key] = rolled[boss.key] or roll()
+-- One run: three seal rules and three pacts, all different, as SHOWN entries, and the pact level.
+local function roll()
+    local plan, taken = { seals = {}, pacts = {}, level = 0 }, {}
+    for seal = 1, #SPLIT do
+        taken[#taken + 1] = pick(taken, ORDER, seal)
+        plan.seals[seal] = SHOWN[taken[#taken]]
+    end
+    for index = 1, PACTS do
+        taken[#taken + 1] = pick(taken, own_rules.pactable, nil)
+        plan.pacts[index] = SHOWN[taken[#taken]]
+    end
+    return plan
+end
+
+-- An Omen spent: one seal ("seals") or pact ("pacts") rolled again, to a different rule.
+local function reroll(plan, kind, index)
+    local taken = { plan[kind][index].name }
+    for _, list in ipairs({ plan.seals, plan.pacts }) do
+        for _, shown in ipairs(list) do
+            if shown ~= plan[kind][index] then taken[#taken + 1] = shown.name end
+        end
+    end
+    plan[kind][index] = SHOWN[pick(taken, kind == "seals" and ORDER or own_rules.pactable, kind == "seals" and index or nil)]
+    return plan[kind][index]
+end
+
+-- The run rolled for a boss's next fight, by boss key, until a fight with it ends. The pact level
+-- picked last for the boss carries over to his next run (until the game restarts).
+local rolled, last_level = {}, {}
+local function plan_for(boss)
+    if not rolled[boss.key] then
+        rolled[boss.key] = roll()
+        rolled[boss.key].level = last_level[boss.key] or 0
+    end
     return rolled[boss.key]
 end
 
@@ -323,8 +359,10 @@ end
 
 -- The fight's phase: the rule of the seal being fought, or none (RULELESS). The Underworld's own
 -- rules also learn which of them is on (content.underworld_seal_rules).
-local function rule_phase(fighter, shown)
+-- pacts: whether the run's pacts are on (while a seal is fought, with or without its rule).
+local function rule_phase(fighter, shown, pacts)
     own_rules.active = shown and own_rules.rules[shown.name] and shown.name or nil
+    own_rules.pacts = pacts and run.pacts or nil
     fighter:set_phase(shown and shown.phase or RULELESS)
 end
 
@@ -333,14 +371,16 @@ local function place_boss(fighter)
     local now = fighter:snapshot()
     if not (now and now.opponent and fighter.opponent) then return false end
     fighter.opponent:change_health(run.boss.seals[run.seal].top - now.opponent.health)
-    rule_phase(fighter, run.rules[run.seal])
+    rule_phase(fighter, run.rules[run.seal], true)
     return true
 end
 
 local function begin_fight(boss, fighter)
     local seal = saved_seal(boss)
-    run = { boss = boss, seal = seal, rules = rules_for(boss), frame = 0, streak = 0, bonus = 0, bonus_set = 0,
-        drunk = {}, waiting = {} }
+    local plan = plan_for(boss)
+    run = { boss = boss, seal = seal, rules = plan.seals, level = plan.level, pacts = {}, broken = {},
+        pact_bonus = PACT_BONUS * plan.level, frame = 0, streak = 0, bonus = 0, bonus_set = 0, drunk = {}, waiting = {} }
+    for index = 1, plan.level do run.pacts[plan.pacts[index].name] = true end
     hold.held = false
     hold.cooldown = boss.cooldowns and boss.cooldowns[sf2.saves.get("difficulty")] or nil
     -- From on_fight_begin the round starts in that phase; the first tick catches up otherwise.
@@ -352,13 +392,14 @@ local function break_seal(fighter, now)
     local broken = run.boss.seals[index]
     -- Damage past the floor does not carry into the next seal.
     fighter.opponent:change_health(broken.floor - now.opponent.health)
+    run.broken[#run.broken + 1] = run.rules[index].name
     run.seal = index + 1
     run.streak = run.streak + 1
     run.bonus = MOMENTUM * run.streak
     run.hold_until = run.frame + INTERMISSION
     hold.held = true
     -- The intermission has no seal rule.
-    rule_phase(fighter, nil)
+    rule_phase(fighter, nil, false)
     -- The fight pauses while the seal shatters in the middle of the screen; the intermission's
     -- frames count from when it resumes.
     fighter:play_seal_break(run.rules[index].sprites.intact)
@@ -383,8 +424,8 @@ local function end_intermission(fighter, now)
     if run.waiting.fury then run.fury_until = run.frame + frames end
     if run.waiting.clear_mind then run.clear_until = run.frame + frames end
     run.waiting = {}
-    -- Clear Mind keeps the rule-free phase until it wears off (tick_fight).
-    if not run.clear_until then rule_phase(fighter, run.rules[run.seal]) end
+    -- Clear Mind keeps the seal's rule off until it wears off (tick_fight); the pacts hold.
+    rule_phase(fighter, not run.clear_until and run.rules[run.seal] or nil, true)
     sf2.fx.play(run.boss.resume_fx)
     fighter:shake(30, "opponent", 6)
 end
@@ -411,14 +452,15 @@ local function tick_fight(fighter, tick)
     else
         if run.clear_until and run.frame >= run.clear_until then
             run.clear_until = nil
-            rule_phase(fighter, run.rules[run.seal])
+            rule_phase(fighter, run.rules[run.seal], true)
         end
         local floor = run.boss.seals[run.seal].floor
         -- The last seal has no floor: the knockout ends the fight as usual.
         if floor > 0 and now.opponent.health <= floor then break_seal(fighter, now) end
     end
-    -- Momentum changed by a break, or reset by Prepare.
-    if run.bonus ~= run.bonus_set and fighter:set_reward_bonus(run.bonus) then run.bonus_set = run.bonus end
+    -- Momentum changed by a break, or reset by Prepare; the pact's share stays.
+    local bonus = run.bonus + run.pact_bonus
+    if bonus ~= run.bonus_set and fighter:set_reward_bonus(bonus) then run.bonus_set = bonus end
 end
 
 -- How many times the player has beaten the boss's sealed fight (the profile's own count, which
@@ -428,9 +470,11 @@ local function victories(boss)
 end
 
 -- The fight's result on Eclipse's results screen, in place of the game's tally: the seals as they
--- ended (broken ones cracked), where the next visit starts, and the rewards with Momentum, which
--- the host fills in. A surrender goes straight to the map as before.
-local function show_results(boss, rules, seal, won)
+-- ended (broken ones cracked), where the next visit starts, the rewards with Momentum and the
+-- pact (filled in by the host), the shards and Omen it gave, and the Seal Codex with the rules
+-- this fight added. A surrender goes straight to the map as before.
+local function show_results(boss, ended)
+    local rules, seal, won = ended.rules, ended.seal, ended.won
     local stages = {}
     for index, stage in ipairs(rules) do
         local broken = won or index < seal
@@ -446,29 +490,53 @@ local function show_results(boss, rules, seal, won)
         local restart = GO_BACK[sf2.saves.get("difficulty")] and math.max(1, seal - 1) or seal
         subtitle = restart == seal and fill(TEXT["results.lost_kept"], seal) or fill(TEXT["results.lost_back"], seal, restart)
     end
+    -- The codex as it will be once the battle_result handler saves this fight's rules.
+    local codex, new = meta.codex(boss.key), 0
+    for _, name in ipairs(ended.broken) do
+        if not codex[name] then
+            codex[name] = true
+            new = new + 1
+        end
+    end
+    local known = meta.codex_count(codex)
+    local lines = {}
+    if won then lines[#lines + 1] = TEXT["results.won_note"] end
+    lines[#lines + 1] = new > 0 and fill(META["results.codex_new"], known, meta.codex_size, new)
+        or fill(META["results.codex"], known, meta.codex_size)
     -- Mod Lua has no pcall: a refusal is logged by the host and the game's tally shows instead.
     sf2.ui.results({
         title = won and TEXT["results.won"] or TEXT["results.lost"],
         subtitle = subtitle,
         portrait = boss.picture,
         stages = stages,
-        bonus = TEXT["results.momentum"],
-        note = won and TEXT["results.won_note"] or nil,
+        bonus = ended.level > 0 and META["results.bonus_pact"] or TEXT["results.momentum"],
+        note = table.concat(lines, "\n"),
+        items = ended.spoils,
         -- The profile counts this fight's result after on_fight_end, so a win is added here.
         victories = victories(boss) + (won and 1 or 0),
+        golden = known == meta.codex_size,
     })
 end
 
 local function end_fight(fighter, event)
     if not run then return end
     local won = event.player_result == "win"
-    -- The last seal breaks with the boss and counts for Momentum too.
-    if won then fighter:set_reward_bonus(MOMENTUM * (run.streak + 1)) end
-    local boss, rules, seal = run.boss, run.rules, run.seal
-    reached[boss.key] = seal
+    -- The last seal breaks with the boss and counts for Momentum and the codex too.
+    if won then
+        fighter:set_reward_bonus(MOMENTUM * (run.streak + 1) + run.pact_bonus)
+        run.broken[#run.broken + 1] = run.rules[run.seal].name
+    end
+    local boss = run.boss
+    local arts = {}
+    for _, name in ipairs(run.broken) do arts[#arts + 1] = RULES[name].art end
+    local ended = { rules = run.rules, seal = run.seal, won = won, broken = run.broken, level = run.level,
+        spoils = meta.spoils(arts, won) }
+    -- Saved when the result arrives (install).
+    reached[boss.key] = { seal = run.seal, broken = run.broken, pact = won and run.level or 0 }
     -- The next run rolls new rules.
     rolled[boss.key] = nil
     own_rules.active = nil
+    own_rules.pacts = nil
     hold.held = false
     hold.cooldown = nil
     close_view(prepare)
@@ -476,7 +544,7 @@ local function end_fight(fighter, event)
     intermission = nil
     run = nil
     -- Last, so a refused screen cannot leave the run behind.
-    show_results(boss, rules, seal, won)
+    show_results(boss, ended)
 end
 
 -- The round controller on the player: one per boss.
@@ -607,38 +675,108 @@ end
 
 -- The pre-fight menu ------------------------------------------------------------------------------
 
-local function open_menu(boss, request)
+-- A line for the next refresh of the challenge screen (an Omen spent, an elixir brewed), then gone.
+local notice = nil
+
+-- The challenge screen's content for the boss's next run: its seals (rules new to his codex
+-- marked) and the pacts taken, the elixirs (pressed to brew from shards), the pact picker, and
+-- the stakes: Momentum, the pact, the Omens held.
+local function menu_content(boss)
+    local plan = plan_for(boss)
     local next_seal = saved_seal(boss)
+    local codex = meta.codex(boss.key)
     local stages = {}
-    for index, seal in ipairs(rules_for(boss)) do
-        stages[index] = { name = seal.title, text = seal.hint,
-            icon = index < next_seal and seal.sprites.broken or seal.sprites.intact,
+    for index, shown in ipairs(plan.seals) do
+        stages[index] = { name = codex[shown.name] and shown.title or fill(META["menu.new"], shown.title), text = shown.hint,
+            icon = index < next_seal and shown.sprites.broken or shown.sprites.intact,
             state = index < next_seal and "done" or (index == next_seal and "next" or "locked") }
+    end
+    for index = 1, plan.level do
+        local shown = plan.pacts[index]
+        stages[#stages + 1] = { name = fill(META["menu.pact_row"], shown.title), text = shown.hint,
+            icon = shown.sprites.intact, state = "locked" }
     end
     local held = {}
     for _, elixir in ipairs(elixirs.list) do
         held[#held + 1] = { item = elixir.item, count = sf2.profile.item_count(elixir.item) }
     end
-    sf2.ui.challenge {
+    local shards = meta.shard_counts()
+    local stakes = { fill(TEXT["menu.momentum"], math.floor(MOMENTUM * 100 + 0.5)) }
+    if plan.level > 0 then
+        stakes[#stakes + 1] = fill(META["menu.pact_note"], ROMAN[plan.level], math.floor(PACT_BONUS * plan.level * 100 + 0.5))
+    end
+    local omens = meta.omens()
+    stakes[#stakes + 1] = omens > 0 and fill(META["menu.omens"], omens) or META["menu.no_omens"]
+    if notice then
+        table.insert(stakes, 1, notice)
+        notice = nil
+    end
+    local known = meta.codex_count(codex)
+    local subtitle = fill(TEXT["menu.subtitle"], #boss.seals) .. "  ·  " .. fill(META["menu.codex"], known, meta.codex_size)
+    local best = meta.best_pact(boss.key)
+    if best > 0 then subtitle = subtitle .. "  ·  " .. fill(META["menu.best_pact"], ROMAN[best]) end
+    local buttons = {}
+    for level = 0, PACTS do
+        buttons[#buttons + 1] = { id = "pact" .. level, text = META["pact." .. level], selected = plan.level == level }
+    end
+    return {
         title = boss.name,
-        subtitle = fill(TEXT["menu.subtitle"], #boss.seals),
+        subtitle = subtitle,
         portrait = boss.picture,
-        -- The hanko on the portrait: stamped once per win, an empty ring before the first.
+        -- The hanko on the portrait: stamped once per win, an empty ring before the first; gold
+        -- once every seal rule is in his codex.
         victories = victories(boss),
+        golden = known == meta.codex_size,
         stages = stages,
         items = held,
-        items_note = TEXT["menu.elixirs_hint"],
+        items_note = fill(META["menu.shards"], shards[1], shards[2], shards[3], shards[4], shards[5], shards[6])
+            .. "\n" .. META["menu.brew_hint"],
         loadouts = true,
-        note = fill(TEXT["menu.momentum"], math.floor(MOMENTUM * 100 + 0.5)),
-        on_fight = function(view)
-            close_view(view)
-            if not sf2.story.resume_fight(request) then sf2.story.cancel_fight(request) end
-        end,
-        on_back = function(view)
-            close_view(view)
-            sf2.story.cancel_fight(request)
-        end,
+        note = table.concat(stakes, "\n"),
+        buttons = buttons,
     }
+end
+
+local function open_menu(boss, request)
+    local plan = plan_for(boss)
+    local content = menu_content(boss)
+    local function refresh(view) sf2.ui.refresh(view, menu_content(boss)) end
+    content.on_fight = function(view)
+        close_view(view)
+        if not sf2.story.resume_fight(request) then sf2.story.cancel_fight(request) end
+    end
+    content.on_back = function(view)
+        close_view(view)
+        sf2.story.cancel_fight(request)
+    end
+    -- The pact picker.
+    content.on_button = function(view, id)
+        plan.level = tonumber(id:match("%d+")) or 0
+        last_level[boss.key] = plan.level
+        refresh(view)
+    end
+    -- A seal still to break, or a pact, rolled again for an Omen.
+    content.on_stage = function(view, index)
+        local kind, slot = "seals", index
+        if index > #SPLIT then kind, slot = "pacts", index - #SPLIT end
+        if kind == "seals" and slot < saved_seal(boss) then
+            notice = META["menu.already_broken"]
+        elseif not meta.spend_omen() then
+            notice = META["menu.no_omens"]
+        else
+            notice = fill(META["menu.rerolled"], reroll(plan, kind, slot).title)
+        end
+        refresh(view)
+    end
+    -- An elixir brewed from shards.
+    content.on_item = function(view, index)
+        local elixir = elixirs.list[index]
+        if not elixir then return end
+        local result = meta.brew(elixir)
+        notice = fill(META["menu." .. (result == "brewed" and "brewed" or result)], elixir.name)
+        refresh(view)
+    end
+    sf2.ui.challenge(content)
 end
 
 -- A sealed boss's before_fight step for content.underworld_story (only one handler per fight, so
@@ -667,13 +805,15 @@ local function install(underworld)
     sf2.story.on("battle_result", function(event)
         local boss = by_fight[event.fight]
         if not boss then return end
-        local seal = reached[boss.key]
+        local ended = reached[boss.key]
         reached[boss.key] = nil
         if event.outcome == "win" then
             save_seal(boss, 1)
-        elseif seal then
-            save_seal(boss, GO_BACK[sf2.saves.get("difficulty")] and math.max(1, seal - 1) or seal)
+        elseif ended then
+            save_seal(boss, GO_BACK[sf2.saves.get("difficulty")] and math.max(1, ended.seal - 1) or ended.seal)
         end
+        -- The rules broken join the boss's codex; a win raises his best pact.
+        if ended then meta.record(boss.key, ended.broken, ended.pact) end
     end)
 end
 
