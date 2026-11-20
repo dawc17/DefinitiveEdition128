@@ -566,6 +566,31 @@ end
 
 -- content.underworld calls this for every fight it registers. fight: the fresh table about to go
 -- to sf2.battles.register; rule_table resolves a generated rule row (its description key).
+-- The rule tables every sealed fight shares: every seal rule, each in its own phase (any of them
+-- can be rolled), the Lua dispatchers and the boss's guard. Built once, so Eclipse registers them
+-- once for all the sealed fights (a mod has 4096 registrations).
+local shared = nil
+local function shared_rules(rule_table)
+    if shared then return shared end
+    shared = {}
+    for _, name in ipairs(ORDER) do
+        local rule = RULES[name]
+        if rule.rule then
+            local group = rule_group(rule.rule)
+            group.phases = { PHASES[name] }
+            shared[#shared + 1] = rule_table(group)
+        else
+            -- The rule's text, and its built-in rules if it has any (a group may be empty).
+            shared[#shared + 1] = { kind = "group", phases = { PHASES[name] },
+                description = SHOWN[name].description, rules = copy(rule.native or {}) }
+        end
+    end
+    -- The Lua parts of the Underworld's own rules, one behavior per side.
+    for _, entry in ipairs(own_rules.behaviors) do shared[#shared + 1] = entry end
+    shared[#shared + 1] = { kind = "behavior", behavior = guard, target = "opponent" }
+    return shared
+end
+
 local function apply(battle, fight, rule_table)
     local boss = BOSSES[battle]
     if not boss or fight.name ~= "1" then return end
@@ -576,25 +601,8 @@ local function apply(battle, fight, rule_table)
     opponent.health_marks = boss.marks
     -- Arkhos has a sealed tactic of his own; everyone else keeps his.
     if boss.tactic then opponent.tactic = boss.tactic end
-    -- Every seal rule, each in its own phase, since any of them can be rolled.
-    for _, name in ipairs(ORDER) do
-        local rule = RULES[name]
-        if rule.rule then
-            local group = rule_group(rule.rule)
-            group.phases = { PHASES[name] }
-            fight.rules[#fight.rules + 1] = rule_table(group)
-        else
-            -- The rule's text, and its built-in rules if it has any (a group may be empty).
-            fight.rules[#fight.rules + 1] = { kind = "group", phases = { PHASES[name] },
-                description = SHOWN[name].description, rules = copy(rule.native or {}) }
-        end
-    end
-    -- The Lua parts of the Underworld's own rules, one behavior per side.
-    for _, entry in ipairs(own_rules.behaviors) do
-        fight.rules[#fight.rules + 1] = { kind = entry.kind, behavior = entry.behavior, target = entry.target }
-    end
+    for _, rule in ipairs(shared_rules(rule_table)) do fight.rules[#fight.rules + 1] = rule end
     fight.rules[#fight.rules + 1] = { kind = "behavior", behavior = boss.controller, target = "player", controls_outcome = true }
-    fight.rules[#fight.rules + 1] = { kind = "behavior", behavior = guard, target = "opponent" }
 end
 
 -- The pre-fight menu ------------------------------------------------------------------------------
