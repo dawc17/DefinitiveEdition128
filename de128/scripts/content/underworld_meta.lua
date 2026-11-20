@@ -18,8 +18,20 @@ local elixirs = require("content.underworld_elixirs")
 local FIELD = "uw_meta"
 local SHARD_STACK, OMEN_STACK = 99, 20
 
--- The colours of the seal art (content.underworld_seals' rules), in the order the text lists them.
+-- The colours of the seal art (content.underworld_seals' rules), in the order the screens show
+-- them, with the ink each is drawn in on the challenge screen's tally strip.
 local ARTS = { "orange", "red", "jade", "green", "blue", "purple" }
+local INK = { orange = "#D9822B", red = "#B8342A", jade = "#3F8F7C", green = "#6AA339", blue = "#3D73B8", purple = "#7D4BB0" }
+
+-- Pictures (assets/textures/underworld_meta, cut from the game's seal art with ImageMagick):
+-- shard_<art> a jagged piece of the seal, codex_<art> the seal with its cracks, pact a red hanko.
+local pictures = { shard = {}, codex = {}, pact = sf2.assets.sprite("sprites/underworld_meta/pact"),
+    omen = sf2.assets.sprite("sprites/underworld_meta/omen"),
+    momentum = sf2.assets.sprite("sprites/underworld_seals/red_broken") }
+for _, art in ipairs(ARTS) do
+    pictures.shard[art] = sf2.assets.sprite("sprites/underworld_meta/shard_" .. art)
+    pictures.codex[art] = sf2.assets.sprite("sprites/underworld_meta/codex_" .. art)
+end
 
 local shards = {}
 for _, art in ipairs(ARTS) do
@@ -28,7 +40,7 @@ for _, art in ipairs(ARTS) do
         category = "consumable", id = "seal_shard_" .. art,
         display_name = words.own("item.seal_shard_" .. art, key .. ".name"),
         description = words.own("item.seal_shard_" .. art .. ".description", key .. ".description"),
-        icon = sf2.assets.sprite("sprites/underworld_seals/" .. art .. "_broken"), stack = SHARD_STACK,
+        icon = pictures.shard[art], stack = SHARD_STACK,
     }
 end
 
@@ -37,10 +49,11 @@ local omen = sf2.items.register {
     category = "consumable", id = "omen",
     display_name = words.own("item.omen", "de128.uw_meta.omen.name"),
     description = words.own("item.omen.description", "de128.uw_meta.omen.description"),
-    icon = sf2.assets.sprite("sprites/underworld_meta/omen"), stack = OMEN_STACK,
+    icon = pictures.omen, stack = OMEN_STACK,
 }
 
--- Shards per elixir. de128.uw_meta.menu.brew_hint spells these out: keep them together.
+-- Shards per elixir, in the order the challenge screen draws them under the elixir.
+local RECIPES_ORDER = { "jade", "orange", "red", "green", "blue", "purple" }
 local RECIPES = {
     healing_elixir = { jade = 2, green = 1 },
     iron_skin_elixir = { orange = 2, green = 1 },
@@ -99,7 +112,7 @@ local function save(key, set, pact)
     sf2.state.set { [FIELD] = value .. key .. "=" .. encode(set) .. ":" .. pact .. "," }
 end
 
-local M = { shards = shards, arts = ARTS, omen = omen, codex_size = #CODEX }
+local M = { shards = shards, arts = ARTS, ink = INK, pictures = pictures, omen = omen, codex_size = #CODEX, codex_order = CODEX }
 
 function M.codex(key) return decode((entry(key))) end
 function M.in_codex(name) return PLACE[name] ~= nil end
@@ -164,6 +177,19 @@ end
 
 function M.omens() return sf2.profile.item_count(omen) end
 function M.spend_omen() return sf2.profile.take_item(omen, 1) end
+
+-- An elixir's cost as challenge-screen pictures: one shard each, lit while the player holds it.
+function M.cost(elixir)
+    local recipe = assert(RECIPES[elixir.id], "No recipe for " .. elixir.id)
+    local cost = {}
+    for _, art in ipairs(RECIPES_ORDER) do
+        local held = sf2.profile.item_count(shards[art])
+        for piece = 1, recipe[art] or 0 do
+            cost[#cost + 1] = { icon = pictures.shard[art], lit = piece <= held }
+        end
+    end
+    return cost
+end
 
 -- Brews one elixir from shards: "brewed", "short" (not enough shards) or "full" (no room).
 function M.brew(elixir)

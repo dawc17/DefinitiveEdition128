@@ -30,10 +30,10 @@ local meta = require("content.underworld_meta")
 -- controller moves the fight to the phase of the seal's rule, or to RULELESS between seals.
 --
 -- Each run also rolls three pacts, Lua rules the player may take on for every seal from the
--- challenge screen (levels 0-3, +25% rewards each, beside Momentum). On the challenge screen an
--- Omen rerolls a seal or pact (its row pressed) and Seal Shards brew elixirs (a slot pressed); a
--- fight gives a shard per seal broken and an Omen on a win, and its broken rules join the boss's
--- Seal Codex (content.underworld_meta).
+-- challenge screen's pact tiles (levels 0-3, +25% rewards each, beside Momentum). On the
+-- challenge screen an Omen rerolls a seal (its row pressed), Seal Shards brew elixirs (a slot
+-- pressed) and the codex tally opens the boss's Seal Codex page; a fight gives a shard per seal
+-- broken and an Omen on a win, and its broken rules join the codex (content.underworld_meta).
 
 -- Seal rules by name: rule, the description key of a rule group the Underworld's Power Mode
 -- fights use (content.underworld_data), copied for the seal; title, de128.uw_seals.rule.<name>;
@@ -156,10 +156,9 @@ for _, key in ipairs({ "hud.prepare", "prepare.title", "prepare.subtitle", "prep
     TEXT[key] = say(key)
 end
 local META = {}
-for _, key in ipairs({ "menu.codex", "menu.best_pact", "menu.new", "menu.pact_row", "menu.pact_note", "menu.omens",
-    "menu.no_omens", "menu.shards", "menu.brew_hint", "menu.brewed", "menu.short", "menu.full", "menu.rerolled",
-    "menu.already_broken", "pact.0", "pact.1", "pact.2", "pact.3", "results.codex", "results.codex_new",
-    "results.bonus_pact" }) do
+for _, key in ipairs({ "menu.new_stamp", "menu.codex_title", "menu.codex_count", "menu.codex_hint", "menu.share",
+    "menu.times", "menu.no_omens", "menu.brewed", "menu.short", "menu.full", "menu.rerolled", "menu.already_broken",
+    "results.codex", "results.codex_new", "results.bonus_pact" }) do
     META[key] = words.read("de128.uw_meta." .. key)
 end
 
@@ -677,94 +676,142 @@ end
 
 -- A line for the next refresh of the challenge screen (an Omen spent, an elixir brewed), then gone.
 local notice = nil
+-- The challenge screen's codex page: open or not, and the seal rule selected on it.
+local codex_page = { open = false, selected = nil }
 
--- The challenge screen's content for the boss's next run: its seals (rules new to his codex
--- marked) and the pacts taken, the elixirs (pressed to brew from shards), the pact picker, and
--- the stakes: Momentum, the pact, the Omens held.
+-- The rules of each seal colour, in codex order: the codex page's rows and the tally's groups.
+local BY_ART = {}
+for _, art in ipairs(meta.arts) do BY_ART[art] = {} end
+for _, name in ipairs(meta.codex_order) do
+    local list = BY_ART[RULES[name].art]
+    list[#list + 1] = name
+end
+
+-- The codex page: one row per seal colour, a rule's seal cracked once broken under this boss.
+local function codex_grid(codex)
+    local rows = {}
+    for _, art in ipairs(meta.arts) do
+        local row = {}
+        for _, name in ipairs(BY_ART[art]) do
+            local known = codex[name] == true
+            row[#row + 1] = { id = name, lit = known, selected = name == codex_page.selected,
+                icon = known and meta.pictures.codex[art] or SHOWN[name].sprites.intact }
+        end
+        rows[#rows + 1] = row
+    end
+    local selected = codex_page.selected and SHOWN[codex_page.selected]
+    return {
+        title = META["menu.codex_title"],
+        count = fill(META["menu.codex_count"], meta.codex_count(codex), meta.codex_size),
+        caption = selected and selected.title or nil,
+        text = selected and selected.hint or META["menu.codex_hint"],
+        rows = rows,
+    }
+end
+
+-- The challenge screen's content for the boss's next run, pictures first: the seals on the scroll
+-- (a red stamp on rules new to his codex), or his codex page; on the card the codex tally, the
+-- stakes (Momentum, the pact's share, the Omens held), the three pacts to take, the elixirs with
+-- their shard costs, and the shard pouch.
 local function menu_content(boss)
     local plan = plan_for(boss)
     local next_seal = saved_seal(boss)
     local codex = meta.codex(boss.key)
     local stages = {}
     for index, shown in ipairs(plan.seals) do
-        stages[index] = { name = codex[shown.name] and shown.title or fill(META["menu.new"], shown.title), text = shown.hint,
+        stages[index] = { name = shown.title, text = shown.hint,
+            stamp = not codex[shown.name] and META["menu.new_stamp"] or nil,
             icon = index < next_seal and shown.sprites.broken or shown.sprites.intact,
             state = index < next_seal and "done" or (index == next_seal and "next" or "locked") }
     end
-    for index = 1, plan.level do
-        local shown = plan.pacts[index]
-        stages[#stages + 1] = { name = fill(META["menu.pact_row"], shown.title), text = shown.hint,
-            icon = shown.sprites.intact, state = "locked" }
+    local tally = {}
+    for _, art in ipairs(meta.arts) do
+        local filled = 0
+        for _, name in ipairs(BY_ART[art]) do if codex[name] then filled = filled + 1 end end
+        tally[#tally + 1] = { color = meta.ink[art], count = #BY_ART[art], filled = filled }
+    end
+    local stakes = { { icon = meta.pictures.momentum, text = fill(META["menu.share"], math.floor(MOMENTUM * 100 + 0.5)) } }
+    if plan.level > 0 then
+        stakes[#stakes + 1] = { icon = meta.pictures.pact, text = fill(META["menu.share"], math.floor(PACT_BONUS * plan.level * 100 + 0.5)) }
+    end
+    local omens = meta.omens()
+    stakes[#stakes + 1] = { icon = meta.pictures.omen, text = fill(META["menu.times"], omens), lit = omens > 0 }
+    local choices = {}
+    for index, shown in ipairs(plan.pacts) do
+        choices[index] = { id = "pact" .. index, icon = shown.sprites.intact, name = shown.title,
+            chosen = index <= plan.level, mark = ROMAN[index] }
     end
     local held = {}
     for _, elixir in ipairs(elixirs.list) do
-        held[#held + 1] = { item = elixir.item, count = sf2.profile.item_count(elixir.item) }
+        held[#held + 1] = { item = elixir.item, count = sf2.profile.item_count(elixir.item), cost = meta.cost(elixir) }
     end
-    local shards = meta.shard_counts()
-    local stakes = { fill(TEXT["menu.momentum"], math.floor(MOMENTUM * 100 + 0.5)) }
-    if plan.level > 0 then
-        stakes[#stakes + 1] = fill(META["menu.pact_note"], ROMAN[plan.level], math.floor(PACT_BONUS * plan.level * 100 + 0.5))
-    end
-    local omens = meta.omens()
-    stakes[#stakes + 1] = omens > 0 and fill(META["menu.omens"], omens) or META["menu.no_omens"]
-    if notice then
-        table.insert(stakes, 1, notice)
-        notice = nil
-    end
+    local pouch, counts = {}, meta.shard_counts()
+    for index, art in ipairs(meta.arts) do pouch[index] = { icon = meta.pictures.shard[art], count = counts[index] } end
     local known = meta.codex_count(codex)
-    local subtitle = fill(TEXT["menu.subtitle"], #boss.seals) .. "  ·  " .. fill(META["menu.codex"], known, meta.codex_size)
-    local best = meta.best_pact(boss.key)
-    if best > 0 then subtitle = subtitle .. "  ·  " .. fill(META["menu.best_pact"], ROMAN[best]) end
-    local buttons = {}
-    for level = 0, PACTS do
-        buttons[#buttons + 1] = { id = "pact" .. level, text = META["pact." .. level], selected = plan.level == level }
-    end
-    return {
+    local content = {
         title = boss.name,
-        subtitle = subtitle,
         portrait = boss.picture,
         -- The hanko on the portrait: stamped once per win, an empty ring before the first; gold
         -- once every seal rule is in his codex.
         victories = victories(boss),
         golden = known == meta.codex_size,
         stages = stages,
+        tally = tally,
+        stakes = stakes,
+        choices = choices,
         items = held,
-        items_note = fill(META["menu.shards"], shards[1], shards[2], shards[3], shards[4], shards[5], shards[6])
-            .. "\n" .. META["menu.brew_hint"],
+        pouch = pouch,
         loadouts = true,
-        note = table.concat(stakes, "\n"),
-        buttons = buttons,
+        note = notice,
     }
+    notice = nil
+    if codex_page.open then content.grid = codex_grid(codex) end
+    return content
 end
 
 local function open_menu(boss, request)
     local plan = plan_for(boss)
+    codex_page.open, codex_page.selected = false, nil
     local content = menu_content(boss)
     local function refresh(view) sf2.ui.refresh(view, menu_content(boss)) end
     content.on_fight = function(view)
         close_view(view)
         if not sf2.story.resume_fight(request) then sf2.story.cancel_fight(request) end
     end
+    -- Back closes the codex page first, then the screen.
     content.on_back = function(view)
+        if codex_page.open then
+            codex_page.open = false
+            refresh(view)
+            return
+        end
         close_view(view)
         sf2.story.cancel_fight(request)
     end
-    -- The pact picker.
-    content.on_button = function(view, id)
-        plan.level = tonumber(id:match("%d+")) or 0
+    -- The codex tally opens and closes the codex page; a seal on it is selected for its words.
+    content.on_tally = function(view)
+        codex_page.open = not codex_page.open
+        refresh(view)
+    end
+    content.on_cell = function(view, id)
+        codex_page.selected = id
+        refresh(view)
+    end
+    -- A pact taken (with the ones before it) or given back (with the ones after it).
+    content.on_choice = function(view, id)
+        local index = tonumber(id:match("%d+")) or 0
+        plan.level = plan.level >= index and index - 1 or index
         last_level[boss.key] = plan.level
         refresh(view)
     end
-    -- A seal still to break, or a pact, rolled again for an Omen.
+    -- A seal still to break, rolled again for an Omen.
     content.on_stage = function(view, index)
-        local kind, slot = "seals", index
-        if index > #SPLIT then kind, slot = "pacts", index - #SPLIT end
-        if kind == "seals" and slot < saved_seal(boss) then
+        if index < saved_seal(boss) then
             notice = META["menu.already_broken"]
         elseif not meta.spend_omen() then
             notice = META["menu.no_omens"]
         else
-            notice = fill(META["menu.rerolled"], reroll(plan, kind, slot).title)
+            notice = fill(META["menu.rerolled"], reroll(plan, "seals", index).title)
         end
         refresh(view)
     end
