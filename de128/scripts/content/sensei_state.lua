@@ -38,6 +38,8 @@ function result.register()
     -- Sealed Underworld bosses (underworld_seals.lua): the seal each starts at next, as
     -- ",boss_6=2,"; a boss at seal 1 is not listed. A new field takes its default on old saves.
     fields.uw_seal_progress = ","
+    -- The sequence the sealed bosses' seal rules are rolled from, every run (underworld_seals.lua).
+    fields.uw_seal_rng = 40961
     sf2.state.register { version = 1, fields = fields }
     registered = true
 end
