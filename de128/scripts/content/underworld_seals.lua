@@ -2,6 +2,7 @@ local sf2 = require("sf2")
 local words = require("content.text")
 local elixirs = require("content.underworld_elixirs")
 local raid_boss_abilities = require("content.raid_boss_abilities")
+local own_rules = require("content.underworld_seal_rules")
 
 -- Phased Underworld bosses (Eclipse Docs/Engineering/Modding/UNDERWORLD_PHASED_BOSSES_PLAN.md).
 -- A boss's health is split into seals, later ones larger, and each seal is a fight phase with its
@@ -41,6 +42,12 @@ local RULES = {
     darkness = { rule = "LIGHT_IN_THE_DARK", art = "purple" },
     hidden_health = { rule = "NO_HEALTHBAR", art = "purple" },
 }
+-- The Underworld's own seal rules (content.underworld_seal_rules): built-in rules and Lua behaviors,
+-- with their hint text in de128.uw_seals.hint.<name>.
+for name, rule in pairs(own_rules) do
+    assert(not RULES[name], "Seal rule " .. name .. " is defined twice")
+    RULES[name] = rule
+end
 
 -- Seals split the boss's health 8:10:12 from the top (later seals larger), rounded to bars:
 -- 30 bars break at 22 and 12.
@@ -56,86 +63,86 @@ local SPLIT = { 8, 10, 12 }
 local BOSSES = {
     -- Tier 1
     BOSS_1 = { bars = 15, title = "RAIDBOSS_FIRE_TITLE", portrait = "boss_fire", glow = "#FF8A3D",
-        seals = { "hard_ground", "burning", "hot_ground" } },
+        seals = { "hard_ground", "mounting_wrath", "hot_ground" } },
     BOSS_SON_OF_HEAVEN = { bars = 16, title = "RAIDBOSS_CNY_Title", portrait = "new_man_shuang_gou", glow = "#FFD24A",
-        seals = { "no_jumps", "draining_ground", "burning" } },
+        seals = { "kicks_only", "draining_ground", "burning" } },
     BOSS_2 = { bars = 17, title = "RAIDBOSS_Stone_Title", portrait = "boss_crystal", glow = "#9FE3FF",
-        seals = { "hard_ground", "no_double", "earthquake" } },
+        seals = { "hard_ground", "unflinching", "earthquake" } },
     BOSS_PUPPETEER = { bars = 18, title = "RAIDBOSS_PUPPETEER_TITLE", portrait = "character_puppeteer", glow = "#C08CFF",
-        seals = { "no_kicks", "fragile_ground", "inverted" } },
+        seals = { "undertow", "fragile_ground", "inverted" } },
     BOSS_3 = { bars = 19, title = "RAIDBOSS_Mushroom_Title", portrait = "boss_mushroom", glow = "#B6FF5C",
-        seals = { "no_jumps", "withering", "draining_ground" } },
+        seals = { "no_jumps", "breathless", "draining_ground" } },
     BOSS_LAMB_VULCAN = { bars = 21, title = "RAIDBOSS_LAMB_Title", portrait = "boss_lamb_vulcan", glow = "#FF6A2A",
-        seals = { "no_double", "burning", "hot_ground" } },
+        seals = { "bare_hands", "burning", "hot_ground" } },
     BOSS_4 = { bars = 23, title = "RAIDBOSS_Vortex_Title", portrait = "boss_vortex", glow = "#5CD6FF",
-        seals = { "no_jumps", "earthquake", "inverted" } },
+        seals = { "gale", "earthquake", "inverted" } },
     BOSS_5 = { bars = 25, title = "RAIDBOSS_Fatum_Title", portrait = "boss_fatum", glow = "#B07CFF",
-        seals = { "no_double", "withering", "hidden_health" } },
+        seals = { "no_double", "measured_strikes", "hidden_health" } },
     BOSS_LAMB_FUNGUS = { bars = 27, title = "RAIDBOSS_LAMB_Title", portrait = "boss_lamb_fungus", glow = "#B6FF5C",
-        seals = { "no_kicks", "draining_ground", "hidden_health" } },
+        seals = { "no_kicks", "relentless", "hidden_health" } },
     BOSS_WOLF_WIND = { bars = 29, title = "RAIDBOSS_WIND_WOLF", portrait = "boss_wind_wolf_new", glow = "#CFFFF2",
-        seals = { "no_jumps", "hot_ground", "inverted" } },
+        seals = { "no_jumps", "patience", "inverted" } },
     BOSS_6 = { bars = 30, title = "RAIDBOSS_Arkhos_Title", portrait = "boss_arkhos", glow = "#7CFF8A",
-        seals = { "hard_ground", "draining_ground", "darkness" }, sound = "snd_rats_ring",
+        seals = { "mix_it_up", "draining_ground", "darkness" }, sound = "snd_rats_ring",
         tactic = raid_boss_abilities.arkhos_sealed,
         cooldowns = { easy = 690, medium = 600, hard = 540, very_hard = 480 } },
     BOSS_7 = { bars = 31, title = "RAIDBOSS_Hoaxen_Title", portrait = "boss_hoaxen", glow = "#4CFFD0",
-        seals = { "no_double", "no_blocks", "inverted" } },
+        seals = { "undertow", "no_blocks", "inverted" } },
     BOSS_8 = { bars = 33, title = "RAIDBOSS_Hunger_Title", portrait = "boss_hunger", glow = "#FF4A4A",
-        seals = { "no_kicks", "withering", "earthquake" } },
+        seals = { "desperation", "withering", "earthquake" } },
     BOSS_LAMB_HUNGER = { bars = 35, title = "RAIDBOSS_LAMB_Title", portrait = "boss_lamb_hunger", glow = "#FF5A5A",
-        seals = { "no_double", "draining_ground", "darkness" } },
+        seals = { "no_double", "glass_cannon", "darkness" } },
     BOSS_9 = { bars = 37, title = "RAIDBOSS_War_Title", portrait = "boss_war", glow = "#FF7040",
-        seals = { "no_blocks", "burning", "fragile_ground" } },
+        seals = { "no_blocks", "mounting_wrath", "fragile_ground" } },
     BOSS_BANSHEE = { bars = 39, title = "RAIDBOSS_Witch_banshee_Title", portrait = "witch_halloween_ghost", glow = "#A8D8FF",
-        seals = { "no_jumps", "earthquake", "darkness" } },
+        seals = { "vanishing", "earthquake", "darkness" } },
     BOSS_10 = { bars = 41, title = "RAIDBOSS_Tenebris_Title", portrait = "boss_tenebris", glow = "#9A6CFF",
-        seals = { "hard_ground", "withering", "darkness" } },
+        seals = { "hard_ground", "withering", "moonless" } },
     -- His first fight's own avatar (boss_architect_hummer_new) has no portrait.
     BOSS_ARCHITECT_1 = { bars = 42, title = "RAIDBOSS_ARCHITECT_TITLE", portrait = "boss_architect", glow = "#FFC060",
-        seals = { "no_kicks", "no_blocks", "inverted" } },
+        seals = { "thorny_walls", "no_blocks", "inverted" } },
     BOSS_11 = { bars = 43, title = "RAIDBOSS_GATEKEEPER_TITLE", portrait = "boss_gatekeeper", glow = "#5CA8FF",
-        seals = { "no_double", "fragile_ground", "hidden_health" } },
+        seals = { "no_double", "patience", "hidden_health" } },
     BOSS_ARCHITECT_2 = { bars = 45, title = "RAIDBOSS_ARCHITECT_TITLE", portrait = "boss_architect", glow = "#FFC060",
-        seals = { "no_kicks", "earthquake", "hidden_health" } },
+        seals = { "thorny_walls", "earthquake", "hidden_health" } },
     BOSS_12 = { bars = 47, title = "RAIDBOSS_SATURN_TITLE", portrait = "boss_saturn", glow = "#8CF0FF",
-        seals = { "hard_ground", "burning", "inverted" } },
+        seals = { "overcharge", "burning", "inverted" } },
     BOSS_13 = { bars = 49, title = "BLACKNESS_TITLE", portrait = "boss_blackness", glow = "#B05CFF",
-        seals = { "no_blocks", "draining_ground", "darkness" } },
+        seals = { "no_blocks", "vengeance", "moonless" } },
     BOSS_14 = { bars = 50, title = "RAIDBOSS_HUNTER_TITLE", portrait = "hunter_raid", glow = "#6AB8FF",
-        seals = { "no_jumps", "fragile_ground", "darkness" } },
+        seals = { "slow_hands", "fragile_ground", "darkness" } },
     -- The event bosses
     BOSS_WHISPER = { bars = 15, title = "RAIDBOSS_WHISPER_TITLE", portrait = "boss_whisper_24", glow = "#FF6AD8",
-        seals = { "no_double", "withering", "darkness" } },
+        seals = { "no_double", "tricksters_hex", "darkness" } },
     BOSS_SON_OF_THE_SUN = { bars = 16, title = "RAIDBOSS_CNY24_Title", portrait = "boss_son_of_the_sun", glow = "#FFC83A",
-        seals = { "hard_ground", "hot_ground", "darkness" } },
+        seals = { "desperation", "hot_ground", "darkness" } },
     BOSS_RAVANA = { bars = 17, title = "BOSS_RAVANA_Title", portrait = "boss_ravana", glow = "#FF9A3A",
-        seals = { "no_double", "burning", "no_blocks" } },
+        seals = { "mix_it_up", "burning", "no_blocks" } },
     BOSS_ADANTI = { bars = 19, title = "BOSS_BISON_Title", portrait = "boss_bison", glow = "#7CC8FF",
-        seals = { "no_kicks", "earthquake", "hot_ground" } },
+        seals = { "unflinching", "earthquake", "hot_ground" } },
     BOSS_COUNTESS = { bars = 20, title = "RAIDBOSS_Witch_old_Title", portrait = "witch_halloween_old", glow = "#D84A6A",
-        seals = { "no_jumps", "draining_ground", "inverted" } },
+        seals = { "no_jumps", "breathless", "inverted" } },
     BOSS_MORGANA = { bars = 22, title = "RAIDBOSS_Witch_young_Title", portrait = "boss_morgana", glow = "#9CFF6A",
-        seals = { "no_double", "fragile_ground", "inverted" } },
+        seals = { "no_double", "fragile_ground", "tricksters_hex" } },
     BOSS_LAMB = { bars = 25, title = "RAIDBOSS_LAMB_Title", portrait = "boss_lamb", glow = "#C85CFF",
-        seals = { "no_jumps", "hot_ground", "hidden_health" } },
+        seals = { "glass_cannon", "hot_ground", "hidden_health" } },
     BOSS_RAKSHASA = { bars = 28, title = "RAIDBOSS_RAKSHASA", portrait = "boss_rakshasa", glow = "#FFA040",
-        seals = { "no_double", "burning", "darkness" } },
+        seals = { "no_double", "measured_strikes", "darkness" } },
     BOSS_HALLOWEEN_PUPPETEER = { bars = 30, title = "RAIDBOSS_PUPPETEER_TITLE", portrait = "boss_puppeteer_hw21", glow = "#FF9A2A",
-        seals = { "no_kicks", "draining_ground", "inverted" } },
+        seals = { "kicks_only", "draining_ground", "inverted" } },
     BOSS_FARADEYA = { bars = 34, title = "RAIDBOSS_FARADAY_Title", portrait = "character_faradaya", glow = "#8C9CFF",
-        seals = { "hard_ground", "earthquake", "withering" } },
+        seals = { "overcharge", "earthquake", "withering" } },
     BOSS_BERSTUUK = { bars = 36, title = "RAIDBOSS_BERSTUUK_TITLE", portrait = "boss_berstuuk", glow = "#FFB04A",
-        seals = { "no_double", "no_blocks", "fragile_ground" } },
+        seals = { "slow_hands", "no_blocks", "fragile_ground" } },
     BOSS_DANDY = { bars = 40, title = "RAIDBOSS_DANDY_Title", portrait = "character_samson", glow = "#9CC8FF",
-        seals = { "no_jumps", "burning", "withering" } },
+        seals = { "no_jumps", "vengeance", "withering" } },
     BOSS_SHURALE = { bars = 42, title = "RAIDBOSS_SHURALE_TITLE", portrait = "boss_shurale_ny22", glow = "#9CEBFF",
-        seals = { "no_double", "burning", "inverted" } },
+        seals = { "gale", "burning", "inverted" } },
     -- No Power Mode
     BOSS_INVISIBLE = { bars = 32, title = "RAIDBOSS_Invisible_Title", portrait = "man_invisible", glow = "#E0E8FF",
-        seals = { "no_blocks", "fragile_ground", "hidden_health" } },
+        seals = { "no_blocks", "vanishing", "hidden_health" } },
     BOSS_HAUNTED_PRINCE = { bars = 46, title = "RAIDBOSS_PRINCE_TITLE", portrait = "character_prince_evil", glow = "#8A5CFF",
-        seals = { "hard_ground", "withering", "darkness" } },
+        seals = { "patience", "withering", "darkness" } },
 }
 
 local INTERMISSION = 300   -- frames between seals (5 s of fight time)
@@ -187,8 +194,11 @@ for battle, boss in pairs(BOSSES) do
         used = used + SPLIT[index]
         local floor = index == #boss.seals and 0 or boss.bars - math.floor(boss.bars * used / 30 + 0.5)
         assert(floor < top, "Sealed boss " .. battle .. " has an empty seal")
-        seals[index] = { name = name, rule = rule.rule, top = top, floor = floor,
-            title = say("rule." .. name), hint = words.read(rule.rule), sprites = sprites(rule.art) }
+        -- A copied Power Mode rule shows the game's own text; the Underworld's own rules their hint.
+        local hint = rule.rule or "de128.uw_seals.hint." .. name
+        seals[index] = { name = name, rule = rule, top = top, floor = floor,
+            title = say("rule." .. name), hint = words.read(hint), description = words.get(hint),
+            sprites = sprites(rule.art) }
         if floor > 0 then table.insert(marks, 1, floor) end
         top = floor
     end
@@ -517,9 +527,20 @@ local function apply(battle, fight, rule_table)
     -- Arkhos has a sealed tactic of his own; everyone else keeps his.
     if boss.tactic then opponent.tactic = boss.tactic end
     for index, seal in ipairs(boss.seals) do
-        local group = rule_group(seal.rule)
-        group.phases = { index }
-        fight.rules[#fight.rules + 1] = rule_table(group)
+        if seal.rule.rule then
+            local group = rule_group(seal.rule.rule)
+            group.phases = { index }
+            fight.rules[#fight.rules + 1] = rule_table(group)
+        else
+            -- The seal's text, and its built-in rules if it has any (a group may be empty).
+            fight.rules[#fight.rules + 1] = { kind = "group", phases = { index },
+                description = seal.description, rules = copy(seal.rule.native or {}) }
+            -- Behaviors check the phase themselves (content.underworld_seal_rules).
+            for _, entry in ipairs(seal.rule.behaviors or {}) do
+                fight.rules[#fight.rules + 1] = { kind = "behavior", behavior = entry.behavior,
+                    target = entry.target, parameters = { phase = index } }
+            end
+        end
     end
     fight.rules[#fight.rules + 1] = { kind = "behavior", behavior = boss.controller, target = "player", controls_outcome = true }
     fight.rules[#fight.rules + 1] = { kind = "behavior", behavior = guard, target = "opponent" }
