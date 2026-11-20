@@ -31,9 +31,11 @@ local meta = require("content.underworld_meta")
 --
 -- Each run also rolls three pacts, Lua rules the player may take on for every seal from the
 -- challenge screen's pact tiles (levels 0-3, +25% rewards each, beside Momentum). On the
--- challenge screen an Omen rerolls a seal (its row pressed), Seal Shards brew elixirs (a slot
--- pressed) and the codex tally opens the boss's Seal Codex page; a fight gives a shard per seal
--- broken and an Omen on a win, and its broken rules join the codex (content.underworld_meta).
+-- challenge screen an Omen rerolls a seal (the Omen control at the end of its row, pressed twice),
+-- Seal Shards brew elixirs (a slot pressed twice) and the codex tally opens the boss's Seal Codex
+-- page; a fight gives a shard per seal broken and an Omen on a win, and its broken rules join the
+-- codex (content.underworld_meta). Nothing on the screen spends on a single press: Eclipse arms
+-- the control first and its info line says what a second press does.
 
 -- Seal rules by name: rule, the description key of a rule group the Underworld's Power Mode
 -- fights use (content.underworld_data), copied for the seal; title, de128.uw_seals.rule.<name>;
@@ -157,7 +159,9 @@ for _, key in ipairs({ "hud.prepare", "prepare.title", "prepare.subtitle", "prep
 end
 local META = {}
 for _, key in ipairs({ "menu.new_stamp", "menu.codex_title", "menu.codex_count", "menu.codex_hint", "menu.share",
-    "menu.times", "menu.no_omens", "menu.brewed", "menu.short", "menu.full", "menu.rerolled", "menu.already_broken",
+    "menu.no_omens", "menu.brewed", "menu.short", "menu.full", "menu.rerolled",
+    "menu.rate", "menu.reroll_confirm", "menu.brew_confirm", "menu.label_pacts", "menu.label_elixirs",
+    "menu.momentum_info", "menu.pact_title", "menu.pact_info", "menu.wins_title", "menu.wins_info", "menu.shard_info",
     "results.codex", "results.codex_new", "results.bonus_pact" }) do
     META[key] = words.read("de128.uw_meta." .. key)
 end
@@ -191,7 +195,7 @@ for _, name in ipairs(ORDER) do
     local rule = RULES[name]
     local hint = rule.rule or "de128.uw_seals.hint." .. name
     SHOWN[name] = { name = name, phase = PHASES[name], title = say("rule." .. name), hint = words.read(hint),
-        description = words.get(hint), sprites = sprites(rule.art) }
+        description = words.get(hint), sprites = sprites(rule.art), art = rule.art }
 end
 
 for battle, boss in pairs(BOSSES) do
@@ -377,7 +381,7 @@ end
 local function begin_fight(boss, fighter)
     local seal = saved_seal(boss)
     local plan = plan_for(boss)
-    run = { boss = boss, seal = seal, rules = plan.seals, level = plan.level, pacts = {}, broken = {},
+    run = { boss = boss, seal = seal, first = seal, rules = plan.seals, level = plan.level, pacts = {}, broken = {},
         pact_bonus = PACT_BONUS * plan.level, frame = 0, streak = 0, bonus = 0, bonus_set = 0, drunk = {}, waiting = {} }
     for index = 1, plan.level do run.pacts[plan.pacts[index].name] = true end
     hold.held = false
@@ -472,14 +476,23 @@ end
 -- ended (broken ones cracked), where the next visit starts, the rewards with Momentum and the
 -- pact (filled in by the host), the shards and Omen it gave, and the Seal Codex with the rules
 -- this fight added. A surrender goes straight to the map as before.
+-- Rules a fight has just added to a boss's codex, by boss key, until his codex page is next
+-- opened: the tally pulses and they crack in on the page. Not saved; it is for the visit right
+-- after the fight.
+local fresh_codex = {}
+
 local function show_results(boss, ended)
     local rules, seal, won = ended.rules, ended.seal, ended.won
+    local first = ended.first or 1
     local stages = {}
     for index, stage in ipairs(rules) do
         local broken = won or index < seal
+        -- Broken seals keep their colour under the cracks (the codex art). Those broken in this
+        -- fight are stamped in turn; those broken before it (a resumed run) show settled, in ink.
         stages[index] = { name = stage.title, text = stage.hint,
-            icon = broken and stage.sprites.broken or stage.sprites.intact,
-            state = broken and "done" or (index == seal and "next" or "locked") }
+            icon = broken and meta.pictures.codex[stage.art] or stage.sprites.intact,
+            state = broken and "done" or (index == seal and "next" or "upcoming") }
+        if broken then stages[index].fresh = index >= first end
     end
     local subtitle
     if won then
@@ -495,6 +508,8 @@ local function show_results(boss, ended)
         if not codex[name] then
             codex[name] = true
             new = new + 1
+            fresh_codex[boss.key] = fresh_codex[boss.key] or {}
+            fresh_codex[boss.key][name] = true
         end
     end
     local known = meta.codex_count(codex)
@@ -514,6 +529,7 @@ local function show_results(boss, ended)
         -- The profile counts this fight's result after on_fight_end, so a win is added here.
         victories = victories(boss) + (won and 1 or 0),
         golden = known == meta.codex_size,
+        hanko_info = { title = META["menu.wins_title"] },
     })
 end
 
@@ -528,7 +544,7 @@ local function end_fight(fighter, event)
     local boss = run.boss
     local arts = {}
     for _, name in ipairs(run.broken) do arts[#arts + 1] = RULES[name].art end
-    local ended = { rules = run.rules, seal = run.seal, won = won, broken = run.broken, level = run.level,
+    local ended = { rules = run.rules, seal = run.seal, first = run.first, won = won, broken = run.broken, level = run.level,
         spoils = meta.spoils(arts, won) }
     -- Saved when the result arrives (install).
     reached[boss.key] = { seal = run.seal, broken = run.broken, pact = won and run.level or 0 }
@@ -687,42 +703,63 @@ for _, name in ipairs(meta.codex_order) do
     list[#list + 1] = name
 end
 
--- The codex page: one row per seal colour, a rule's seal cracked once broken under this boss.
-local function codex_grid(codex)
+-- The codex page: one row per seal colour, a rule's seal cracked once broken under this boss
+-- (in its colour, its name under it), a pale ghost until then. Rules the last fight added crack
+-- in as the page opens. A seal is always selected, so its words show at the foot: the one picked,
+-- else the first found, else the first.
+local function codex_grid(boss, codex)
+    local fresh = fresh_codex[boss.key] or {}
+    if not codex_page.selected then
+        for _, name in ipairs(meta.codex_order) do
+            if codex[name] then
+                codex_page.selected = name
+                break
+            end
+        end
+        codex_page.selected = codex_page.selected or BY_ART[meta.arts[1]][1]
+    end
     local rows = {}
     for _, art in ipairs(meta.arts) do
         local row = {}
         for _, name in ipairs(BY_ART[art]) do
             local known = codex[name] == true
             row[#row + 1] = { id = name, lit = known, selected = name == codex_page.selected,
-                icon = known and meta.pictures.codex[art] or SHOWN[name].sprites.intact }
+                icon = known and meta.pictures.codex[art] or SHOWN[name].sprites.intact,
+                label = known and SHOWN[name].title or nil, fresh = fresh[name] == true }
         end
         rows[#rows + 1] = row
     end
-    local selected = codex_page.selected and SHOWN[codex_page.selected]
+    local selected = SHOWN[codex_page.selected]
     return {
         title = META["menu.codex_title"],
         count = fill(META["menu.codex_count"], meta.codex_count(codex), meta.codex_size),
-        caption = selected and selected.title or nil,
-        text = selected and selected.hint or META["menu.codex_hint"],
+        caption = selected.title,
+        text = codex[selected.name] and selected.hint or META["menu.codex_hint"],
         rows = rows,
     }
 end
 
 -- The challenge screen's content for the boss's next run, pictures first: the seals on the scroll
--- (a red stamp on rules new to his codex), or his codex page; on the card the codex tally, the
--- stakes (Momentum, the pact's share, the Omens held), the three pacts to take, the elixirs with
--- their shard costs, and the shard pouch.
+-- (a red stamp on rules new to his codex; an Omen control on each seal still to break, the Omens
+-- held over them), or his codex page; on the card the codex tally, the stakes (Momentum's rate and
+-- the pact's share), the info line, the three pacts to take, the elixirs with their shard costs,
+-- and the shard pouch. Everything the player can select says what it is on the info line.
 local function menu_content(boss)
     local plan = plan_for(boss)
     local next_seal = saved_seal(boss)
     local codex = meta.codex(boss.key)
+    local omens = meta.omens()
     local stages = {}
     for index, shown in ipairs(plan.seals) do
         stages[index] = { name = shown.title, text = shown.hint,
             stamp = not codex[shown.name] and META["menu.new_stamp"] or nil,
-            icon = index < next_seal and shown.sprites.broken or shown.sprites.intact,
-            state = index < next_seal and "done" or (index == next_seal and "next" or "locked") }
+            icon = index < next_seal and meta.pictures.codex[shown.art] or shown.sprites.intact,
+            state = index < next_seal and "done" or (index == next_seal and "next" or "upcoming") }
+        -- A seal still to break can be rolled again for an Omen: pressed once to arm, again to spend.
+        if index >= next_seal then
+            stages[index].action = { icon = meta.pictures.omen, text = "1", confirm = META["menu.reroll_confirm"],
+                enabled = omens > 0, reason = META["menu.no_omens"] }
+        end
     end
     local tally = {}
     for _, art in ipairs(meta.arts) do
@@ -730,23 +767,33 @@ local function menu_content(boss)
         for _, name in ipairs(BY_ART[art]) do if codex[name] then filled = filled + 1 end end
         tally[#tally + 1] = { color = meta.ink[art], count = #BY_ART[art], filled = filled }
     end
-    local stakes = { { icon = meta.pictures.momentum, text = fill(META["menu.share"], math.floor(MOMENTUM * 100 + 0.5)) } }
+    local rate = math.floor(MOMENTUM * 100 + 0.5)
+    local stakes = { { icon = meta.pictures.momentum, text = fill(META["menu.rate"], rate),
+        info = { title = TEXT["results.momentum"], text = fill(META["menu.momentum_info"], rate) } } }
     if plan.level > 0 then
-        stakes[#stakes + 1] = { icon = meta.pictures.pact, text = fill(META["menu.share"], math.floor(PACT_BONUS * plan.level * 100 + 0.5)) }
+        local share = math.floor(PACT_BONUS * plan.level * 100 + 0.5)
+        stakes[#stakes + 1] = { icon = meta.pictures.pact, text = fill(META["menu.share"], share),
+            info = { title = META["menu.pact_title"], text = fill(META["menu.pact_info"], plan.level, share) } }
     end
-    local omens = meta.omens()
-    stakes[#stakes + 1] = { icon = meta.pictures.omen, text = fill(META["menu.times"], omens), lit = omens > 0 }
+    local tag = fill(META["menu.share"], math.floor(PACT_BONUS * 100 + 0.5))
     local choices = {}
     for index, shown in ipairs(plan.pacts) do
         choices[index] = { id = "pact" .. index, icon = shown.sprites.intact, name = shown.title,
-            chosen = index <= plan.level, mark = ROMAN[index] }
+            chosen = index <= plan.level, mark = ROMAN[index], tag = tag,
+            info = { title = shown.title, text = shown.hint } }
     end
     local held = {}
     for _, elixir in ipairs(elixirs.list) do
-        held[#held + 1] = { item = elixir.item, count = sf2.profile.item_count(elixir.item), cost = meta.cost(elixir) }
+        local check = meta.can_brew(elixir)
+        held[#held + 1] = { item = elixir.item, count = sf2.profile.item_count(elixir.item), cost = meta.cost(elixir),
+            info = { title = elixir.name, text = elixir.short }, confirm = META["menu.brew_confirm"],
+            enabled = check == "brewed", reason = check ~= "brewed" and fill(META["menu." .. check], elixir.name) or nil }
     end
     local pouch, counts = {}, meta.shard_counts()
-    for index, art in ipairs(meta.arts) do pouch[index] = { icon = meta.pictures.shard[art], count = counts[index] } end
+    for index, art in ipairs(meta.arts) do
+        pouch[index] = { icon = meta.pictures.shard[art], count = counts[index],
+            info = { title = meta.shard_names[art], text = META["menu.shard_info"] } }
+    end
     local known = meta.codex_count(codex)
     local content = {
         title = boss.name,
@@ -755,17 +802,27 @@ local function menu_content(boss)
         -- once every seal rule is in his codex.
         victories = victories(boss),
         golden = known == meta.codex_size,
+        hanko_info = { title = META["menu.wins_title"], text = fill(META["menu.wins_info"], boss.name) },
         stages = stages,
+        action_stock = { icon = meta.pictures.omen, count = omens },
         tally = tally,
+        -- The tally pulses after a fight that added rules, until the codex page shows them.
+        tally_new = fresh_codex[boss.key] ~= nil,
         stakes = stakes,
         choices = choices,
+        choices_label = META["menu.label_pacts"],
         items = held,
+        items_label = META["menu.label_elixirs"],
         pouch = pouch,
         loadouts = true,
         note = notice,
     }
     notice = nil
-    if codex_page.open then content.grid = codex_grid(codex) end
+    if codex_page.open then
+        content.grid = codex_grid(boss, codex)
+        -- Shown cracking in once; later refreshes draw them settled.
+        fresh_codex[boss.key] = nil
+    end
     return content
 end
 
@@ -788,9 +845,14 @@ local function open_menu(boss, request)
         close_view(view)
         sf2.story.cancel_fight(request)
     end
-    -- The codex tally opens and closes the codex page; a seal on it is selected for its words.
+    -- The codex tally opens and closes the codex page, and the page's own cross closes it; a seal
+    -- on it is selected for its words.
     content.on_tally = function(view)
         codex_page.open = not codex_page.open
+        refresh(view)
+    end
+    content.on_close_grid = function(view)
+        codex_page.open = false
         refresh(view)
     end
     content.on_cell = function(view, id)
@@ -804,11 +866,11 @@ local function open_menu(boss, request)
         last_level[boss.key] = plan.level
         refresh(view)
     end
-    -- A seal still to break, rolled again for an Omen.
-    content.on_stage = function(view, index)
-        if index < saved_seal(boss) then
-            notice = META["menu.already_broken"]
-        elseif not meta.spend_omen() then
+    -- A seal still to break, rolled again for an Omen. The host runs this only on the second
+    -- press of its control, and never while no Omen is held (the control then says why).
+    content.on_action = function(view, index)
+        if index < saved_seal(boss) then return end
+        if not meta.spend_omen() then
             notice = META["menu.no_omens"]
         else
             notice = fill(META["menu.rerolled"], reroll(plan, "seals", index).title)

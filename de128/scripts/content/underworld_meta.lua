@@ -33,9 +33,10 @@ for _, art in ipairs(ARTS) do
     pictures.codex[art] = sf2.assets.sprite("sprites/underworld_meta/codex_" .. art)
 end
 
-local shards = {}
+local shards, shard_names = {}, {}
 for _, art in ipairs(ARTS) do
     local key = "de128.uw_meta.shard." .. art
+    shard_names[art] = words.read(key .. ".name")
     shards[art] = sf2.items.register {
         category = "consumable", id = "seal_shard_" .. art,
         display_name = words.own("item.seal_shard_" .. art, key .. ".name"),
@@ -112,7 +113,7 @@ local function save(key, set, pact)
     sf2.state.set { [FIELD] = value .. key .. "=" .. encode(set) .. ":" .. pact .. "," }
 end
 
-local M = { shards = shards, arts = ARTS, ink = INK, pictures = pictures, omen = omen, codex_size = #CODEX, codex_order = CODEX }
+local M = { shards = shards, shard_names = shard_names, arts = ARTS, ink = INK, pictures = pictures, omen = omen, codex_size = #CODEX, codex_order = CODEX }
 
 function M.codex(key) return decode((entry(key))) end
 function M.in_codex(name) return PLACE[name] ~= nil end
@@ -178,26 +179,36 @@ end
 function M.omens() return sf2.profile.item_count(omen) end
 function M.spend_omen() return sf2.profile.take_item(omen, 1) end
 
--- An elixir's cost as challenge-screen pictures: one shard each, lit while the player holds it.
+-- An elixir's cost as challenge-screen pictures: one per shard colour with how many it takes,
+-- lit while the player holds that many (unlit ones stay in their colour, pale).
 function M.cost(elixir)
     local recipe = assert(RECIPES[elixir.id], "No recipe for " .. elixir.id)
     local cost = {}
     for _, art in ipairs(RECIPES_ORDER) do
-        local held = sf2.profile.item_count(shards[art])
-        for piece = 1, recipe[art] or 0 do
-            cost[#cost + 1] = { icon = pictures.shard[art], lit = piece <= held }
+        local need = recipe[art]
+        if need then
+            cost[#cost + 1] = { icon = pictures.shard[art], count = need,
+                lit = sf2.profile.item_count(shards[art]) >= need }
         end
     end
     return cost
 end
 
--- Brews one elixir from shards: "brewed", "short" (not enough shards) or "full" (no room).
-function M.brew(elixir)
+-- Whether one elixir can be brewed now, changing nothing: "brewed", "short" or "full".
+function M.can_brew(elixir)
     local recipe = assert(RECIPES[elixir.id], "No recipe for " .. elixir.id)
     for art, count in pairs(recipe) do
         if sf2.profile.item_count(shards[art]) < count then return "short" end
     end
     if sf2.profile.item_count(elixir.item) >= elixirs.stack then return "full" end
+    return "brewed"
+end
+
+-- Brews one elixir from shards: "brewed", "short" (not enough shards) or "full" (no room).
+function M.brew(elixir)
+    local recipe = assert(RECIPES[elixir.id], "No recipe for " .. elixir.id)
+    local check = M.can_brew(elixir)
+    if check ~= "brewed" then return check end
     for art, count in pairs(recipe) do
         if not sf2.profile.take_item(shards[art], count) then return "short" end
     end
