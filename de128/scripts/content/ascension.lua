@@ -298,10 +298,12 @@ local DIALOGS = {
     end,
     -- Asc_tutorial_first_fightend_loss: three more tickets after a first loss in fight 1.
     consolation = function()
-        if not has("consolation_owed") then return false end
-        if not sf2.profile.give_item(ticket, ENTRY_TICKETS) then return false end
-        remove("consolation_owed")
-        return play({ card(key("tutorial_ascension_immunity_fail_2"), MORE), card(acquired, TAKE, MESSAGE, tickets_picture) })
+        if not has("consolation_owed") then return "skip" end
+        if not play({ card(key("tutorial_ascension_immunity_fail_2"), MORE), card(acquired, TAKE, MESSAGE, tickets_picture) }) then
+            return false
+        end
+        if sf2.profile.give_item(ticket, ENTRY_TICKETS) then remove("consolation_owed") end
+        return true
     end,
     -- Asc_tutorial_duel and Zone2LossTutor.
     duel = function() return play({ card(key("de128.ascension.duel_tickets")) }) end,
@@ -329,9 +331,16 @@ show_next = function()
         for _, name in ipairs(due) do if name == "consolation" then queued = true end end
         if not queued then due[#due + 1] = "consolation" end
     end
+    -- A dialog that cannot open now (another DE128 sequence is playing, or the map is not ready)
+    -- stays first in line for the next try; only one that no longer applies ("skip") is dropped.
     while #due > 0 do
-        local name = table.remove(due, 1)
-        if DIALOGS[name]() then return end
+        local result = DIALOGS[due[1]]()
+        if result == "skip" then
+            table.remove(due, 1)
+        else
+            if result then table.remove(due, 1) end
+            return
+        end
     end
 end
 
@@ -371,11 +380,15 @@ sf2.story.on("fight_end", function(event)
         end
     end
     check_reminder()
+    -- Story events from the fight reach the mod once the map is back, after its scene_enter (and
+    -- the result events): try the queue right away instead of at the next scene change.
+    show_next()
 end)
 
 sf2.story.on("item_acquired", function(event)
     if event.item and monk_items[event.item:lower()] and event.previous_count == 0 and not has("set_item") then
         add("set_item"); due[#due + 1] = "set_item"
+        show_next()
     end
 end)
 
@@ -405,6 +418,7 @@ end)
 -- defeat dialog does on battle_result; otherwise it waited for the next scene change.
 sf2.story.on("battle_result", function() show_next() end)
 sf2.story.on("mode_reset", function() show_next() end)
+sf2.story.on("map_button", function() show_next() end)
 
 -- AscensionZoneIntro: the Puppeteer tells the Monk's story the first time the player enters.
 for _, fight in ipairs(fights) do
