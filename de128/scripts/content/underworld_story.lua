@@ -4,6 +4,10 @@ local text = require("content.underworld_text")
 local shared = require("content.sensei_state")
 local sensei_art = require("content.sensei_art")
 local seals = require("content.underworld_seals")
+local words = require("content.text")
+
+-- The debug menu's button for the first-visit guide (read while loading, like all DE128 words).
+local DEBUG_GUIDE = words.read("de128.uw_meta.guide.debug")
 
 -- The archived Underworld quests (RaidIntro, RaidIntro2 and the 32 RaidEnter/
 -- RaidWinAfter/RaidLoseAfter bosses; see Tools/GenerateDE128Underworld.py) as mod
@@ -89,6 +93,8 @@ local function install(underworld)
     shared.register()
     story_portraits()
     local results = {}
+    -- The first-visit guide's own fight request is under way (see try_guide below).
+    local guide_launched = false
     for boss, sequences in pairs(story.bosses) do
         local fights = underworld.by_battle[boss]
         assert(fights and fights["1"], "Missing Underworld story fight " .. boss .. "|1")
@@ -115,9 +121,16 @@ local function install(underworld)
                     elseif sf2.story.resume_fight(request) then add("entered", key)
                     else sf2.story.cancel_fight(request) end
                 end,
-                on_cancel = function() sf2.story.cancel_fight(request) end,
+                on_cancel = function()
+                    guide_launched = false
+                    sf2.story.cancel_fight(request)
+                end,
             }
-            if not opened then sf2.story.cancel_fight(request) end
+            if not opened then
+                -- Another DE128 sequence is playing: a guide launch is tried again on a later event.
+                guide_launched = false
+                sf2.story.cancel_fight(request)
+            end
             return nil
         end)
     end
@@ -152,6 +165,33 @@ local function install(underworld)
         sf2.map.focus(underworld.battles[story.focus])
         sf2.map.open_underworld()
     end
+
+    -- The sealed Underworld's first-visit guide (content.underworld_seals) runs on the first boss's
+    -- real challenge screen. Once the intro has finished it opens that screen the way the map's
+    -- boss button does (the boss's own entry dialog first, the first time), so Fight and Back work
+    -- as ever and nothing starts until Fight. A launch the game refuses, or one whose entry dialog
+    -- cannot open while another DE128 sequence plays, is tried again on a later event.
+    local focus_fight = assert(underworld.by_battle[story.focus] and underworld.by_battle[story.focus]["1"],
+        "Missing Underworld focus fight " .. story.focus)
+    local function try_guide()
+        if guide_launched or not seals.guide_pending() then return end
+        enter_underworld()
+        guide_launched = sf2.story.start_fight(focus_fight.handle)
+    end
+
+    -- Debug builds (Eclipse's F1 menu outside fights): the guide again on any save. It opens the
+    -- Underworld and the first boss's screen; the saved state only changes if it is walked to the end.
+    sf2.debug.action { id = "underworld_guide", label = DEBUG_GUIDE, run = function()
+        seals.force_guide()
+        if scene ~= "map" then
+            sf2.log.warn("Underworld guide: open the map first; it shows on the next sealed boss's screen.")
+            return
+        end
+        enter_underworld()
+        if not sf2.story.start_fight(focus_fight.handle) then
+            sf2.log.warn("Underworld guide: no fight can start now; it shows on the next sealed boss's screen.")
+        end
+    end }
 
     local function run_intro()
         run_cards("intro", story.intro, function()
@@ -195,12 +235,16 @@ local function install(underworld)
             -- DE128 keeps the player on the Underworld map the intro just opened.
             run_cards("followup", story.followup, function()
                 sf2.state.set { uw_intro = 2 }
+                seals.intro_finished()
                 show_next()
             end, enter_underworld)
             return
         end
         local boss, kind = pending_result()
-        if not boss then return end
+        if not boss then
+            try_guide()
+            return
+        end
         local key = boss:lower()
         run_cards(boss .. ":" .. kind, story.bosses[boss][kind], function()
             add(kind .. "_shown", key)
@@ -216,9 +260,16 @@ local function install(underworld)
         if not has(event.outcome .. "_shown", key) then add(event.outcome .. "_pending", key) end
         show_next()
     end)
+    -- A refused guide launch is tried again after any fight and on map buttons too.
+    sf2.story.on("battle_result", function()
+        guide_launched = false
+        show_next()
+    end)
+    sf2.story.on("map_button", function() show_next() end)
     sf2.story.on("scene_enter", function(event)
         scene = event.scene
         view = nil
+        guide_launched = false
         if scene ~= "map" then return end
         -- The toggle stays hidden until the intro's ShowRaidsGag step.
         if sf2.state.get("uw_intro") == 0 then sf2.map.show_underworld(false) end

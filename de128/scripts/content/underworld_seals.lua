@@ -167,6 +167,14 @@ for _, key in ipairs({ "menu.new_stamp", "menu.codex_title", "menu.codex_count",
     "results.codex", "results.codex_new", "results.bonus_pact" }) do
     META[key] = words.read("de128.uw_meta." .. key)
 end
+-- The first-visit guide's steps, in the order it walks the challenge screen: the Eclipse part each
+-- frames (sf2.ui.challenge `guide`) and its words, de128.uw_meta.guide.<part>.title/.text.
+local GUIDE_PARTS = { "portrait", "stages", "tally", "stakes", "choices", "items", "pouch", "actions", "loadouts", "buttons" }
+local GUIDE_TEXT = {}
+for _, part in ipairs(GUIDE_PARTS) do
+    GUIDE_TEXT[part] = { title = words.read("de128.uw_meta.guide." .. part .. ".title"),
+        text = words.read("de128.uw_meta.guide." .. part .. ".text") }
+end
 
 -- "{0}", "{1}" ... in a text, filled in order.
 local function fill(template, ...)
@@ -855,10 +863,46 @@ local function menu_content(boss)
     return content
 end
 
+-- The first-visit guide (Eclipse's challenge screen guide): the first sealed challenge screen a
+-- save opens walks through its parts once, nothing spendable meanwhile. Its state is the reserved
+-- ",guide=<n>," entry of uw_meta (content.underworld_meta): 0 pending after the Underworld intro,
+-- 1 shown. A save from before the guide that has already fought sealed bosses (a codex, or a seal
+-- reached) counts as having seen it. The debug action forces it once, whatever was saved.
+local guide = { forced = false }
+
+local function guide_due()
+    if guide.forced then return true end
+    local state = meta.guide_state()
+    if state == 1 then return false end
+    if state == nil and (meta.played() or (sf2.state.get(FIELD) or ",") ~= ",") then
+        meta.set_guide(1)
+        return false
+    end
+    return true
+end
+
+local function guide_steps()
+    local rates = { stakes = math.floor(MOMENTUM * 100 + 0.5), choices = math.floor(PACT_BONUS * 100 + 0.5) }
+    local steps = {}
+    for _, part in ipairs(GUIDE_PARTS) do
+        local words_for = GUIDE_TEXT[part]
+        steps[#steps + 1] = { target = part, title = words_for.title,
+            text = rates[part] and fill(words_for.text, rates[part]) or words_for.text }
+    end
+    return steps
+end
+
 local function open_menu(boss, request)
     local plan = plan_for(boss)
     codex_page.open, codex_page.selected = false, nil
     local content = menu_content(boss)
+    -- Only the opening content carries the guide: refreshes leave it out, so they never restart it.
+    local guided, forced = guide_due(), guide.forced
+    if guided then
+        content.guide = { steps = guide_steps(),
+            -- A debug run marks it seen only when it was walked to the end.
+            on_done = function(_, skipped) if forced and not skipped then meta.set_guide(1) end end }
+    end
     local function refresh(view) sf2.ui.refresh(view, menu_content(boss)) end
     content.on_fight = function(view)
         close_view(view)
@@ -915,7 +959,24 @@ local function open_menu(boss, request)
         refresh(view)
     end
     sf2.ui.challenge(content)
+    -- Shown: never again on this save (a debug run leaves the saved state to on_done).
+    if guided then
+        guide.forced = false
+        if not forced then meta.set_guide(1) end
+    end
 end
+
+-- content.underworld_story: the Underworld intro has finished, so the guide is due (unless this save
+-- already fought sealed bosses); whether it is still to be shown; the debug action's force.
+local function guide_pending()
+    return meta.guide_state() == 0
+end
+
+local function intro_finished()
+    if meta.guide_state() == nil and not meta.played() and (sf2.state.get(FIELD) or ",") == "," then meta.set_guide(0) end
+end
+
+local function force_guide() guide.forced = true end
 
 -- A sealed boss's before_fight step for content.underworld_story (only one handler per fight, so
 -- the story calls it after its first-entry dialogue), or nil for other bosses. Holds the fight.
@@ -955,4 +1016,5 @@ local function install(underworld)
     end)
 end
 
-return { apply = apply, menu = menu, install = install }
+return { apply = apply, menu = menu, install = install, guide_pending = guide_pending, intro_finished = intro_finished,
+    force_guide = force_guide }

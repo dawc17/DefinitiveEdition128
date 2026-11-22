@@ -12,7 +12,8 @@ local elixirs = require("content.underworld_elixirs")
 --   Pacts        chosen on the challenge screen (levels 0-3); the best level beaten is kept per boss.
 -- Shards and Omens are stackable consumables, so they live in the inventory. The codex and best
 -- pact share one saved string, uw_meta (content.sensei_state), as ",<boss key>=<codex>:<pact>,"
--- entries: <codex> is CODEX's bits, four to a hex digit, first rule lowest.
+-- entries: <codex> is CODEX's bits, four to a hex digit, first rule lowest. One reserved entry,
+-- ",guide=<n>,", holds the first-visit guide's state (M.guide_state below).
 -- Words: de128.uw_meta.* in Eclipse's English text. Numbers are first guesses.
 
 local FIELD = "uw_meta"
@@ -122,6 +123,27 @@ function M.codex_count(set)
     local count = 0
     for name in pairs(set) do if PLACE[name] then count = count + 1 end end
     return count
+end
+
+-- The sealed Underworld's first-visit guide (content.underworld_seals) keeps its state in the same
+-- string, as one reserved entry ",guide=<n>,": 0 once the Underworld intro has finished (the guide
+-- is still to be shown), 1 once it has been shown; no entry on saves from before it. It can never
+-- be read as a boss's entry or touch one: boss keys are lower-case archive names ("boss_1"), never
+-- "guide", and its value has no ":<pact>", so entry() and save() above never match it; and
+-- ",guide=%d," needs the literal key right after a comma, which no boss entry has.
+local GUIDE = ",guide=(%d),"
+function M.guide_state()
+    return tonumber((sf2.state.get(FIELD) or ","):match(GUIDE))
+end
+
+function M.set_guide(state)
+    local value = (sf2.state.get(FIELD) or ","):gsub(",guide=%d,", ",")
+    sf2.state.set { [FIELD] = value .. "guide=" .. state .. "," }
+end
+
+-- Whether this save has fought a sealed boss far enough to keep something (a codex or best pact).
+function M.played()
+    return (sf2.state.get(FIELD) or ","):find(",[%w_]+=%x+:%d,") ~= nil
 end
 
 function M.best_pact(key)
