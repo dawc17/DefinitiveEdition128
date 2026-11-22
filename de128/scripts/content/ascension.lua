@@ -16,6 +16,10 @@ local trial = require("content.ascension_rules")
 --   Tickets  three from the Puppeteer when Ascension opens, three more after a first loss in
 --            fight 1, two for every duel win (as the archive's duels paid), one from a chest,
 --            and ten for 30 gems in the shop's chest tab from Act 2.
+--   Screens  Eclipse draws 1.9.38's own: the ticket check before a run (entry_dialog: the
+--            Puppeteer, YOU HAVE, LEAVE / FIGHT! / the ten-ticket pack), the chest lottery (the
+--            Bronze, Silver or Gold scroll, START and MORE for gems) and the immunity sliders on
+--            the map panel and the result screen (show_resistance).
 -- The game's own Ascension words are Eclipse's English text; de128.ascension.* are DE128's.
 -- Saved state: one field, "ascension", a set of words such as ",unlocked,zone_intro,".
 
@@ -62,7 +66,7 @@ for _, name in ipairs {
     "tutorial_ascension_intro2_1", "tutorial_ascension_intro2_3", "tutorial_ascension_loss1",
     "tutorial_ascension_reminder", "tutorial_ascention_intro_title",
     "AscDefeatPrase_1", "AscDefeatPrase_2", "AscDefeatPrase_3", "AscDefeatPrase_4",
-    "AscWinPrase_1", "AscWinPrase_2", "AscWinPrase_3", "AscWinPrase_4",
+    "AscWinPrase_1", "AscWinPrase_2", "AscWinPrase_3", "AscWinPrase_4", "Ascension_chest_tooltip",
 } do TEXT[name] = words.get(name) end
 local puppeteer = sf2.assets.sprite("core:ui/users/character_puppeteer")
 local tickets_picture = sf2.assets.sprite("core:ui/users/tickets")
@@ -74,7 +78,7 @@ local ticket = sf2.items.register {
     description = words.own("item.ascension_ticket.description", "de128.ascension.ticket.description"),
     icon = ticket_icon, stack = TICKET_STACK,
     -- Sold beside the chests from Act 2: ten tickets for 30 gems (owner's price; 1.9.38's
-    -- Pack_Tickets was a paid pack, so DE128 prices it in gems instead).
+    -- Pack_Tickets sold ten for 80 gems). The ticket check offers the same pack.
     shop = { price = { gems = 30 }, count = 10, group = "ZONE_2" },
 }
 
@@ -115,6 +119,8 @@ local PIECES = {
     { item = "magic/MAGIC_C2_Z2_MONK_ROOT_STUN", perk = "PERK_ITEM_SPECIAL_INTOXICATION_MAGIC" },
 }
 local CHESTS = { 1, 1, 2, 2, 3 }
+-- The archive's Lottery Type, which picks the lottery screen's scroll.
+local CHEST_TYPES = { "bronze", "silver", "gold" }
 local chest_pictures = {}
 for tier = 1, 3 do chest_pictures[tier] = sf2.assets.sprite("sprites/ascension/challenge2_chest_" .. tier) end
 local monk_items = {}
@@ -157,7 +163,7 @@ local function lottery(step)
     orbs(0.09, 0.02, 0.03)
     coins(0.8)
     orbs(0.01, 0.02, 0.03)
-    return { image = chest_pictures[tier], slots = slots }
+    return { type = CHEST_TYPES[tier], image = chest_pictures[tier], slots = slots }
 end
 
 local fight_specs = {}
@@ -209,6 +215,8 @@ end
 sf2.modes.register {
     id = "ascension", fights = fights, repeatable = true, reset_on_loss = true,
     entry_item = ticket, entry_count = ENTRY_TICKETS, entry_per = "run",
+    -- AscensionCheckTickets: the Puppeteer asks before every run.
+    entry_dialog = { title = key("tutorial_ascention_intro_title"), portrait = puppeteer, text = key("Ascension_chest_tooltip") },
     on_prepare = function(_, event)
         local draw = number("draws") + 1
         set_number("draws", draw)
