@@ -22,8 +22,28 @@ shared.register()
 local FIELD = "ascension"
 local TICKET_STACK = 999
 local ENTRY_TICKETS = 3
-local LOCK_FIGHT = "core:fights/zone_1/boss_lynx/6"
-local UNLOCK_FIGHT = "core:fights/zone_2/tournament/12"
+-- 1.9.38 shows the battle locked after Lynx and opens it after Tournament stage 12. The game
+-- resets fight records when a tournament or boss is replayed (Eclipse mode, rematches), so a
+-- save past that point may show 0 wins there: any later milestone counts as well.
+local LOCK_FIGHTS, UNLOCK_FIGHTS = { "core:fights/zone_1/boss_lynx/6", "core:fights/zone_1/boss_lynx_intermission/1",
+    "core:fights/zone_1/boss_lynx_eclipsemode/1", "core:fights/zone_2/tournament/1", "core:fights/zone_2/challenge/1",
+    "core:fights/zone_2/duel/1" }, {}
+for stage = 12, 24 do UNLOCK_FIGHTS[#UNLOCK_FIGHTS + 1] = "core:fights/zone_2/tournament/" .. stage end
+for _, id in ipairs { "core:fights/zone_2/boss_hermit/1", "core:fights/zone_2/boss_hermit_intermission/1",
+    "core:fights/zone_2/boss_hermit_eclipsemode/1", "core:fights/zone_2/challenge_intermission/1",
+    "core:fights/zone_2/duel_intermission/1" } do UNLOCK_FIGHTS[#UNLOCK_FIGHTS + 1] = id end
+for zone = 3, 7 do
+    for _, kind in ipairs { "tournament", "challenge", "duel" } do
+        UNLOCK_FIGHTS[#UNLOCK_FIGHTS + 1] = "core:fights/zone_" .. zone .. "/" .. kind .. "/1"
+    end
+end
+for _, id in ipairs(UNLOCK_FIGHTS) do LOCK_FIGHTS[#LOCK_FIGHTS + 1] = id end
+local function any_won(ids)
+    for _, id in ipairs(ids) do
+        if sf2.profile.fight(id).wins >= 1 then return true end
+    end
+    return false
+end
 
 local function key(name) return words.get(name) end
 local puppeteer = sf2.assets.sprite("core:ui/users/character_puppeteer")
@@ -220,7 +240,7 @@ end
 
 local function reveal()
     if has("unlocked") or has("locked") then return end
-    if sf2.profile.fight(LOCK_FIGHT).wins < 1 then return end
+    if not any_won(LOCK_FIGHTS) then return end
     if sf2.map.reveal { battle = battle, locked = true } then add("locked") end
 end
 
@@ -271,7 +291,7 @@ show_next = function()
     if scene ~= "map" or view or shared.dialogue_pending() or shared.defeat_pending() then return end
     reveal()
     if not has("unlocked") then
-        if sf2.profile.fight(UNLOCK_FIGHT).wins >= 1 then unlock() end
+        if any_won(UNLOCK_FIGHTS) then unlock() end
         return
     end
     -- The consolation tickets stay owed (saved) until they are given on the map.
