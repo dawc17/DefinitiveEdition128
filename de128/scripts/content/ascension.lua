@@ -46,7 +46,24 @@ local function any_won(ids)
     return false
 end
 
-local function key(name) return words.get(name) end
+-- Text handles can only be fetched while the mod loads, and the dialogs below open during play,
+-- so every line they use is fetched here once.
+local TEXT = {}
+local function key(name)
+    local handle = TEXT[name]
+    if not handle then error("ascension: text '" .. name .. "' was not fetched at load", 2) end
+    return handle
+end
+for _, name in ipairs {
+    "Ascension", "Ascension_TITLE", "LockedAscensionDescription", "AscSetItemAcquered",
+    "ZONE_2Asc_Intro_1", "ZONE_2Asc_Intro_2", "ZONE_2Asc_Intro_3", "ZONE_2Asc_Intro_4",
+    "de128.ascension.duel_tickets", "dlgAlertTitle", "dlgStoryBtnMore", "dlgStoryBtnOk", "dlgStoryBtnTake",
+    "tutorial_ascension_immunity_fail", "tutorial_ascension_immunity_fail_2", "tutorial_ascension_intro1",
+    "tutorial_ascension_intro2_1", "tutorial_ascension_intro2_3", "tutorial_ascension_loss1",
+    "tutorial_ascension_reminder", "tutorial_ascention_intro_title",
+    "AscDefeatPrase_1", "AscDefeatPrase_2", "AscDefeatPrase_3", "AscDefeatPrase_4",
+    "AscWinPrase_1", "AscWinPrase_2", "AscWinPrase_3", "AscWinPrase_4",
+} do TEXT[name] = words.get(name) end
 local puppeteer = sf2.assets.sprite("core:ui/users/character_puppeteer")
 local tickets_picture = sf2.assets.sprite("core:ui/users/tickets")
 local ticket_icon = sf2.assets.sprite("sprites/ascension/ticket")
