@@ -28,7 +28,7 @@ local UNLOCK_FIGHT = "core:fights/zone_2/tournament/12"
 local function key(name) return words.get(name) end
 local puppeteer = sf2.assets.sprite("core:ui/users/character_puppeteer")
 local tickets_picture = sf2.assets.sprite("core:ui/users/tickets")
-local ticket_icon = sf2.assets.sprite("core:ui/atlases/MiscSprites.ticket")
+local ticket_icon = sf2.assets.sprite("sprites/ascension/ticket")
 
 local ticket = sf2.items.register {
     category = "consumable", id = "ascension_ticket",
