@@ -17,8 +17,19 @@ end
 -- Titan's citadel (C3_BOSS_TITAN and its Eclipse twin) follows the player's progress: fights
 -- 1-5 are the five bodyguards; entering fight 6 first sends the player to May until she is
 -- beaten (quests Zone7FightWithMay and Zone7FightWithMay_EclipseMode), and only then to Titan,
--- who keeps the battle's own picture. May's panel reads "Justice accepted your challenge."
-local MAY = { preview = "preview_fights.may", challenger = words.read("de128.battle_previews.may_challenger") }
+-- who keeps the battle's own picture. May's panel is titled Justice and reads "Justice accepted
+-- your challenge."
+local JUSTICE = words.read("de128.battle_previews.may_challenger")
+local MAY = { preview = "preview_fights.may", challenger = JUSTICE, title = JUSTICE }
+-- Fights 1-5 are the bodyguards in the battle's order (stages.xml C3_BOSS_TITAN and its
+-- twin): each shows Seby's own picture (2026-11-22) and is titled with the bodyguard's name.
+local BODYGUARDS = {}
+for index, key in ipairs({ "assassin", "master", "guru", "corsair", "emperor" }) do
+    local name = words.read("de128.battle_previews." .. key)
+    BODYGUARDS[index] = {
+        preview = sf2.assets.sprite("sprites/titan_bodyguards/preview_" .. key), challenger = name, title = name,
+    }
+end
 
 -- Act 3's Sensei battle fights in the village, which the Special Edition locations switch swaps
 -- for village_se: sprites/sensei/act3 (Seby's classic village) shows without it, act3_se with it.
@@ -45,7 +56,7 @@ sf2.battles.on_preview(function(battle)
     if challenger then return sf2.settings.get(se_locations) and challenger or nil end
     local titan = TITAN[battle.id]
     if titan == nil or battle.fight == nil then return nil end
-    if battle.index <= 5 then return "preview_fights.titan_bodyguards" end
+    if battle.index >= 1 and battle.index <= 5 then return BODYGUARDS[battle.index] end
     -- The story fight meets May once; the Eclipse twin meets her before every Titan win.
     local titan_wins = titan.replayable and sf2.profile.fight(battle.fight).wins or 0
     if sf2.profile.fight(titan.may).wins <= titan_wins then return MAY end

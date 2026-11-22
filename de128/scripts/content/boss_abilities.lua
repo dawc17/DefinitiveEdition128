@@ -1,7 +1,7 @@
 local sf2 = require("sf2")
 local words = require("content.text")
 
--- Boss-ability enchantments granted by DE's Special Recipes I-III.
+-- Boss-ability enchantments granted by DE128's Special Recipes I and II.
 -- Authority: Assets/DExml/perks.xml PERK_SHADOW_CLOAK .. PERK_TITANS_SHIELD
 -- (PerkType="Combo", Button="RaidCharge"), list.xml's single-item SpecialRecipe
 -- sets (name = perk Alias, description = set Brief) and forge.xml's Abilities
@@ -110,12 +110,16 @@ local function ability_behavior(key)
         state = { lifetime = "round", fields = fields },
     }
     local base = {
+        -- DE quests.xml ShowRaidChargeButton: an active ability shows RaidCharge
+        -- outside raids too, from the round's start (its stances included). Opponents
+        -- have no button; the call is then a no-op.
+        on_round_begin = function(self, fighter)
+            fighter:set_control_visible("raid_charge", true)
+        end,
         on_tick = function(self, fighter)
             if self.state.started then return end
             self.state.started = true
             recharge(self, fighter, self.params.initial_frames)
-            -- DE quests.xml ShowRaidChargeButton: an active ability shows RaidCharge
-            -- outside raids too. Opponents have no button; the call is then a no-op.
             fighter:set_control_visible("raid_charge", true)
         end,
         on_animation_start = function(self, fighter, event)
@@ -271,6 +275,10 @@ local cloak_behavior = {
         started = false,
         cloaked = false,
     } },
+    -- The RaidCharge button shows from the round's start, as the other abilities' does.
+    on_round_begin = function(self, fighter)
+        fighter:set_control_visible("raid_charge", true)
+    end,
     on_tick = function(self, fighter)
         if not self.state.started then
             self.state.started = true

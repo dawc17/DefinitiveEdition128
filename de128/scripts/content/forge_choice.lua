@@ -3,9 +3,10 @@ local words = require("content.text")
 
 -- Deterministic forge: every recipe DE128 ships or uses lets the player pick the
 -- exact enchantment and a strength tier instead of rolling one (selection
--- "choose"). Tier strength is a fraction of the recipe item's deviation range;
--- the price scale multiplies the recipe's level price row. Eclipse owns the
--- mechanism (sf2.forge.patch with selection / perk); this module is
+-- "choose"). Tier strength is the fraction of the item level's full enchantment
+-- power (the aspect list.xml gives an item of that level): High is all of it,
+-- Mid two thirds, Low one third. The price scale multiplies the recipe's level
+-- price row. Eclipse owns the mechanism (sf2.forge.patch with selection / perk); this module is
 -- only DE128's policy. Design: Docs/Engineering/Modding/DETERMINISTIC_FORGE_PLAN.md.
 --
 -- Candidate price scales: normal enchantments 1x (the default, so unconfigured),
@@ -16,8 +17,8 @@ assert(type(sf2.forge.patch) == "function", "DE128 requires the public sf2.forge
 local registered = require("content.forge")
 
 local tiers = {
-    { id = "low", name = words.get("de128.forge_tier.low"), strength = 0.0, price = 0.5 },
-    { id = "mid", name = words.get("de128.forge_tier.mid"), strength = 0.5, price = 1.0 },
+    { id = "low", name = words.get("de128.forge_tier.low"), strength = 1 / 3, price = 0.5 },
+    { id = "mid", name = words.get("de128.forge_tier.mid"), strength = 2 / 3, price = 1.0 },
     { id = "high", name = words.get("de128.forge_tier.high"), strength = 1.0, price = 2.0 },
 }
 
@@ -26,7 +27,7 @@ local tiers = {
 local recipes = {
     "Simple", "Medium", "Complex",
     registered.complex_2, registered.complex_3,
-    registered.abilities_1, registered.abilities_2, registered.abilities_3,
+    registered.abilities_1, registered.abilities_2,
 }
 for _, recipe in ipairs(recipes) do
     sf2.forge.patch { recipe = recipe, selection = "choose", tiers = tiers }
@@ -93,15 +94,16 @@ local function install(underworld)
         assistants = join(story("shogun_katana"), both(sensei[6])),
         rat_wave = young("Man_Arkhos"),
         war_whirl = young("Girl_Drakaina"),
-        lightning_chain = young("Man_Dandy"),
+        fear_ray = young("Man_Tenebris"),
         power_field = young("Cyborg_Gatekeeper"),
+        grasp_of_darkness = young("Girl_Blackness"),
+        lightning_chain = young("Man_Dandy"),
     }
 
     local abilities = require("content.boss_abilities").perks
     local recipe_perks = {
-        abilities_1 = { "shadow_cloak", "hermit_storm", "earthquake", "wasp_fly" },
-        abilities_2 = { "teleportation", "assistants", "rat_wave", "war_whirl" },
-        abilities_3 = { "lightning_chain", "power_field" },
+        abilities_1 = { "shadow_cloak", "hermit_storm", "earthquake", "wasp_fly", "teleportation", "assistants" },
+        abilities_2 = { "rat_wave", "war_whirl", "fear_ray", "power_field", "grasp_of_darkness", "lightning_chain" },
     }
     for id, keys in pairs(recipe_perks) do
         for _, key in ipairs(keys) do

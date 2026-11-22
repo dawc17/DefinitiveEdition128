@@ -66,12 +66,26 @@ local function revise_prince(data)
     end
 end
 
+-- Seby's 2026-11-21 map layout: map places (stage units, drawn at twice their value) that
+-- differ from the archive. A Power Mode twin keeps its normal battle's place.
+local PLACES = {
+    BOSS_7 = { x = -60, y = -205 }, BOSS_7_HARDMODE = { x = -60, y = -205 },
+}
+
+local function revise_places(data)
+    for name, place in pairs(PLACES) do
+        local _, _, battle = find_battle(data, name)
+        battle.x, battle.y = place.x, place.y
+    end
+end
+
 local applied = false
 local function apply(data)
     if applied then return data end
     applied = true
     scrap(data)
     revise_prince(data)
+    revise_places(data)
     return data
 end
 

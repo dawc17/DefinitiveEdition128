@@ -11,7 +11,7 @@ local sf2 = require("sf2")
 -- fight's forced loadout. Set-chest purchases that also reset it are not
 -- modelled: equipment is re-read every round instead of latched.
 -- The ability perks are the player's DE enchantments from content.boss_abilities
--- (Special Recipes I-III).
+-- (Special Recipes I and II).
 local ability_keys = {
     "shadow_cloak", "hermit_storm", "earthquake", "wasp_fly", "teleportation", "assistants", "rat_wave",
     "war_whirl", "fear_ray", "lightning_chain", "power_field", "grasp_of_darkness",

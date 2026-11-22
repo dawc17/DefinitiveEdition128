@@ -216,6 +216,8 @@ local function install(raid_charge_rule)
                 icons = {
                     base = sf2.assets.sprite("sprites/underworld/" .. spec.icon_atlas:lower() .. "_base"),
                     active = sf2.assets.sprite("sprites/underworld/" .. spec.icon_atlas:lower() .. "_active"),
+                    -- Generated from base and active (Tools/Recovery/BuildDE128PressedBattleIcons.py).
+                    pressed = sf2.assets.sprite("sprites/underworld/" .. spec.icon_atlas:lower() .. "_pressed"),
                 }
             end
             local description = nil

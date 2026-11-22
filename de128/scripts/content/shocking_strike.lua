@@ -18,9 +18,12 @@ local CHANCE_PER_POWER = 0.025
 local POWER_LOW, POWER_HIGH = 1.5, 3.0
 local RETURN_FRAMES = 600
 
--- The forge tier reaches the behavior as self.strength: low 0, mid 0.5, high 1.
+-- The forge tier reaches the behavior as self.strength: low 1/3, mid 2/3, high 1
+-- (content.forge_choice); pieces forged before 2026-11-22 carry low 0, mid 0.5, high 1.
+-- Both read as the tier's step from LOW to HIGH: 0, 0.5 or 1.
 local function chance(strength)
-    return CHANCE_PER_POWER * (POWER_LOW + (POWER_HIGH - POWER_LOW) * strength)
+    local step = strength < 0.5 and 0 or strength < 0.85 and 0.5 or 1
+    return CHANCE_PER_POWER * (POWER_LOW + (POWER_HIGH - POWER_LOW) * step)
 end
 
 local shock_roll = sf2.random.stream("de128", "shocking_strike")

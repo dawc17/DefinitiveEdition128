@@ -3,7 +3,7 @@ local words = require("content.text")
 
 -- Historical forge.xml splits the twelve existing Complex candidates into
 -- three equal pools. The two new pools use the unchanged core Complex prices.
--- Special Recipes I-III (Abilities, Abilities2, Abilities3) grant the boss-ability
+-- Special Recipes I and II (Abilities, Abilities2) grant the boss-ability
 -- enchantments from content.boss_abilities. Like the current DE forge.xml, every
 -- added recipe prices with the core Complex table; content.forge_choice scales it
 -- per candidate (boss abilities 1.5x) and per strength tier.
@@ -52,16 +52,22 @@ for _, pool in ipairs(pools) do
     }
 end
 
--- forge.xml Abilities* recipes: one enchantment per category, BarScale
--- "Enchantment", no deviation, no variation conditions, in archived order.
+-- Special Recipes: one enchantment per category, BarScale "Enchantment", no
+-- deviation, no variation conditions. Special Recipe I holds the demon abilities in
+-- story order; Special Recipe II the Underworld boss abilities in the tier order of
+-- their bosses (Arkhos, War, Tenebris, Gatekeeper, Blackness, Dandy). The archive's
+-- Special Recipe III is folded into II; items forged with it keep their enchantments,
+-- which are the same perks.
 local abilities = require("content.boss_abilities").perks
 local special_recipes = {
-    { id = "abilities_1", text = "forgeRecipeAbilities", perks = { "shadow_cloak", "hermit_storm", "earthquake", "wasp_fly" } },
-    { id = "abilities_2", text = "forgeRecipeAbilities2", perks = { "teleportation", "assistants", "rat_wave", "war_whirl" } },
+    { id = "abilities_1", text = "forgeRecipeAbilities", perks = {
+        "shadow_cloak", "hermit_storm", "earthquake", "wasp_fly", "teleportation", "assistants",
+    } },
     -- lightning_chain is DE128's own Lightning Chain special (content.lightning_chain) under
     -- the old enchantment's ID, so forged and saved Lightning Chain pieces carry the new special.
-    { id = "abilities_3", text = "forgeRecipeAbilities3",
-        perks = { "lightning_chain", "power_field" } },
+    { id = "abilities_2", text = "forgeRecipeAbilities2", perks = {
+        "rat_wave", "war_whirl", "fear_ray", "power_field", "grasp_of_darkness", "lightning_chain",
+    } },
 }
 for _, recipe in ipairs(special_recipes) do
     local items, candidates = {}, {}

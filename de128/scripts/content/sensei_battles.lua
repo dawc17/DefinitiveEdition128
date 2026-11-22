@@ -1,12 +1,12 @@
 local sf2 = require("sf2")
 -- Pending map definitions. Registration alone does not reveal these entries.
 local places = {
-    { x = 45, y = -200, location = "core:locations/statue", preview = "act1", music = "fight34_halls_of_the_dead_heroes" },
-    { x = 130, y = -180, location = "core:locations/stone_dragon", preview = "act2", music = "the_stone_dragon" },
-    { x = -400, y = -20, location = "core:locations/village", preview = "act3", music = "fight6_sparring" },
-    { x = -400, y = -20, location = "core:locations/ships", preview = "act4", music = "fight14_ship_battle" },
-    { x = -400, y = 20, location = "core:locations/flooded_village", preview = "act5", music = "fight38_sakura_forest" },
-    { x = -400, y = -30, location = "core:locations/magic_rocks", preview = "act6", music = "fight28_flying_rocks" },
+    { x = 80, y = -210, location = "core:locations/statue", preview = "act1", music = "fight34_halls_of_the_dead_heroes" },
+    { x = 155, y = -180, location = "core:locations/stone_dragon", preview = "act2", music = "the_stone_dragon" },
+    { x = -455, y = -5, location = "core:locations/village", preview = "act3", music = "fight6_sparring" },
+    { x = -450, y = -5, location = "core:locations/ships", preview = "act4", music = "fight14_ship_battle" },
+    { x = -470, y = 30, location = "core:locations/flooded_village", preview = "act5", music = "fight38_sakura_forest" },
+    { x = -450, y = -35, location = "core:locations/magic_rocks", preview = "act6", music = "fight28_flying_rocks" },
 }
 -- fights[mode][act] is the list of fight tables of that battle (see content.sensei_encounters).
 -- Fights are unnamed, so they are "1", "2", ...: sensei_act_<act>_<mode>_<position>.

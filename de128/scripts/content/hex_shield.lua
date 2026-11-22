@@ -9,9 +9,11 @@ local words = require("content.text")
 
 local RECHARGE = { 900, 600, 420 }        -- frames for low, mid, high
 
--- The forge tier reaches the behavior as self.strength: low 0, mid 0.5, high 1.
+-- The forge tier reaches the behavior as self.strength: low 1/3, mid 2/3, high 1
+-- (content.forge_choice). Pieces forged before 2026-11-22 carry low 0, mid 0.5, high 1,
+-- which the same cut-offs read as the same tiers.
 local function recharge_frames(strength)
-    return RECHARGE[strength < 0.25 and 1 or strength < 0.75 and 2 or 3]
+    return RECHARGE[strength < 0.5 and 1 or strength < 0.85 and 2 or 3]
 end
 
 local behavior = {

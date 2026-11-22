@@ -7,7 +7,7 @@ local shared = require("content.sensei_state")
 -- Art and music ship with DE128 (Tools/ExtractDE128ChallengerArt.py).
 local CHALLENGERS = {
     {
-        key = "trickster", zone = "zone_1", battle = "challenger_trickster", x = 160, y = -45,
+        key = "trickster", zone = "zone_1", battle = "challenger_trickster", x = 135, y = -55,
         alias = "characterTrickster", title = "TRICKSTER_Title", description = "descTrickster",
         location = "core:locations/mountain", music = "samurai_spirit", experience = 0,
         first_name = "NAME_TRICKSTER", avatar = "man_nunchaku_new", voice = "Male",
@@ -17,7 +17,7 @@ local CHALLENGERS = {
         grant = { perk = "PERK_ITEM_SPECIAL_OVERHEAT_WEAPON", chance = 0.3 },
     },
     {
-        key = "hawk", zone = "zone_2", battle = "challenger_hawk", x = 5, y = 155,
+        key = "hawk", zone = "zone_2", battle = "challenger_hawk", x = 10, y = 145,
         alias = "NAME_HAWK", title = "HAWK_Title", description = "descHawk",
         location = "core:locations/sakura", music = "blade_dance", experience = 1,
         first_name = "NAME_HAWK", avatar = "man_ninja_naginata_new", voice = "Male",
@@ -30,7 +30,7 @@ local CHALLENGERS = {
             parameters = { Base = -1000, DamageFactor = 15850 } },
     },
     {
-        key = "rose", zone = "zone_3", battle = "challenger_rose", x = 65, y = -180,
+        key = "rose", zone = "zone_3", battle = "challenger_rose", x = 80, y = -180,
         alias = "NAME_ROSE", title = "ROSE_Title", description = "descRose",
         location = "core:locations/pink_lake", music = "ronin", experience = 1,
         first_name = "NAME_ROSE", avatar = "girl_katana_new", voice = "Female",
@@ -41,7 +41,7 @@ local CHALLENGERS = {
         grant = { perk = "PERK_ITEM_SPECIAL_OVERHEAT_WEAPON", chance = 0.35, parameters = { DamageFactor = 15850 } },
     },
     {
-        key = "fisher", zone = "zone_4", battle = "challenger_fisher", x = 90, y = -130,
+        key = "fisher", zone = "zone_4", battle = "challenger_fisher", x = 105, y = -105,
         alias = "NAME_FISHER", title = "FISHER_Title", description = "descFisher",
         location = "core:locations/heaven", music = "heavenly_clouds", experience = 1,
         first_name = "NAME_FISHER", avatar = "man_cool_staff_new", voice = "Male",
@@ -53,7 +53,7 @@ local CHALLENGERS = {
         grant = { perk = "PERK_ITEM_SPECIAL_WEAKNESS_WEAPON", chance = 0.41, frames = 300, parameters = { Base = -20000 } },
     },
     {
-        key = "outcast", zone = "zone_5", battle = "challenger_outcast", x = -90, y = 120,
+        key = "outcast", zone = "zone_5", battle = "challenger_outcast", x = -125, y = 130,
         alias = "NAME_OUTCAST", title = "OUTCAST_Title", description = "descOutcast",
         location = "core:locations/snowy_peak", music = "fuji", experience = 1,
         first_name = "NAME_OUTCAST", avatar = "man_heavy_kusarigama_new", voice = "Male",
@@ -67,7 +67,7 @@ local CHALLENGERS = {
     {
         -- Ronin and Nova use the historical Assets/DExml positions. The owner drop's
         -- (-505, 100) and (295, -220) differ from the shipped game's map (owner screenshot).
-        key = "ronin", zone = "zone_6", battle = "challenger_ronin", x = -455, y = 130,
+        key = "ronin", zone = "zone_6", battle = "challenger_ronin", x = -440, y = 155,
         alias = "NAME_RONIN", title = "RONIN_Title", description = "descRonin",
         location = "core:locations/waterfall", music = "sky_isles", experience = 1,
         first_name = "NAME_RONIN", avatar = "man_dadao_janissary_new", voice = "Male",
@@ -81,7 +81,7 @@ local CHALLENGERS = {
             parameters = { Base = -1000, DamageFactor = 15850 } },
     },
     {
-        key = "nova", zone = "zone_6", battle = "challenger_nova", x = -225, y = -245,
+        key = "nova", zone = "zone_6", battle = "challenger_nova", x = -240, y = -235,
         alias = "NAME_IM_STRANGER", title = "NOVA_Title", description = "descNova",
         location = "core:locations/road", music = "the_monastery", experience = 1,
         first_name = "NAME_IM_STRANGER", avatar = "girl_im_knuckles_new", voice = "Female",

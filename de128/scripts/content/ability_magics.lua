@@ -2,7 +2,7 @@ local sf2 = require("sf2")
 local words = require("content.text")
 local grasp = require("content.blackness_grasp")
 
--- Fear Ray and Grasp of Darkness as magic items (Special Recipe III no longer offers them). Each
+-- Fear Ray and Grasp of Darkness as magic items (Special Recipe II also offers them as enchantments). Each
 -- is a pre-enchanted Magic item cast with the magic button: a copy of the boss-ability cast
 -- that pays one magic charge instead of using the perk recharge, locked to the item's own
 -- subtype. The boss and raid-charge versions stay as they are (content.boss_abilities).
