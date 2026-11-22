@@ -379,11 +379,32 @@ sf2.story.on("item_acquired", function(event)
     end
 end)
 
+-- The Sensei's map dialogs (sensei_defeat, sensei_notifications) hold the screen first; when one
+-- closes it wakes the others through shared.wake_notifications, so Ascension joins that chain.
+-- Hooked on the first scene, after every module has installed its own wake.
+local woken = false
+local function join_wakes()
+    if woken then return end
+    woken = true
+    local previous = shared.wake_notifications
+    shared.wake_notifications = function(...)
+        previous(...)
+        show_next()
+    end
+end
+
 sf2.story.on("scene_enter", function(event)
     scene = event.scene
     view = false
+    join_wakes()
     show_next()
 end)
+
+-- Back on the map after a loss the result can arrive after the map scene began (the run's reset
+-- and the fight result), so a dialog queued by fight_end is tried again then, as the Sensei's
+-- defeat dialog does on battle_result; otherwise it waited for the next scene change.
+sf2.story.on("battle_result", function() show_next() end)
+sf2.story.on("mode_reset", function() show_next() end)
 
 -- AscensionZoneIntro: the Puppeteer tells the Monk's story the first time the player enters.
 for _, fight in ipairs(fights) do
