@@ -81,7 +81,8 @@ require("content.underworld_story").install(underworld)
 require("content.challengers").install(raid_charge)
 -- Deterministic forge: choose-mode recipes; reads the bosses registered above.
 require("content.forge_choice").install(underworld)
--- Disabled at the owner's request. Keep the prototype out of the active mod.
--- require("content.ascension")
+-- Ascension (Act 2's Challenge 2): the Puppeteer's ticketed five-fight Monk set event, restored
+-- from Marmalade SF2 1.9.38. Needs Eclipse's lottery, resistance and entry_per = "run" API.
+require("content.ascension")
 
 sf2.log.info("DE128 " .. sf2.mod.version .. " registered.")

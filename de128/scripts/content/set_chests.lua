@@ -2,11 +2,14 @@ local sf2 = require("sf2")
 local words = require("content.text")
 local shop_groups = require("content.shop_groups")
 
--- Every mythical five-piece set is sold as one chest, the way DE sold the Monk, Sentinel,
+-- Every mythical five-piece set is sold as one chest, the way DE sold the Sentinel,
 -- Neo-wanderer and Chronos sets. A chest unlocks at the level its set belongs to and costs
 -- the sum of its pieces' gem prices; the pieces leave the shop (see content.shop).
--- Monk, Sentinel and Neo-wanderer keep the prices DE gave them: their pieces are level-1
+-- Sentinel and Neo-wanderer keep the prices DE gave them: their pieces are level-1
 -- shop-hidden items whose own prices mean nothing.
+-- The Monk set has no chest: its pieces come from Ascension's chests (content.ascension), as
+-- in 1.9.38. The old 202-gem Monk's Chest (DE's MonkSetChest, Act 2) is retired below so saves
+-- that bought it still resolve.
 
 -- Chests without their own art show this mod sprite. Replace it per chest as set art arrives.
 local PLACEHOLDER = false
@@ -22,12 +25,6 @@ end
 -- Pieces are listed weapon, armor, helm, ranged, magic. `scaled` chests are DE's own: the
 -- pieces arrive upgraded to the buyer's level with these enchantments, the set perk on all.
 local chests = {
-    { id = "monk_set_chest", name = "MonkSetChest", text = "MonkChestDesc", icon = "RaidItems2.monk_chest",
-      level = 7, group = "ACT_2", gems = 202, scaled = {
-        set = "PERK_MONK_SET_WHIRL",
-        extra = { "PERK_ITEM_SPECIAL_WEAKNESS_WEAPON", "PERK_ITEM_SPECIAL_DAMAGE_ABSORPTION_BODY_ARMOR",
-            "PERK_ITEM_SPECIAL_REJUVENATION_HELM", "PERK_ITEM_SPECIAL_BLOODRAGE_RANGED", "PERK_ITEM_SPECIAL_INTOXICATION_MAGIC" } },
-      pieces = { "WEAPON_C2_Z2_MONK_KATAR", "ARMOR_C2_Z2_MONK", "HELM_C2_Z2_MONK", "RANGED_C2_Z2_MONK_SHURIKEN", "MAGIC_C2_Z2_MONK_ROOT_STUN" } },
     { id = "sentinel_set_chest", name = "SentinelSetChest", text = "SentinelChestDesc", icon = "img_dragon_chest",
       level = 13, group = "ACT_3", gems = 263, scaled = {
         set = "PERK_SENTINEL_SET_SUPER_RETURN",
@@ -101,6 +98,7 @@ local function register()
             contents = contents,
         }
     end
+    sf2.items.retire { id = "consumable/monk_set_chest" }
 end
 
 return { register = register, hidden = hidden }

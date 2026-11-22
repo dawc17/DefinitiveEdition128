@@ -42,6 +42,9 @@ function result.register()
     fields.uw_seal_rng = 40961
     -- Each sealed boss's Seal Codex and best pact (underworld_meta.lua), as ",boss_6=<codex>:<pact>,".
     fields.uw_meta = ","
+    -- Ascension (ascension.lua): a set of words, ",unlocked,zone_intro,", plus counters such as
+    -- "draws=4". This is the 64th field: the schema is now full.
+    fields.ascension = ","
     sf2.state.register { version = 1, fields = fields }
     registered = true
 end
