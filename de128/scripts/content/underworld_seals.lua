@@ -30,7 +30,8 @@ local meta = require("content.underworld_meta")
 -- controller moves the fight to the phase of the seal's rule, or to RULELESS between seals.
 --
 -- Each run also rolls three pacts, Lua rules the player may take on for every seal from the
--- challenge screen's pact tiles (levels 0-3, +25% rewards each, beside Momentum). On the
+-- challenge screen's pact tiles (levels 0-3, +25% rewards each, beside Momentum); while they are
+-- on, the fight's pause screen lists them under the seal's rule. On the
 -- challenge screen an Omen rerolls a seal (the Omen control at the end of its row, pressed twice),
 -- Seal Shards brew elixirs (a slot pressed twice) and the codex tally opens the boss's Seal Codex
 -- page; a fight gives a shard per seal broken and an Omen on a win, and its broken rules join the
@@ -162,6 +163,7 @@ for _, key in ipairs({ "menu.new_stamp", "menu.codex_title", "menu.codex_count",
     "menu.no_omens", "menu.brewed", "menu.short", "menu.full", "menu.rerolled",
     "menu.rate", "menu.reroll_confirm", "menu.brew_confirm", "menu.label_pacts", "menu.label_elixirs",
     "menu.momentum_info", "menu.pact_title", "menu.pact_info", "menu.wins_title", "menu.wins_info", "menu.shard_info",
+    "menu.pact_choice_info", "menu.pact_choice_taken", "menu.pacts_intro", "pause.pacts", "pause.pact",
     "results.codex", "results.codex_new", "results.bonus_pact" }) do
     META[key] = words.read("de128.uw_meta." .. key)
 end
@@ -363,10 +365,24 @@ end
 -- The fight's phase: the rule of the seal being fought, or none (RULELESS). The Underworld's own
 -- rules also learn which of them is on (content.underworld_seal_rules).
 -- pacts: whether the run's pacts are on (while a seal is fought, with or without its rule).
+-- The pause screen lists the pacts while they are on (fighter:set_pause_notes): their share of
+-- the rewards, then each pact's seal, name and hint under the seal's own rule.
 local function rule_phase(fighter, shown, pacts)
     own_rules.active = shown and own_rules.rules[shown.name] and shown.name or nil
     own_rules.pacts = pacts and run.pacts or nil
     fighter:set_phase(shown and shown.phase or RULELESS)
+    local on = pacts and run.level > 0
+    if on ~= run.notes_on then
+        local notes = nil
+        if on then
+            notes = { { text = fill(META["pause.pacts"], math.floor(run.pact_bonus * 100 + 0.5)) } }
+            for _, pact in ipairs(run.pact_list) do
+                notes[#notes + 1] = { text = fill(META["pause.pact"], pact.title, pact.hint), icon = pact.sprites.intact }
+            end
+        end
+        fighter:set_pause_notes(notes)
+        run.notes_on = on
+    end
 end
 
 -- The boss starts at his seal's top (a fight resumed at a later seal), in its rule's phase.
@@ -381,9 +397,13 @@ end
 local function begin_fight(boss, fighter)
     local seal = saved_seal(boss)
     local plan = plan_for(boss)
-    run = { boss = boss, seal = seal, first = seal, rules = plan.seals, level = plan.level, pacts = {}, broken = {},
-        pact_bonus = PACT_BONUS * plan.level, frame = 0, streak = 0, bonus = 0, bonus_set = 0, drunk = {}, waiting = {} }
-    for index = 1, plan.level do run.pacts[plan.pacts[index].name] = true end
+    run = { boss = boss, seal = seal, first = seal, rules = plan.seals, level = plan.level, pacts = {}, pact_list = {},
+        broken = {}, pact_bonus = PACT_BONUS * plan.level, frame = 0, streak = 0, bonus = 0, bonus_set = 0, drunk = {},
+        waiting = {}, notes_on = false }
+    for index = 1, plan.level do
+        run.pacts[plan.pacts[index].name] = true
+        run.pact_list[index] = plan.pacts[index]
+    end
     hold.held = false
     hold.cooldown = boss.cooldowns and boss.cooldowns[sf2.saves.get("difficulty")] or nil
     -- From on_fight_begin the round starts in that phase; the first tick catches up otherwise.
@@ -552,6 +572,8 @@ local function end_fight(fighter, event)
     rolled[boss.key] = nil
     own_rules.active = nil
     own_rules.pacts = nil
+    -- Eclipse drops them as the fight ends too; cleared here so nothing outlives the run.
+    if run.notes_on then fighter:set_pause_notes(nil) end
     hold.held = false
     hold.cooldown = nil
     close_view(prepare)
@@ -775,12 +797,16 @@ local function menu_content(boss)
         stakes[#stakes + 1] = { icon = meta.pictures.pact, text = fill(META["menu.share"], share),
             info = { title = META["menu.pact_title"], text = fill(META["menu.pact_info"], plan.level, share) } }
     end
-    local tag = fill(META["menu.share"], math.floor(PACT_BONUS * 100 + 0.5))
+    local each = math.floor(PACT_BONUS * 100 + 0.5)
+    local tag = fill(META["menu.share"], each)
+    -- Each tile says what taking it does (or did), not only its rule, as pressing it takes it.
     local choices = {}
     for index, shown in ipairs(plan.pacts) do
+        local chosen = index <= plan.level
         choices[index] = { id = "pact" .. index, icon = shown.sprites.intact, name = shown.title,
-            chosen = index <= plan.level, mark = ROMAN[index], tag = tag,
-            info = { title = shown.title, text = shown.hint } }
+            chosen = chosen, mark = ROMAN[index], tag = tag,
+            info = { title = shown.title,
+                text = fill(META[chosen and "menu.pact_choice_taken" or "menu.pact_choice_info"], shown.hint, each) } }
     end
     local held = {}
     for _, elixir in ipairs(elixirs.list) do
@@ -811,6 +837,9 @@ local function menu_content(boss)
         stakes = stakes,
         choices = choices,
         choices_label = META["menu.label_pacts"],
+        -- Until a pact is taken, the info line (with nothing selected) says what pacts are; after,
+        -- it falls back to the next seal and the pact stake explains the share.
+        info = plan.level == 0 and { title = META["menu.label_pacts"], text = fill(META["menu.pacts_intro"], each) } or nil,
         items = held,
         items_label = META["menu.label_elixirs"],
         pouch = pouch,
