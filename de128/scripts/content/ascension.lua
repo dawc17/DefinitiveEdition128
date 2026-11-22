@@ -14,7 +14,8 @@ local trial = require("content.ascension_rules")
 --   Rewards  a loss raises immunity (Resistance_2) by 45; a win draws from the fight's chest
 --            (Bronze, Bronze, Silver, Silver, Gold): one Monk piece, forge orbs, coins or a ticket.
 --   Tickets  three from the Puppeteer when Ascension opens, three more after a first loss in
---            fight 1, two for every duel win (as the archive's duels paid), one from a chest.
+--            fight 1, two for every duel win (as the archive's duels paid), one from a chest,
+--            and ten for 30 gems in the shop's chest tab from Act 2.
 -- The game's own Ascension words are Eclipse's English text; de128.ascension.* are DE128's.
 -- Saved state: one field, "ascension", a set of words such as ",unlocked,zone_intro,".
 
@@ -55,6 +56,9 @@ local ticket = sf2.items.register {
     display_name = words.own("item.ascension_ticket", "de128.ascension.ticket.name"),
     description = words.own("item.ascension_ticket.description", "de128.ascension.ticket.description"),
     icon = ticket_icon, stack = TICKET_STACK,
+    -- Sold beside the chests from Act 2: ten tickets for 30 gems (owner's price; 1.9.38's
+    -- Pack_Tickets was a paid pack, so DE128 prices it in gems instead).
+    shop = { price = { gems = 30 }, count = 10, group = "ZONE_2" },
 }
 
 -- Opponents: the archive's Warrior (WarriorPower 0, AttributesAlign 1/0, 0.965/7, 0/7) with one
