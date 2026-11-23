@@ -55,7 +55,8 @@ end
 -- Special Recipes: one enchantment per category, BarScale "Enchantment", no
 -- deviation, no variation conditions. Special Recipe I holds the demon abilities in
 -- story order; Special Recipe II the Underworld boss abilities in the tier order of
--- their bosses (Arkhos, War, Tenebris, Gatekeeper, Blackness, Dandy). The archive's
+-- their bosses (Arkhos, War, Gatekeeper, Dandy); Fear Ray and Grasp of Darkness are magic
+-- items instead (Seby, 2026-11-23), so neither is offered here. The archive's
 -- Special Recipe III is folded into II; items forged with it keep their enchantments,
 -- which are the same perks.
 local abilities = require("content.boss_abilities").perks
@@ -66,7 +67,7 @@ local special_recipes = {
     -- lightning_chain is DE128's own Lightning Chain special (content.lightning_chain) under
     -- the old enchantment's ID, so forged and saved Lightning Chain pieces carry the new special.
     { id = "abilities_2", text = "forgeRecipeAbilities2", perks = {
-        "rat_wave", "war_whirl", "fear_ray", "power_field", "grasp_of_darkness", "lightning_chain",
+        "rat_wave", "war_whirl", "power_field", "lightning_chain",
     } },
 }
 for _, recipe in ipairs(special_recipes) do

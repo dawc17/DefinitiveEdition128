@@ -72,6 +72,12 @@ local PLACES = {
     BOSS_7 = { x = -60, y = -205 }, BOSS_7_HARDMODE = { x = -60, y = -205 },
 }
 
+-- Seby's 2026-11 preview for the tier 1 Puppeteer (the hard mode keeps the archive's).
+local function revise_puppeteer(data)
+    local _, _, battle = find_battle(data, "BOSS_PUPPETEER")
+    battle.preview_sprite = "sprites/underworld/preview_puppeteer"
+end
+
 local function revise_places(data)
     for name, place in pairs(PLACES) do
         local _, _, battle = find_battle(data, name)
@@ -85,6 +91,7 @@ local function apply(data)
     applied = true
     scrap(data)
     revise_prince(data)
+    revise_puppeteer(data)
     revise_places(data)
     return data
 end

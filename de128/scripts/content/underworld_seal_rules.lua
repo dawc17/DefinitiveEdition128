@@ -337,23 +337,26 @@ RULES.overcharge = { art = "blue", state = function() return { shown = false } e
 
 -- Sight ------------------------------------------------------------------------------------------
 
--- On the boss: he turns to glass for 2 s every 5 s.
+-- On the boss: he turns invisible for 2 s every 5 s. The see-through tint is set again every
+-- tick, so another rule's brief flash on him (one tint per behavior) cannot end it early.
 local VANISH_FRAMES, VANISH_PERIOD = 120, 300
-RULES.vanishing = { art = "purple", round = true, state = function() return { due = -1, cloaked = false } end, opponent = {
+RULES.vanishing = { art = "purple", round = true, state = function() return { due = -1, hidden_until = -1 } end, opponent = {
     on_tick = function(st, fighter, tick, on)
         if not on then
             st.due = -1
-            if st.cloaked then
-                st.cloaked = false
-                fighter:clear_cloak()
+            if st.hidden_until >= 0 then
+                st.hidden_until = -1
+                fighter:clear_model_color()
             end
             return
         end
         if st.due < 0 then st.due = tick.frame + VANISH_PERIOD - VANISH_FRAMES end
         if tick.frame >= st.due then
             st.due = tick.frame + VANISH_PERIOD
-            st.cloaked = true
-            fighter:set_cloak(VANISH_FRAMES)
+            st.hidden_until = tick.frame + VANISH_FRAMES
+        end
+        if tick.frame < st.hidden_until then
+            fighter:set_model_color("#FFFFFF00", st.hidden_until - tick.frame)
         end
     end,
 } }
