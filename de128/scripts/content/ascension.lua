@@ -7,7 +7,8 @@ local trial = require("content.ascension_rules")
 -- Marmalade SF2 1.9.38 (stages.xml ZONE_2 Battle Ascension; quests.xml Ascension*;
 -- quest_extensions/zone_2/story.xml Zone2AscensionUnlock and the Asc_* tutorials).
 --   Battle   five one-round fights (99 s) at the statue, Halls of the Dead Heroes, on the Act 2
---            map at -374, 50. A loss sends the run back to fight 1; winning fight 5 starts over.
+--            map at -430, 65 (Seby's layout, 2026-11-24; 1.9.38 had -374, 50). A loss sends the run
+--            back to fight 1; winning fight 5 starts over.
 --   Entry    three tickets when a run starts (the archive's CurrencyCost on fight 1).
 --   Enemies  one Ascension_2 ninja, with Survival_Ranged_2's shurikens or kunai, both at random.
 --   Rules    immunity thresholds and the random enchantment and challenge (content.ascension_rules).
@@ -181,7 +182,7 @@ end
 
 -- Fight IDs are de128:fights/ascension_1 .. ascension_5.
 local battle = sf2.battles.register {
-    id = "ascension", page = sf2.map.get("core:zones/zone_2"), x = -374, y = 50,
+    id = "ascension", page = sf2.map.get("core:zones/zone_2"), x = -430, y = 65,
     alias = words.key("Ascension"), title = words.key("Ascension_TITLE"),
     description = words.key("LockedAscensionDescription"), icon = "ascension",
     preview = "preview_main.statue", location = "core:locations/statue",

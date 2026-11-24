@@ -45,12 +45,18 @@ local function spawn_x(fighter, summon)
     return -toward * summon.behind_player
 end
 
+local DIRECTIONS = { "up", "right", "down", "left" }
+
 return {
     state = { active = false, seen = false, waited = 0, stacks = 0, pad = false, absorb = false },
+    -- The arrows are on the raid charge button from the round's start, as the button is.
+    on_round_begin = function(self, fighter)
+        fighter:set_control_directions("raid_charge", DIRECTIONS)
+    end,
     on_tick = function(self, fighter)
         if not self.state.pad then
             self.state.pad = true
-            fighter:set_control_directions("raid_charge", { "up", "right", "down", "left" })
+            fighter:set_control_directions("raid_charge", DIRECTIONS)
             -- The bodyguards' hits build the same stacks as the player's.
             fighter:forward_actor_hits(true)
         end

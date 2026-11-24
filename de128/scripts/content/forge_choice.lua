@@ -11,10 +11,12 @@ local words = require("content.text")
 --
 -- Candidate price scales: normal enchantments 1x (the default, so unconfigured),
 -- boss abilities 1.5x, mythical set enchantments 2x. Mythical sets need no code
--- here: Eclipse offers a set enchantment once every piece of its set is owned.
--- Boss abilities unlock after any win against that ability's boss.
+-- here: Eclipse offers a set enchantment once every piece of its set is owned (DE128's own
+-- mythicals have their sets in content.set_chests). Boss abilities unlock after any win
+-- against that ability's boss.
 assert(type(sf2.forge.patch) == "function", "DE128 requires the public sf2.forge.patch API.")
-local registered = require("content.forge")
+local forge = require("content.forge")
+local registered = forge.recipes
 
 local tiers = {
     { id = "low", name = words.get("de128.forge_tier.low"), strength = 1 / 3, price = 0.5 },
@@ -26,35 +28,20 @@ local tiers = {
 -- name; DE128's own recipes by the handles content.forge registered.
 local recipes = {
     "Simple", "Medium", "Complex",
-    registered.complex_2, registered.complex_3,
+    registered.complex_2,
     registered.abilities_1, registered.abilities_2,
 }
 for _, recipe in ipairs(recipes) do
     sf2.forge.patch { recipe = recipe, selection = "choose", tiers = tiers }
 end
 
--- The twelve ItemSet DefaultComboPerk enchantments (vanillaXml/list.xml), which
--- forge.xml offers only in the Complex recipes: four stay in core Complex, the
--- other eight are DE128's Complex II and III pools (content.forge).
-local mythical = {
-    Complex = { "PERK_MONK_SET_WHIRL", "PERK_SENTINEL_SET_SUPER_RETURN", "PERK_WARLOCK_SET_CURSE",
-        "PERK_GUARDIAN_SET_PROTECTION" },
-    [registered.complex_2] = { "PERK_SKANDA_SET_KARMA", "PERK_GUST_SET_WIND_MAKER",
-        "PERK_DIRECTOR_SET_PLOT_TWIST", "PERK_TIME_SHIFT_SET_TIME_SHIFTER" },
-    [registered.complex_3] = { "PERK_ARCANE_MARTIAL_ART_SET_NEO_WANDERER", "PERK_CORDYCEPS_FUNGUS_SET",
-        "PERK_MAGMA_VOLCANO_SET", "PERK_KARCER_HUNGER_SET" },
-}
-for recipe, names in pairs(mythical) do
+-- The fifteen mythical (set) enchantments: the twelve ItemSet DefaultComboPerk ones
+-- (vanillaXml/list.xml) and DE128's Stone Fetters, Searing Luminary and Revival Heal, in
+-- Complex Recipes I (core Complex) and II (content.forge).
+for recipe, names in pairs({ Complex = forge.mythicals.Complex, [registered.complex_2] = forge.mythicals.complex_2 }) do
     for _, name in ipairs(names) do
-        sf2.forge.patch { recipe = recipe, perk = sf2.perks.get("core:perks/" .. name), price = 2.0 }
+        sf2.forge.patch { recipe = recipe, perk = forge.perk(name), price = 2.0 }
     end
-end
-
--- DE128's two scripted mythicals (content.forge adds them to Complex II and III), priced like the others.
-for recipe, module in pairs({
-    [registered.complex_2] = "content.searing_luminary", [registered.complex_3] = "content.stone_fetters",
-}) do
-    sf2.forge.patch { recipe = recipe, perk = require(module), price = 2.0 }
 end
 
 -- Boss abilities. Each unlocks after a win against any warrior that IS its

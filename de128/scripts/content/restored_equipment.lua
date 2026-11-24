@@ -20,6 +20,8 @@ local definitions = {
     { "dragons_breath", "MAGIC_C2_Z5_DRAGON_EARTHQUAKE", "magic", "Magic9.img_MAGIC_C2_Z5_DRAGON_EARTHQUAKE", "mdl_magic_mass_bomb", "MassBomb", 13, 44, "ACT_3", "PERK_ITEM_SPECIAL_OVERHEAT_MAGIC", 442 },
     { "lightning_arc", "MAGIC_LIGHTNING", "magic", "Magic13.img_magic_lightning", "mdl_magic_fireball", "LightningArrow", 39, 139, "INTERMISSION", "PERK_ITEM_SPECIAL_ENFEEBLE_MAGIC", 1388 },
 }
+-- The Dragon pieces are sold only in the Dragon Set's chest (content.set_chests); owned, they stay listed.
+local in_chest = require("content.set_chests").hidden
 local equipment = {}
 for _, row in ipairs(definitions) do
     local definition = {
@@ -34,7 +36,9 @@ for _, row in ipairs(definitions) do
     definition.shop = { level = row[7], price = { gems = row[8] } }
     local item = sf2.items.register(definition)
     sf2.items.patch {
-        item = item, required_group = require("content.shop_groups").game(row[9]), minimum_level = row[7],
+        item = item, required_group = require("content.shop_groups").game(row[9]),
+        minimum_level = (not in_chest[row[1]]) and row[7] or nil,
+        visibility = in_chest[row[1]] and "force_hidden" or nil,
         enchantments = { { perk = sf2.perks.get("core:perks/" .. row[10]), aspect = row[11] } },
     }
     equipment[row[1]] = item

@@ -46,7 +46,9 @@ end
 -- hit_moves: begin the recharge when hit during these instead (Hermit Storm's
 -- PostHit Player="Me" trigger).
 local abilities = {
+    -- The storm also recharges when its raid charge cancel (content.hermit_storm) lands the fighter.
     hermit_storm = { core = "PERK_HERMITSTORM", native = "HermitStormRecharge", frames = 420, initial_frames = 300,
+        triggers = { "de128:moves/hermit_storm_cancel" },
         hit_moves = { "de128:moves/hermit_storm_player", "de128:moves/hermit_storm_idle" } },
     earthquake = { core = "PERK_EARTHQUAKE", native = "EarthquakeRecharge", frames = 420, recharge_on_end = true,
         triggers = { "de128:moves/butcher_earthquake_player" } },
@@ -419,20 +421,12 @@ local function pace_perk_for(tactic)
     return spec and pace_perk(spec.key, spec.initial, spec.frames, spec.moves) or nil
 end
 
--- Bosses show DE's own icons for their abilities, not the special sets' (Seby's decision,
--- 2026-11-14): Assets/DExml/perks.xml gives each boss perk ModIcon "Icon" while ready and
--- its *Cooldown ModIcon (the _Red twin) while recharging. Bosses use the same ability moves
--- as the sets but none of their passives, which live on the player's enchantments only.
-local boss_icons = {
-    hermit_storm = "IconAscetism", earthquake = "IconCruelty", wasp_fly = "IconAccuracy",
-    teleportation = "IconChargeSteal", assistants = "IconIronGrip", rat_wave = "IconMagicAttack",
-    war_whirl = "IconSyphon", lightning_chain = "IconLightning", fear_ray = "IconElementalPrecision",
-    power_field = "IconCriticalChance", grasp_of_darkness = "IconLifesteal",
-}
-local function skill(name)
-    return sf2.assets.sprite("core:ui/skills/" .. name)
-end
-
+-- Bosses show the same icons as the player's enchantments: Seby's ability icons
+-- (sprites/abilities/<key>, greyed <key>_cooldown while recharging). They replaced DE's
+-- perks.xml skill icons (IconAscetism, IconCruelty, ...) on bosses at Seby's request,
+-- 2026-11-24. Bosses use the same ability moves as the sets but none of their passives,
+-- which live on the player's enchantments only.
+--
 -- One indicator per perk: the player's enchantment watches its timed recharge; a
 -- boss's core perk watches the native flag and the DE128 pacing flag.
 for _, key in ipairs(order) do
@@ -440,27 +434,33 @@ for _, key in ipairs(order) do
         ready = icon(key), cooldown = cooldown_icon(key) } }
     sf2.perks.patch { perk = core_perks[key], recharge_indicator = {
         flags = { abilities[key].native, sf2.mod.id .. ":behaviors/" .. pace_flag_behavior .. ":" .. key },
-        ready = skill(boss_icons[key]), cooldown = skill(boss_icons[key] .. "_Red") } }
+        ready = icon(key), cooldown = cooldown_icon(key) } }
 end
 sf2.perks.patch { perk = perks.titans_shield, recharge_indicator = { flags = { sf2.mod.id .. ":behaviors/titans_shield:down" },
     ready = icon("titans_shield"), cooldown = cooldown_icon("titans_shield") } }
 -- Greyed while cloaked too: the move cannot be cast again until the recharge ends.
 sf2.perks.patch { perk = perks.shadow_cloak, recharge_indicator = { flags = { cloak_flag("recharge"), cloak_flag("active") },
     ready = icon("shadow_cloak"), cooldown = cooldown_icon("shadow_cloak") } }
--- Bosses carrying other core perks get DE's icons too.
+-- Bosses carrying other core perks get the same icons.
 -- Smoke-bomb invisibility (Lynx, Puppeteer): the core perk's recharge flag, and greyed while
--- invisible, as above. DE's PERK_INVISIBILITY names only IconInvisibility; the _Red twin
--- marks the recharge, as for the abilities above. Shown on the player's side only: on an
--- opponent the icons would give away when it is cloaked or can cloak again.
+-- invisible, as above. Shown on the player's side only: on an opponent the icons would give
+-- away when it is cloaked or can cloak again.
 sf2.perks.patch { perk = sf2.perks.get("core:perks/PERK_INVISIBILITY"),
     recharge_indicator = { flags = { "InvisibilityRecharge", "Invisibility" },
-        ready = skill("IconInvisibility"), cooldown = skill("IconInvisibility_Red") },
+        ready = icon("shadow_cloak"), cooldown = cooldown_icon("shadow_cloak") },
     opponent_icons = false }
 -- Titan's shield: down while the core perk's timed CooldownIcon lasts (after each blocked hit
--- and at the start of the round). DE's ShieldIcon and CooldownIcon pictures.
+-- and at the start of the round).
 sf2.perks.patch { perk = sf2.perks.get("core:perks/PERK_TITANS_SHIELD"),
     recharge_indicator = { flags = { "CooldownIcon" },
-        ready = skill("IconTitanShield_Active"), cooldown = skill("IconTitanShield_Down") } }
+        ready = icon("titans_shield"), cooldown = cooldown_icon("titans_shield") } }
+-- The Stalker's Fly (Man_Stalker's wall jump, core PERK_HUNTERFLY) is the Wasp's wall jump:
+-- the wasp_fly icon instead of the core perk's IconAccuracy. HunterFlyRecharge is the core
+-- perk's own flag, renewed on the start of every HunterFly_* move (template HunterFly) for the
+-- perk's Frames.
+sf2.perks.patch { perk = sf2.perks.get("core:perks/PERK_HUNTERFLY"),
+    recharge_indicator = { flags = { "HunterFlyRecharge" },
+        ready = icon("wasp_fly"), cooldown = cooldown_icon("wasp_fly") } }
 
 -- Requirement for de128-registered ability moves: the core boss perk (opponents) or
 -- the player's enchantment. A list for `any`, so a move writes

@@ -31,6 +31,9 @@ local kinds = { "ranged", "magic", "crit", "throw", "kick", "super", "dodge" }
 -- swapping its marker's sprite, with its own frame counts.
 local SIZE = 400
 local STEP = 3                            -- ticks per art frame
+-- See-through, so the player stays visible inside it (Seby, 2026-11-24); the bird a little
+-- stronger than the flames around it.
+local TINTS = { "#FFFFFF80", "#FFFFFF99" }
 local function frames(art, name, count)
     local list = {}
     for index = 1, count do
@@ -54,10 +57,11 @@ local function layer_sprite(layer, phase, tick)
 end
 
 local markers = {}                        -- marker handle per layer; art only, not saved state
+local shown = {}                          -- the sprite each layer's marker shows now
 
 local function drop_marker()
     for _, marker in pairs(markers) do sf2.world.remove_marker(marker) end
-    markers = {}
+    markers, shown = {}, {}
 end
 
 local function has_interval(animation, kind)
@@ -120,10 +124,8 @@ local function draw_aura(self, fighter, view)
         return
     end
     s.aura_tick = s.aura_tick + 1
-    -- Centred on the player's body: the markers follow the stomach node (x and y are measured
-    -- from it), through crouches, jumps and knockdowns.
-    local rect = { x = -SIZE / 2, y = -SIZE / 2, width = SIZE, height = SIZE }
-    -- A lost marker redraws both, aura first, so the bird stays on top.
+    -- A lost marker redraws both, aura first, so the bird stays on top. Markers only close with
+    -- the round, so this is rare; normally each marker lives through the whole aura.
     for index in ipairs(LAYERS) do
         if sprites[index] and not (markers[index] and sf2.world.is_marker_active(markers[index])) then
             drop_marker()
@@ -134,12 +136,16 @@ local function draw_aura(self, fighter, view)
         local sprite, marker = sprites[index], markers[index]
         if not sprite then
             if marker then sf2.world.remove_marker(marker) end
-            markers[index] = nil
-        elseif marker then
-            sf2.world.try_set_marker(marker, { rect = rect, sprite = sprite })
-        else
+            markers[index], shown[index] = nil, nil
+        elseif not marker then
+            -- Centred on the player's body: the marker follows the stomach node (x and y are
+            -- measured from it) every drawn frame, through crouches, jumps and knockdowns.
             markers[index] = fighter:mark_sprite(sprite,
-                { node = "stomach", x = rect.x, y = rect.y, width = rect.width, height = rect.height })
+                { node = "stomach", x = -SIZE / 2, y = -SIZE / 2, width = SIZE, height = SIZE }, TINTS[index])
+            shown[index] = markers[index] and sprite or nil
+        elseif shown[index] ~= sprite then
+            -- Only a new art frame changes the marker: one in STEP ticks.
+            if sf2.world.try_set_marker(marker, { sprite = sprite }) then shown[index] = sprite end
         end
     end
 end
@@ -166,9 +172,9 @@ local behavior = {
         drop_marker()
         show_meter(self, fighter)
     end,
-    on_round_end = function(_, fighter)
+    -- The meter stays until the round resets, so it leaves with the rest of the fight HUD.
+    on_round_end = function()
         drop_marker()
-        fighter:clear_meter(METER_KEY)
     end,
     on_tick = function(self, fighter, event)
         local s = self.state

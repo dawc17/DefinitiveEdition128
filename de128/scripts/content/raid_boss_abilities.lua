@@ -21,6 +21,72 @@ sf2.moves.patch {
     when = { not_mod = { "Stun", abilities.ready("rat_wave") } },
 }
 abilities.extend_lock("rat_wave", "RatWavePlayer")
+
+-- Rat Wave and the Water Wave magic (Redemptive Gift, MAGIC_AZTEC_24) throw an invisible bomb
+-- that arcs from just in front of the caster to about 280 units ahead (core mass_bomb_start)
+-- and only hits once it has landed and rolls on (RatWaveMiddle, WaterWaveMiddle), so an enemy
+-- closer than that was flown over (Seby, 2026-11-24). The Start moves are restated with the
+-- Middle's attack, so the bomb also hits what it passes on the way; that hit ends the wave as
+-- the Middle's does. Everything else is the native Start. mass_bomb_start.bytes is a
+-- byte-identical copy of the packaged clip. Frames: from sample 2 at 3 frames per sample,
+-- sample N is frames (N - 1) * 3 .. + 2 (sample 3 is frame 6, sample 13 is frame 36).
+local function wave_start(spec)
+    sf2.moves.patch {
+        move = spec.move,
+        replace = {
+            id = spec.id,
+            expected_file = "mass_bomb_start.bytes",
+            animation = sf2.assets.binary("animations/mass_bomb_start"),
+            inherit = { "MagicMissileStart", spec.template, "MagicMissile", "MissileStart", "MagicMissileFly" },
+            first_sample = 2, priority = 500,
+            no_wall_repulsion = true, no_interpolation_frames = true, no_magic_recharge = true,
+            face = { from = { wall = "back", of = "parent" }, to = { wall = "front", of = "parent" } },
+            align = { axes = { "x", "z" }, pivot = { animation = true }, position = { animation = "parent", x = 100 } },
+            events = { "birth" },
+            when = { actor = spec.actor, parent = { not_animation = "StanceShop" } },
+            only_for = { weapon = spec.weapon, rig = "SkeletonMagic" },
+            attacks = { {
+                edges = { "MassBomb-Edge1" },
+                damage = { amount = spec.damage, magic = 0, unarmed = -25 },
+                impulse = { x = 200, y = -500 }, hit = spec.hit,
+                no_effect = true, no_critical = true, body_part = "body", defense = { "body" },
+                ignores_block = true, ignores_invulnerable = { "Evade", "Recovery", "Dash" },
+            } },
+            on = spec.on,
+        },
+    }
+end
+
+wave_start {
+    move = "RatWaveStart", id = "rat_wave_start", template = "RatWave", actor = "RatWave",
+    weapon = { item = "MAGIC_RAT_WAVE" }, damage = 0.40, hit = "RatWaveHit",
+    on = {
+        [36] = { sound = "snd_rats_ring" },
+        strike = {
+            { effect = { name = "RatWaveEnd", core_sequence = "mgc_rat_wave_end", scale = 1.2, time_scale = 3,
+                position = { node = "MassBomb-MacroNode1", of = "self", x = 120, y = 150 } } },
+            { stop_sound = "snd_rats_ring" },
+            { sound = "snd_rats_hit" },
+            { delete_actor = "self" },
+        },
+    },
+}
+
+wave_start {
+    move = "WaterWaveStart", id = "water_wave_start", template = "WaterWave", actor = "WaterWave",
+    weapon = "WaterWave", damage = 0.45, hit = "WaterWaveHit",
+    on = {
+        [6] = { effect = { name = "WaterWaveStart", core_sequence = "mgc_water_wave_start", scale = 1.2, time_scale = 4,
+            position = { node = "MassBomb-MacroNode1", of = "self", x = 0, y = 70 } } },
+        strike = {
+            { effect = { name = "WaterWaveEnd", core_sequence = "mgc_water_wave_end", scale = 1.2, time_scale = 3,
+                position = { node = "MassBomb-MacroNode1", of = "self", x = 120, y = 70 } } },
+            { sound = "snd_magic_water_ball_end" },
+            { delete_actor = "self" },
+        },
+    },
+}
+
 sf2.moves.patch {
     move = "PerkFearRayPlayer",
     when = { not_mod = { "Stun", abilities.ready("fear_ray") } },

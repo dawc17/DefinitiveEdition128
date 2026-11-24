@@ -54,11 +54,17 @@ local move = sf2.moves.register {
     -- One weapon-scaled hit on first contact, then a tick each second the enemy stays inside.
     -- Native move damage is base * the attacker's weapon attribute, so a normal weapon hit's
     -- base (0.1) is "100%" and a tick is 40% of it.
+    -- Every hit is the vanilla whirl's: it knocks the enemy down (Physycal) with the same push.
+    -- The windows follow one another over the vanilla attack (samples 14-70, frames 42-212), one
+    -- a second, so whenever the arms touch the enemy in that second the hit lands; an attack
+    -- hits once per window. (The ticks used to be 3-frame NoReaction windows, which the
+    -- spinning arms mostly missed.)
     attacks = {
         whirl_hit(42, 101, WEAPON_BASE, "Physycal", { x = 150, y = -600 }),
-        whirl_hit(102, 104, WEAPON_BASE * TICK_SHARE, "NoReaction"),
-        whirl_hit(162, 164, WEAPON_BASE * TICK_SHARE, "NoReaction"),
-        whirl_hit(222, 224, WEAPON_BASE * TICK_SHARE, "NoReaction"),
+        whirl_hit(102, 161, WEAPON_BASE * TICK_SHARE, "Physycal", { x = 150, y = -600 }),
+        whirl_hit(162, 212, WEAPON_BASE * TICK_SHARE, "Physycal", { x = 150, y = -600 }),
+        -- The fourth tick the whirl always had, kept so its total damage is unchanged.
+        whirl_hit(213, 242, WEAPON_BASE * TICK_SHARE, "Physycal", { x = 150, y = -600 }),
     },
 
     on = {

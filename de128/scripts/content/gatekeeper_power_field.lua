@@ -14,6 +14,11 @@ sf2.moves.patch { move = "AbilityGateKeeperPowerField", disable = true }
 -- 13 is 39, 20 is 60, and its sample 26 starts on frame 78 and ends on frame 80).
 -- The native effects draw behind the fighters, where a dark silhouette hides them, so these
 -- draw in front.
+--
+-- The electricity around the caster (PowerFieldEffect, PowerFieldEffect2) was the surge's, as in
+-- the native move, but an actor's effects stop when it is deleted, and the surge deletes itself
+-- when its 14-sample clip ends, so they barely showed. The cast plays them instead, on the frame
+-- it spawns the surge, attached to the caster as before: they run their full length.
 local surge = sf2.moves.register {
     id = "gatekeeper_power_surge",
     animation = sf2.assets.binary("animations/ability_power_surge"),
@@ -35,17 +40,6 @@ local surge = sf2.moves.register {
         ignores_invulnerable = { "Evade", "Recovery", "Dash" },
     } },
     on = {
-        [0] = { { effect = {
-            name = "PowerFieldEffect", core_sequence = "effect_electricity",
-            scale = 1.5, time_scale = 2,
-            attach = { of = "parent", root_point = "stomach", attach_point = "chest",
-                offset_x = 15, offset_y = -15 },
-        } }, { effect = {
-            name = "PowerFieldEffect2", core_sequence = "effect_electricity",
-            scale = 1.5, time_scale = 2,
-            attach = { of = "parent", root_point = "stomach", attach_point = "chest",
-                offset_x = 15, offset_y = -15, start_rotation = 330 },
-        } } },
         finish = { delete_actor = "self" },
     },
     only_for = { weapon = "MagicFireAura", rig = "SkeletonMagic" },
@@ -78,10 +72,20 @@ local cast = sf2.moves.register {
             attach = { of = "self", root_point = "stomach", attach_point = "chest",
                 offset_x = -54, offset_y = -12, start_rotation = -78 },
         } },
-        [60] = { projectile = {
+        [60] = { { projectile = {
             name = "AbilityPowerField", core_skeleton = "SkeletonMagic",
             item = aura_item, start = surge,
-        } },
+        } }, { effect = {
+            name = "PowerFieldEffect", core_sequence = "effect_electricity",
+            scale = 1.5, time_scale = 2,
+            attach = { of = "self", root_point = "stomach", attach_point = "chest",
+                offset_x = 15, offset_y = -15 },
+        } }, { effect = {
+            name = "PowerFieldEffect2", core_sequence = "effect_electricity",
+            scale = 1.5, time_scale = 2,
+            attach = { of = "self", root_point = "stomach", attach_point = "chest",
+                offset_x = 15, offset_y = -15, start_rotation = 330 },
+        } } },
         [24] = { sound = { "snd_energy_burst" } },
     },
     events = "controlled",

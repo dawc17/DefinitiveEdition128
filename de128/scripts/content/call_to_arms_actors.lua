@@ -5,8 +5,9 @@ local sf2 = require("sf2")
 -- animation removed. Each is a Start, an optional End, then AssistantLeave.
 -- They are idle actors: only these moves run, never normal AI.
 --
--- Frames: every clip has 2 frames per sample, so with first_sample F, sample N is
--- frames (N - F + 1) * 2 .. + 1.
+-- Frames: the native moves have MidFrames="2", that is 3 frames per sample (as every other
+-- MidFrames="2" move), so with first_sample F, sample N > F is frames (N - F + 1) * 3 .. + 2 and
+-- sample F is frames 0-5. (2 frames per sample played the clips 1.5 times too fast.)
 
 local HITS = { "snd_hit1", "snd_hit2", "snd_hit3", "snd_hit4", "snd_hit5", "snd_hit6" }
 local INHERIT = { "SummonedAssistant", "Assistant", "BossAbility" }
@@ -36,7 +37,7 @@ local GLAIVE_EDGES = { "WEAPON_GLAIVE-Edge1", "WEAPON_GLAIVE-Edge3", "EForearm_2
 local function start_move(id, file, first_sample, uninterruptible, inherit, attacks, swish)
     return sf2.moves.register {
         id = id, animation = clip(file), inherit = inherit,
-        frames_per_sample = 2, first_sample = first_sample, priority = 500,
+        frames_per_sample = 3, first_sample = first_sample, priority = 500,
         no_wall_repulsion = true, no_interpolation_frames = true,
         align = "right_heel", face = "enemy",
         windows = { uninterruptible = { to = uninterruptible } },
@@ -50,7 +51,7 @@ end
 local function end_move(id, file, first_sample, uninterruptible, attacks, after, swish)
     return sf2.moves.register {
         id = id, animation = clip(file), inherit = INHERIT_STRIKE,
-        frames_per_sample = 2, first_sample = first_sample, priority = 500,
+        frames_per_sample = 3, first_sample = first_sample, priority = 500,
         no_wall_repulsion = true,
         align = "left_heel", face = "enemy",
         events = { { interval_end = "uninterruptible" } },
@@ -62,23 +63,29 @@ local function end_move(id, file, first_sample, uninterruptible, attacks, after,
     }
 end
 
-local katana = start_move("bodyguard_katana_start", "front_flip", 2, 37, INHERIT, nil, { 10, "snd_swish7" })
-end_move("bodyguard_katana_end", "two_hand_low_slash", 5, 55,
-    strike(14, 21, KATANA_EDGES, 0.25, { x = 700, y = 0, z = -675 }, "Sweep"), "bodyguard_katana_start", { 10, "snd_swish6" })
+-- Native samples: AssistantLongKatanaStart Uninterrupt to 19, swish 6; AssistantLongKatanaEnd
+-- Uninterrupt to 31, attack 11-14, swish 9.
+local katana = start_move("bodyguard_katana_start", "front_flip", 2, 56, INHERIT, nil, { 15, "snd_swish7" })
+end_move("bodyguard_katana_end", "two_hand_low_slash", 5, 83,
+    strike(21, 32, KATANA_EDGES, 0.25, { x = 700, y = 0, z = -675 }, "Sweep"), "bodyguard_katana_start", { 15, "snd_swish6" })
 
-local naginata = start_move("bodyguard_naginata_start", "spear_heavy_split", 2, 49, INHERIT_STRIKE,
-    strike(26, 35, SPEAR_EDGES, 0.1, { x = 350, y = 0, z = 0 }, "Overhead"), { 26, "snd_swish2" })
+-- AssistantBigNaginataStart: Uninterrupt to 25, attack 14-18, swish 14.
+local naginata = start_move("bodyguard_naginata_start", "spear_heavy_split", 2, 74, INHERIT_STRIKE,
+    strike(39, 53, SPEAR_EDGES, 0.1, { x = 350, y = 0, z = 0 }, "Overhead"), { 39, "snd_swish2" })
 
-local yari = start_move("bodyguard_yari_start", "spear_super_split", 20, 49, INHERIT_STRIKE,
-    strike(4, 25, SPEAR_EDGES, 0.25, { x = 500, y = 0, z = 0 }, "Middle"), { 4, "snd_swish5" })
+-- AssistantBigMagariYariStart (from sample 20): Uninterrupt to 43, attack 21-31, swish 21.
+local yari = start_move("bodyguard_yari_start", "spear_super_split", 20, 74, INHERIT_STRIKE,
+    strike(6, 38, SPEAR_EDGES, 0.25, { x = 500, y = 0, z = 0 }, "Middle"), { 6, "snd_swish5" })
 
-local glaive = start_move("bodyguard_glaive_start", "forward_roll", 2, 33, INHERIT, nil, { 10, "snd_swish7" })
-end_move("bodyguard_glaive_end", "glaive_spinning_slash", 4, 31,
-    strike(14, 19, GLAIVE_EDGES, 0.25, { x = 245, y = 0, z = -350 }, "Spinning"), "bodyguard_glaive_start", { 6, "snd_swish_sword1" })
+-- AssistantUniqGlaiveStart: Uninterrupt to 17, swish 6; AssistantUniqGlaiveEnd (from sample 4):
+-- Uninterrupt to 18, attack 10-12, swish 6.
+local glaive = start_move("bodyguard_glaive_start", "forward_roll", 2, 50, INHERIT, nil, { 15, "snd_swish7" })
+end_move("bodyguard_glaive_end", "glaive_spinning_slash", 4, 47,
+    strike(21, 29, GLAIVE_EDGES, 0.25, { x = 245, y = 0, z = -350 }, "Spinning"), "bodyguard_glaive_start", { 9, "snd_swish_sword1" })
 
 sf2.moves.register {
     id = "bodyguard_leave", animation = clip("jump_away"), inherit = { "Assistant", "BossAbility" },
-    frames_per_sample = 2, first_sample = 1, priority = 600,
+    frames_per_sample = 3, first_sample = 1, priority = 600,
     no_wall_repulsion = true, mirror = "left_heel",
     align = "left_heel",
     events = { { interval_end = "uninterruptible" } },

@@ -1,53 +1,68 @@
 local sf2 = require("sf2")
 local words = require("content.text")
 
--- Historical forge.xml splits the twelve existing Complex candidates into
--- three equal pools. The two new pools use the unchanged core Complex prices.
--- Special Recipes I and II (Abilities, Abilities2) grant the boss-ability
--- enchantments from content.boss_abilities. Like the current DE forge.xml, every
--- added recipe prices with the core Complex table; content.forge_choice scales it
--- per candidate (boss abilities 1.5x) and per strength tier.
+-- Complex Recipes I and II hold the fifteen mythical (set) enchantments in the order their sets'
+-- chests unlock (Seby, 2026-11-24; content.set_chests), seven in I and eight in II. Complex
+-- Recipe I is the core Complex recipe: it keeps its first five set enchantments and Plot Twist,
+-- lists DE128's Stone Fetters just before Plot Twist, and gives the other six to Complex Recipe
+-- II. Complex Recipe III is retired the way Special Recipe III was: it is no longer registered,
+-- and pieces forged with it keep their enchantments, which are the same perks. Every added
+-- recipe prices with the core Complex table, as the DE forge.xml did; content.forge_choice
+-- scales it per candidate (mythicals 2x, boss abilities 1.5x) and per strength tier.
+-- Special Recipes I and II (Abilities, Abilities2) grant the boss-ability enchantments from
+-- content.boss_abilities.
 local equipment = {
     "weapon", "armor", "helm",
     "ranged", "magic",
 }
 local complex = sf2.forge.get("Complex")
 local simple = sf2.forge.get("Simple")
-local pools = {
-    { id = "complex_2", text = "forgeRecipeComplex2", perks = {
-        "PERK_SKANDA_SET_KARMA", "PERK_GUST_SET_WIND_MAKER",
-        "PERK_DIRECTOR_SET_PLOT_TWIST", "PERK_TIME_SHIFT_SET_TIME_SHIFTER",
-    }, scripted = { "searing_luminary" } },
-    { id = "complex_3", text = "forgeRecipeComplex3", perks = {
-        "PERK_ARCANE_MARTIAL_ART_SET_NEO_WANDERER", "PERK_CORDYCEPS_FUNGUS_SET",
-        "PERK_MAGMA_VOLCANO_SET", "PERK_KARCER_HUNGER_SET",
-    }, scripted = { "stone_fetters" } },
-}
 
--- DE128's own mythicals (kind = "combo" scripted perks) join the pool beside the core ones.
+-- DE128's own mythicals (kind = "combo" scripted perks), by the keys the pools below use.
 local mythicals = {
-    searing_luminary = require("content.searing_luminary"),
     stone_fetters = require("content.stone_fetters"),
+    searing_luminary = require("content.searing_luminary"),
+    revival_heal = require("content.revival_heal"),
+}
+local function perk(name)
+    return mythicals[name] or sf2.perks.get("core:perks/" .. name)
+end
+
+-- Complex Recipe I: Tempest Rage, Typhoon of Spirits, Crimson Corruption, Icy Resistance and
+-- Karma stay core Complex's own candidates; Stone Fetters is listed before Plot Twist.
+local before_plot_twist = sf2.perks.get("core:perks/PERK_DIRECTOR_SET_PLOT_TWIST")
+for _, category in ipairs(equipment) do
+    sf2.forge.patch {
+        profile = complex, perk = mythicals.stone_fetters, equipment = category,
+        include = { before = before_plot_twist },
+    }
+end
+
+-- Complex Recipe II, in order: Predator's Fury, Arcane Martial Art, Revival Heal, Cordyceps,
+-- Searing Luminary, Roaring Luminary, Time Shift, Squall. A mod recipe lists its candidates
+-- in the order given; its core ones leave core Complex.
+local complex_2 = {
+    "PERK_KARCER_HUNGER_SET", "PERK_ARCANE_MARTIAL_ART_SET_NEO_WANDERER", "revival_heal",
+    "PERK_CORDYCEPS_FUNGUS_SET", "searing_luminary", "PERK_MAGMA_VOLCANO_SET",
+    "PERK_TIME_SHIFT_SET_TIME_SHIFTER", "PERK_GUST_SET_WIND_MAKER",
 }
 
 -- Handles of the recipes registered here, for content.forge_choice.
 local registered = {}
 
-for _, pool in ipairs(pools) do
+do
     local items, candidates = {}, {}
     for _, category in ipairs(equipment) do
         items[#items + 1] = { equipment = category, enchantments = 1, bar_scale = "Enchantment" }
-        for _, name in ipairs(pool.perks) do
-            local perk = sf2.perks.get("core:perks/" .. name)
-            sf2.forge.patch { profile = complex, perk = perk, equipment = category, exclude = true }
-            candidates[#candidates + 1] = { perk = perk, equipment = category }
-        end
-        for _, key in ipairs(pool.scripted or {}) do
-            candidates[#candidates + 1] = { perk = mythicals[key], equipment = category }
+        for _, name in ipairs(complex_2) do
+            if not mythicals[name] then
+                sf2.forge.patch { profile = complex, perk = perk(name), equipment = category, exclude = true }
+            end
+            candidates[#candidates + 1] = { perk = perk(name), equipment = category }
         end
     end
-    registered[pool.id] = sf2.forge.register {
-        id = pool.id, alias = words.key(pool.text),
+    registered.complex_2 = sf2.forge.register {
+        id = "complex_2", alias = words.key("forgeRecipeComplex2"),
         profile = complex, items = items, candidates = candidates,
     }
 end
@@ -92,4 +107,17 @@ for _, category in ipairs(equipment) do
     }
 end
 
-return registered
+return {
+    -- Handles of the recipes registered here.
+    recipes = registered,
+    -- Each Complex recipe's mythicals in their order (core perk names or DE128 keys), and the
+    -- perk handle for such a name, for content.forge_choice's prices.
+    mythicals = {
+        Complex = {
+            "PERK_MONK_SET_WHIRL", "PERK_SENTINEL_SET_SUPER_RETURN", "PERK_WARLOCK_SET_CURSE",
+            "PERK_GUARDIAN_SET_PROTECTION", "PERK_SKANDA_SET_KARMA", "stone_fetters", "PERK_DIRECTOR_SET_PLOT_TWIST",
+        },
+        complex_2 = complex_2,
+    },
+    perk = perk,
+}

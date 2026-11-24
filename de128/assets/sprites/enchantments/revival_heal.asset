@@ -1,0 +1,3 @@
+type=sprite
+texture=textures/enchantments/revival_heal.png
+pixels_per_unit=100

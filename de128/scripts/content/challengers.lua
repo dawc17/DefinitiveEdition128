@@ -7,7 +7,7 @@ local shared = require("content.sensei_state")
 -- Art and music ship with DE128 (Tools/ExtractDE128ChallengerArt.py).
 local CHALLENGERS = {
     {
-        key = "trickster", zone = "zone_1", battle = "challenger_trickster", x = 135, y = -55,
+        key = "trickster", zone = "zone_1", battle = "challenger_trickster", x = 150, y = -55,
         alias = "characterTrickster", title = "TRICKSTER_Title", description = "descTrickster",
         location = "core:locations/mountain", music = "samurai_spirit", experience = 0,
         first_name = "NAME_TRICKSTER", avatar = "man_nunchaku_new", voice = "Male",

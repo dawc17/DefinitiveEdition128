@@ -66,10 +66,42 @@ local function revise_prince(data)
     end
 end
 
--- Seby's 2026-11-21 map layout: map places (stage units, drawn at twice their value) that
--- differ from the archive. A Power Mode twin keeps its normal battle's place.
+-- Seby's 2026-11-24 map layout (his F6 map button file) places every tier 1-4 battle, in
+-- stage units (drawn at twice their value); it replaces his 2026-11-21 place for BOSS_7.
+-- Boss 4's 126.5 is held at 126, as the story map's half units are. A Power Mode twin keeps
+-- its normal battle's place.
 local PLACES = {
-    BOSS_7 = { x = -60, y = -205 }, BOSS_7_HARDMODE = { x = -60, y = -205 },
+    -- Tier 1
+    BOSS_1 = { x = -80, y = -180 }, BOSS_SON_OF_HEAVEN = { x = -280, y = -230 },
+    BOSS_2 = { x = -480, y = -180 }, BOSS_PUPPETEER = { x = -480, y = -15 },
+    BOSS_3 = { x = -280, y = -45 }, BOSS_LAMB_VULCAN = { x = -80, y = -15 },
+    BOSS_4 = { x = -280, y = 126 },
+    -- Tier 2
+    BOSS_5 = { x = -150, y = 15 }, BOSS_LAMB_FUNGUS = { x = 80, y = 5 },
+    BOSS_WOLF_WIND = { x = -480, y = 90 }, BOSS_6 = { x = -380, y = -70 },
+    BOSS_7 = { x = -150, y = -230 },
+    -- Tier 3
+    BOSS_8 = { x = -290, y = -180 }, BOSS_LAMB_HUNGER = { x = -485, y = -195 },
+    BOSS_9 = { x = -40, y = -105 }, BOSS_BANSHEE = { x = 165, y = -125 },
+    BOSS_10 = { x = -260, y = 40 }, BOSS_ARCHITECT_1 = { x = -475, y = 80 },
+    -- Tier 4
+    BOSS_11 = { x = -120, y = 80 }, BOSS_ARCHITECT_2 = { x = -200, y = -200 },
+    BOSS_12 = { x = -25, y = -60 }, BOSS_13 = { x = -455, y = 85 },
+    BOSS_14 = { x = -265, y = -35 },
+}
+-- Tiers 5-8 are the dark copies of the tier 1-4 maps (Seby: their places are tier 1-4's), so
+-- each of their battles moves with the tier 1-4 battle whose spot it shared (Rakshasa sat 5
+-- units below the Wind Wolf). Tier 8 takes its tier 4 places in content.underworld (TIER8_PLACES).
+local SHARED_PLACES = {
+    -- Tier 5 on tier 1
+    BOSS_WHISPER = "BOSS_1", BOSS_SON_OF_THE_SUN = "BOSS_SON_OF_HEAVEN", BOSS_RAVANA = "BOSS_2",
+    BOSS_ADANTI = "BOSS_PUPPETEER", BOSS_COUNTESS = "BOSS_3",
+    -- Tier 6 on tier 2
+    BOSS_MORGANA = "BOSS_5", BOSS_LAMB = "BOSS_LAMB_FUNGUS", BOSS_RAKSHASA = "BOSS_WOLF_WIND",
+    BOSS_HALLOWEEN_PUPPETEER = "BOSS_6",
+    -- Tier 7 on tier 3
+    BOSS_FARADEYA = "BOSS_8", BOSS_BERSTUUK = "BOSS_LAMB_HUNGER", BOSS_DANDY = "BOSS_9",
+    BOSS_SHURALE = "BOSS_10",
 }
 
 -- Seby's 2026-11 preview for the tier 1 Puppeteer (the hard mode keeps the archive's).
@@ -78,10 +110,17 @@ local function revise_puppeteer(data)
     battle.preview_sprite = "sprites/underworld/preview_puppeteer"
 end
 
-local function revise_places(data)
-    for name, place in pairs(PLACES) do
-        local _, _, battle = find_battle(data, name)
+local function place_battle(data, name, place)
+    for _, battle_name in ipairs({ name, name .. "_HARDMODE" }) do
+        local _, _, battle = find_battle(data, battle_name)
         battle.x, battle.y = place.x, place.y
+    end
+end
+
+local function revise_places(data)
+    for name, place in pairs(PLACES) do place_battle(data, name, place) end
+    for name, partner in pairs(SHARED_PLACES) do
+        place_battle(data, name, assert(PLACES[partner], "No Underworld place for " .. partner))
     end
 end
 

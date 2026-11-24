@@ -9,9 +9,11 @@ local DEBUFF_STACKS = 2
 local DAMAGE_PER_STACK = 0.01
 local PULSE_FRAMES = 60
 
--- The rat projectile's only attack runs in RatWaveMiddle; nothing else uses that animation.
+-- The rat projectile attacks in RatWaveStart (DE128's close-range hit, content.raid_boss_abilities)
+-- and RatWaveMiddle; nothing else uses those animations.
+local RAT_MOVES = { RatWaveStart = true, RatWaveMiddle = true }
 local function is_rat_hit(event)
-    return event.attack ~= nil and event.attack.animation_name == "RatWaveMiddle"
+    return event.attack ~= nil and RAT_MOVES[event.attack.animation_name] == true
 end
 
 local function stack_count(self, fighter)

@@ -13,10 +13,13 @@ set_chests.register()
 
 for _, row in ipairs(require("content.shop_data")) do
     local item = sf2.items.get("core:items/" .. row[1] .. "/" .. row[2])
+    -- A piece sold only in a set chest is listed once owned; its chest has the level gate, which can
+    -- be lower than the piece's own level (the Director set's chest opens at 25, its pieces are 50).
+    local in_chest = set_chests.hidden[row[2]]
     local patch = {
         item = item,
-        visibility = set_chests.hidden[row[2]] and "force_hidden" or "force_visible",
-        minimum_level = row[3],
+        visibility = in_chest and "force_hidden" or "force_visible",
+        minimum_level = (not in_chest) and row[3] or nil,
         required_group = shop_groups.game(row[4]),
         initial_profile = {
             level = row[3], upgrade_level = row[5],

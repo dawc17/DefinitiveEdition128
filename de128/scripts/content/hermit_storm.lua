@@ -13,10 +13,19 @@ sf2.moves.patch { move = "Win_HermitStorm", disable = true }
 -- Frames: hermit_storm_idle starts at sample 3 and the player move at sample 1, both
 -- with 3 frames per sample. Sample N is game frames (N - first + 1) * 3 .. +2, and the
 -- first sample is frames 0-5.
+--
+-- Once the storm is up, only a hit or the raid charge button ends it (Seby, 2026-11-24): the
+-- levitation loops and nothing else may cut it. The cast and the idle are uninterruptible to
+-- their end, so other key presses, buffered ones included, are refused. (The cast used to turn
+-- semi-uninterruptible at frame 108, where 2key follow-ups could cut it and leave the looped
+-- levitation effect running; the idle at frame 102.) hermit_storm_cancel asks for no
+-- controllable state, so its raid charge press still gets through.
+-- The victory pose outranks the idle (999): with no uninterruptible end inside the idle any
+-- more, a round won during the cast reaches it at the idle's end instead (archive: 100).
 local win = sf2.moves.register {
     id = "hermit_storm_win", animation = sf2.assets.binary("animations/hermit_super_attack_idle"),
     inherit = { "Win", "EndStance", "StageStance", "Stance" },
-    last_sample = 54, priority = 100,
+    last_sample = 54, priority = 1000,
     ends_stage = true,
     align = "right_heel",
     transitions = { { sample_shift = 0, when = { all = { { animation = "de128:moves/hermit_storm_idle" }, { animation = "de128:moves/hermit_storm_win" } } } } },
@@ -53,7 +62,7 @@ local idle = sf2.moves.register {
     events = { "finish" },
     when = { any = { { animation = "de128:moves/hermit_storm_player" }, { animation = "de128:moves/hermit_storm_idle" }, { animation = "de128:moves/hermit_storm_win" } } },
     only_for = { any = abilities.lock("hermit_storm") },
-    windows = { unstable = true, semi_uninterruptible = { from = 102 }, uninterruptible = { to = 101 } },
+    windows = { unstable = true, uninterruptible = true },
     on = idle_actions,
 }
 
@@ -66,6 +75,27 @@ local function attack(from, to, hit)
         impulse = { x = 345, y = -205, z = -350 }, hit = hit,
     }
 end
+-- Raid charge while levitating: the fighter drops to the ground into the cast's first,
+-- standing samples (blended in over the first 10 frames), the levitation effect and the
+-- storm's hum stop, and the stance idle takes over when it ends. In the cast it counts from
+-- frame 84, after the last attack. Its start begins the recharge (content.boss_abilities).
+sf2.moves.register {
+    id = "hermit_storm_cancel", animation = sf2.assets.binary("animations/hermit_super_attack"),
+    first_sample = 0, last_sample = 1, frames_per_sample = 5, priority = 120,
+    align = "left_heel",
+    events = { "key_pressed" },
+    when = {
+        keys = "raid_charge",
+        stage = "fight",
+        any = { { animation = "de128:moves/hermit_storm_idle" },
+            { animation = "de128:moves/hermit_storm_player", window = "HermitStormHover" } },
+    },
+    only_for = { any = abilities.lock("hermit_storm"), rig = "Skeleton" },
+    windows = { unstable = true, uninterruptible = { to = 9 } },
+    on = { [0] = { { stop_effect = "HermitStormLevitation" }, { stop_sound = "snd_hermit_storm_idle" } } },
+    face = "enemy",
+}
+
 local player = sf2.moves.register {
     id = "hermit_storm_player", animation = sf2.assets.binary("animations/hermit_super_attack"),
     inherit = { "1key", "BossAbility", "Controlled", "SoundStrike" },
@@ -80,10 +110,11 @@ local player = sf2.moves.register {
     when = {
         keys = "raid_charge",
         not_mod = { "HermitStormRecharge", abilities.ready("hermit_storm"), abilities.paced("hermit_storm"), "SilenceIcon" },
+        not_animation = "de128:moves/hermit_storm_idle",
         controllable = true,
     },
     only_for = { any = abilities.lock("hermit_storm"), rig = "Skeleton" },
-    windows = { unstable = true, uninterruptible = { to = 110 }, semi_uninterruptible = { from = 108 } },
+    windows = { unstable = true, uninterruptible = true, HermitStormHover = { from = 84 } },
     attacks = { attack(24, 29, "High"), attack(33, 59, "Low"), attack(60, 83, "Low") },
     on = {
         [60] = { projectile = {

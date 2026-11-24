@@ -6,7 +6,7 @@ local places = {
     { x = -455, y = -5, location = "core:locations/village", preview = "act3", music = "fight6_sparring" },
     { x = -450, y = -5, location = "core:locations/ships", preview = "act4", music = "fight14_ship_battle" },
     { x = -470, y = 30, location = "core:locations/flooded_village", preview = "act5", music = "fight38_sakura_forest" },
-    { x = -450, y = -35, location = "core:locations/magic_rocks", preview = "act6", music = "fight28_flying_rocks" },
+    { x = -450, y = -25, location = "core:locations/magic_rocks", preview = "act6", music = "fight28_flying_rocks" },
 }
 -- fights[mode][act] is the list of fight tables of that battle (see content.sensei_encounters).
 -- Fights are unnamed, so they are "1", "2", ...: sensei_act_<act>_<mode>_<position>.

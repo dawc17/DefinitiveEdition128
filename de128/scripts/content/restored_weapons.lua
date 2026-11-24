@@ -19,6 +19,8 @@ local definitions = {
     { "chinese_swords", "WEAPON_CHINESE_SWORDS", "Weapon19.img_weapon_chinese_swords", "mdl_weapon_hermit_swords", "ChineseSwords", 42, 214, "INTERMISSION", "FRENZY", 1511 },
     { "giant_sword", "WEAPON_GIANT_SWORD", "Weapon20.img_weapon_giant_sword", "mdl_weapon_giant_sword_mini", "GiantSword", 50, 305, "ACT_7_3", "TIME_BOMB", 1797 },
 }
+-- Dragon Knives is sold only in the Dragon Set's chest (content.set_chests); owned, it stays listed.
+local in_chest = require("content.set_chests").hidden
 local weapons = {}
 for _, row in ipairs(definitions) do
     local item = sf2.items.register {
@@ -31,7 +33,9 @@ for _, row in ipairs(definitions) do
         shop = { level = row[6], price = { gems = row[7] } },
     }
     sf2.items.patch {
-        item = item, required_group = require("content.shop_groups").game(row[8]), minimum_level = row[6],
+        item = item, required_group = require("content.shop_groups").game(row[8]),
+        minimum_level = (not in_chest[row[1]]) and row[6] or nil,
+        visibility = in_chest[row[1]] and "force_hidden" or nil,
         enchantments = { { perk = sf2.perks.get("core:perks/PERK_ITEM_SPECIAL_" .. row[9] .. "_WEAPON"), aspect = row[10] } },
     }
     weapons[row[1]] = item
