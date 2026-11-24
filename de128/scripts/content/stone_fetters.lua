@@ -84,7 +84,7 @@ local NO_STAGGER = { "Physical", "Fall", "Jump", "Wall", "Throw", "ThrowFall", "
 
 local function can_stagger(fighter)
     for _, name in ipairs(NO_STAGGER) do
-        if fighter:animation_is(name, "opponent") then return false end
+        if fighter:animation_is(name, "opponent") then return false, name end
     end
     return true
 end
@@ -101,7 +101,7 @@ end
 
 local function quake_enemy(fighter, view)
     local receipt = fighter:spawn_projectile(quake, clamp(view.opponent.position.x - view.self.position.x), 0)
-    if receipt.status == "failed" then sf2.log.warn("Stone Fetters quake: " .. tostring(receipt.error)) end
+    sf2.log.info("Stone Fetters quake spawn: " .. tostring(receipt.status) .. " " .. tostring(receipt.error))
 end
 
 -- Eight cells: one a hit while counting, then the time left while the enemy is bound.
@@ -172,10 +172,17 @@ local behavior = {
             if s.now >= s.next_stagger then
                 s.next_stagger = s.now + STAGGER_EVERY
                 s.stagger_due = not is_boss(fighter, view)
+                -- Temporary diagnostics (2026-11-24): why a due quake does not spawn.
+                if not s.stagger_due then sf2.log.info("Stone Fetters quake skipped: opponent counts as a boss") end
             end
-            if s.stagger_due and fighter.opponent and can_stagger(fighter) then
-                s.stagger_due = false
-                quake_enemy(fighter, view)
+            if s.stagger_due and fighter.opponent then
+                local free, blocker = can_stagger(fighter)
+                if free then
+                    s.stagger_due = false
+                    quake_enemy(fighter, view)
+                elseif s.now % 60 == 0 then
+                    sf2.log.info("Stone Fetters quake waiting: opponent in " .. tostring(blocker))
+                end
             end
         end
         if s.now % 30 == 0 then fighter:set_model_color(TINT, 60) end
