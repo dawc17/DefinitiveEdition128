@@ -162,15 +162,16 @@ end
 
 local fields = {
     now = 0, charge = 0, lit = false, aura_phase = 0, aura_tick = 0, burn_tick = 0,
-    base_damage = 0, doom_until = 0,
+    base_damage = 0, doom_until = 0, meter_shown = false,
 }
 for _, kind in ipairs(kinds) do fields["last_" .. kind] = -WINDOW end
 
 local behavior = {
     state = { lifetime = "round", fields = fields },
+    -- The meter is drawn from the first fight tick: fight meters need a running round.
     on_round_begin = function(self, fighter)
         drop_marker()
-        show_meter(self, fighter)
+        self.state.meter_shown = false
     end,
     -- The meter stays until the round resets, so it leaves with the rest of the fight HUD.
     on_round_end = function()
@@ -181,6 +182,7 @@ local behavior = {
         s.now = event.frame
         local view = fighter:snapshot()
         if not view or not view.round_active then return end
+        if not s.meter_shown then s.meter_shown = true; show_meter(self, fighter) end
         -- Dodging through an attack: i-frames while the enemy's attack window is open and near.
         if view.opponent and has_interval(view.self.animation, "invulnerable")
             and has_interval(view.opponent.animation, "attack")

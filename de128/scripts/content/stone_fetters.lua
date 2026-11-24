@@ -144,13 +144,17 @@ local behavior = {
     } },
     -- No on_round_end clear: the meter stays until the round resets, so it leaves with the rest
     -- of the fight HUD.
+    -- The meter is drawn from on_tick: fight meters need a running round.
     on_round_begin = function(self, fighter)
         self.state.shown = -1
-        show_meter(self, fighter)
     end,
     on_tick = function(self, fighter, event)
         local s = self.state
         s.now = event.frame
+        if s.shown == -1 then
+            local first = fighter:snapshot()
+            if first and first.round_active then show_meter(self, fighter) end
+        end
         if not s.active then
             if s.hits > 0 and s.now - s.last_hit > WINDOW then
                 s.hits = 0
