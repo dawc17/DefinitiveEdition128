@@ -12,6 +12,7 @@ return sf2.perks.register {
     description = words.own("special.revival_heal.description", "special.revival_heal.description"),
     icon = sf2.assets.sprite("sprites/enchantments/revival_heal"),
     kind = "combo",
-    -- A behaviour needs at least one handler; this one does nothing until Revival Heal is written.
-    behavior = { on_hit = function() end },
+    -- A behaviour needs at least one handler (on_round_begin, on_tick, on_post_hit...); this one does
+    -- nothing until Revival Heal is written.
+    behavior = { on_round_begin = function() end },
 }
