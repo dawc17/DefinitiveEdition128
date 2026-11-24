@@ -3,7 +3,7 @@ local words = require("content.text")
 
 -- Stone Fetters (mythical, kind = "combo"): eight melee hits, each within 3.5 s of the last,
 -- trigger a draining meter. While it lasts an earthquake strikes the enemy every 3 s whether or
--- not a hit lands (never a boss), knocking them down as a landed sweep does, and the player takes
+-- not a hit lands, knocking them down as a landed sweep does, and the player takes
 -- hits armored. Bosses never use it.
 -- Plan: Stone Fetters Mythical Enchantment Concept Plan.
 
@@ -84,15 +84,11 @@ local NO_STAGGER = { "Physical", "Fall", "Jump", "Wall", "Throw", "ThrowFall", "
 
 local function can_stagger(fighter)
     for _, name in ipairs(NO_STAGGER) do
-        if fighter:animation_is(name, "opponent") then return false, name end
+        if fighter:animation_is(name, "opponent") then return false end
     end
     return true
 end
 
--- Bosses carry the anti-shock perk; raid bosses also have several health bars.
-local function is_boss(fighter, view)
-    return not view or not view.opponent or view.opponent.max_health > 1 or fighter:has_perk("PERK_ANTI_SHOCK", "opponent")
-end
 
 -- Spawn offsets are from the player's centre along the arena's axes, at most 1000 each way.
 local function clamp(offset)
@@ -101,7 +97,7 @@ end
 
 local function quake_enemy(fighter, view)
     local receipt = fighter:spawn_projectile(quake, clamp(view.opponent.position.x - view.self.position.x), 0)
-    sf2.log.info("Stone Fetters quake spawn: " .. tostring(receipt.status) .. " " .. tostring(receipt.error))
+    if receipt.status == "failed" then sf2.log.warn("Stone Fetters quake: " .. tostring(receipt.error)) end
 end
 
 -- Eight cells: one a hit while counting, then the time left while the enemy is bound.
@@ -171,18 +167,12 @@ local behavior = {
         if view and view.round_active then
             if s.now >= s.next_stagger then
                 s.next_stagger = s.now + STAGGER_EVERY
-                s.stagger_due = not is_boss(fighter, view)
-                -- Temporary diagnostics (2026-11-24): why a due quake does not spawn.
-                if not s.stagger_due then sf2.log.info("Stone Fetters quake skipped: opponent counts as a boss") end
+                -- Every opponent, bosses included (Seby, 2026-11-24).
+                s.stagger_due = true
             end
-            if s.stagger_due and fighter.opponent then
-                local free, blocker = can_stagger(fighter)
-                if free then
-                    s.stagger_due = false
-                    quake_enemy(fighter, view)
-                elseif s.now % 60 == 0 then
-                    sf2.log.info("Stone Fetters quake waiting: opponent in " .. tostring(blocker))
-                end
+            if s.stagger_due and fighter.opponent and can_stagger(fighter) then
+                s.stagger_due = false
+                quake_enemy(fighter, view)
             end
         end
         if s.now % 30 == 0 then fighter:set_model_color(TINT, 60) end
