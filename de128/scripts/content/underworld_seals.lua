@@ -616,7 +616,9 @@ local function glow(boss, strength)
 end
 
 -- On the boss: no damage while the fight holds him, his AI held (he starts nothing, whatever his
--- tactic), and a glow that pulses and grows as he gathers himself. No move plays: core Standup
+-- tactic), the perk effects on him frozen (a Crimson Corruption curse keeps its level and time
+-- and deals nothing until the next seal; owner, 2026-11-26), and a glow that pulses and grows as
+-- he gathers himself. No move plays: core Standup
 -- needs him on the floor, and play_move takes only moves a mod registers.
 local guard = {
     on_tick = function(_, fighter, tick)
@@ -625,6 +627,7 @@ local guard = {
             if run.ai_held then
                 run.ai_held = false
                 fighter:set_ai_held(false)
+                fighter:set_perk_effects_frozen(false)
             end
             if run.glowing then
                 run.glowing = false
@@ -635,6 +638,7 @@ local guard = {
         if not run.ai_held then
             run.ai_held = true
             fighter:set_ai_held(true)
+            fighter:set_perk_effects_frozen(true)
         end
         if tick.frame % 6 ~= 0 then return end
         run.glowing = true
