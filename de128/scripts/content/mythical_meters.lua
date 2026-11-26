@@ -64,11 +64,10 @@ meter("PERK_TIME_SHIFT_SET_TIME_SHIFTER", 1, {
     { color = "#A9A9FF" },
 })
 
--- Crimson Corruption: the curse's level (EffectStep, up to 15) once it has one; before that, the
--- damage dealt toward the first level (DamageCounter, 0.25 a level).
+-- Crimson Corruption: only while the enemy is cursed, the curse's time left (BloodCurseStart,
+-- 360 frames, refreshed by each hit) with its level (EffectStep, up to 15) above the bar.
 meter("PERK_WARLOCK_SET_CURSE", 1, {
-    { variable = "EffectStep", max = 15, only_above_zero = true, color = "#C0182E" },
-    { variable = "DamageCounter", max = 0.25, color = "#6E1220" },
+    { flag = "BloodCurseStart", on = "opponent", label_variable = "EffectStep", color = "#C0182E" },
 })
 
 -- Squall: full while the gust is ready; after a low kick launches it, the 300-frame cooldown.
