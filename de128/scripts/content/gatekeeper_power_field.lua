@@ -95,27 +95,23 @@ local cast = sf2.moves.register {
 -- The native Electrocution reaction is only a convulsion; the sparks belong to the attacker's
 -- Shocker Claws move. This reaction outranks it (500) and plays the sparks on the victim, so
 -- Static Charge's fourth hit reads as an electrocution. Same clip, timing and conditions.
--- The field's own surge hit ("ElectrocutionPowerfield") is the same convulsion without the sparks,
--- so it gets them too: the target shows electricity like every other electric hit.
-for id, hit in pairs { electrocution_hit = "Electrocution", power_field_hit = "ElectrocutionPowerfield" } do
-    sf2.moves.register {
-        id = id, animation = sf2.assets.binary("animations/hit_electrocution"),
-        inherit = { "Recoil", "Hit" },
-        frames_per_sample = 2, first_sample = 3, priority = 510,
-        align = "pelvis",
-        events = { { hit = hit } },
-        when = { not_mod = "MOD_TITAN", not_animation = "Physical", not_window = "TitanUnhittable" },
-        windows = { uninterruptible = true },
-        only_for = { rig = "Skeleton" },
-        face = "reverse_impulse",
-        on = {
-            [0] = { effect = {
-                name = "ElectrocutionSparks", core_sequence = "mgc_effect_shocker", scale = 1.68, time_scale = 0.9,
-                looped = false, position = { node = "pelvis", of = "self", x = 0, y = 40 }, follow = true,
-            } },
-        },
-    }
-end
+sf2.moves.register {
+    id = "electrocution_hit", animation = sf2.assets.binary("animations/hit_electrocution"),
+    inherit = { "Recoil", "Hit" },
+    frames_per_sample = 2, first_sample = 3, priority = 510,
+    align = "pelvis",
+    events = { { hit = "Electrocution" } },
+    when = { not_mod = "MOD_TITAN", not_animation = "Physical", not_window = "TitanUnhittable" },
+    windows = { uninterruptible = true },
+    only_for = { rig = "Skeleton" },
+    face = "reverse_impulse",
+    on = {
+        [0] = { effect = {
+            name = "ElectrocutionSparks", core_sequence = "mgc_effect_shocker", scale = 1.68, time_scale = 0.9,
+            looped = false, position = { node = "pelvis", of = "self", x = 0, y = 40 }, follow = true,
+        } },
+    },
+}
 
 -- Seconds between fields; recorded as the boss's pacing for its HUD icon, and the cast's
 -- recharge for a boss (its pacing flag lasts this long from each cast's start).
