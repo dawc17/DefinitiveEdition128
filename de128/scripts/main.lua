@@ -64,6 +64,9 @@ require("content.se_music")
 require("content.battle_previews")
 -- Per-save difficulty: Easy, Medium (DE128 as designed), Hard and Very Hard.
 require("content.difficulty")
+
+-- The mythical set enchantments' charge in the fight meter.
+require("content.mythical_meters")
 -- Sensei story: guard templates and RaidCharge availability are synthesized from
 -- archive evidence (see sensei_guard_templates.lua, sensei_raid_charge_state.lua).
 require("content.sensei_story").install_default()
