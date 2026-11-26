@@ -69,6 +69,9 @@ local TIERS = {
         ai = VERY_HARD_AI, ai_add = VERY_HARD_AI_ADD, enchantments = "very_hard", arrow = "#FF3030" },
 }
 
+-- Seconds per round of a score victory on every tier.
+local SCORE_VICTORY_ROUND = 40
+
 -- Fight kinds left as they are. The Underworld is excluded separately.
 local UNCHANGED = { tutorial = true, raid = true, other = true }
 
@@ -178,7 +181,10 @@ sf2.battles.on_prepare(function(fight)
     end
     local strength = clamp_strength((tier.strength or 1) * even)
     if fight.preview then return { strength = strength, minimum_ratio = tier.minimum_ratio } end
-    local plan = { round_time = tier.round_time, strength = strength, minimum_ratio = tier.minimum_ratio,
+    -- A score victory is won on hits within its clock: the tiers' long rounds (Easy's 200 s)
+    -- made it drag, so every tier plays it at SCORE_VICTORY_ROUND (owner, 2026-11-26).
+    local round_time = fight.score_victory and SCORE_VICTORY_ROUND or tier.round_time
+    local plan = { round_time = round_time, strength = strength, minimum_ratio = tier.minimum_ratio,
         ai = tier.ai, ai_add = tier.ai_add, arrow_color = tier.arrow }
     -- An Ascension enemy already carries the trial's own enchantment (content.ascension_rules).
     if tier.enchantments and not fight.id:find(":fights/ascension_", 1, true) then
