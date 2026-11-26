@@ -180,7 +180,8 @@ sf2.battles.on_prepare(function(fight)
     if fight.preview then return { strength = strength, minimum_ratio = tier.minimum_ratio } end
     local plan = { round_time = tier.round_time, strength = strength, minimum_ratio = tier.minimum_ratio,
         ai = tier.ai, ai_add = tier.ai_add, arrow_color = tier.arrow }
-    if tier.enchantments then
+    -- An Ascension enemy already carries the trial's own enchantment (content.ascension_rules).
+    if tier.enchantments and not fight.id:find(":fights/ascension_", 1, true) then
         local seed, enemies = sf2.saves.seed(), {}
         for _, enemy in ipairs(fight.enemies) do
             if not enchanted(enemy) then
