@@ -1,7 +1,11 @@
 local sf2 = require("sf2")
 -- DE Underworld: eight tiers of offline boss fights (archive raid_stages_default.xml)
--- registered as Underworld map pages, with Power Mode twins. Data is generated
--- offline by Tools/GenerateDE128Underworld.py; this module only registers it.
+-- registered as Underworld map pages. Data is generated offline by
+-- Tools/GenerateDE128Underworld.py; this module only registers it.
+-- Power Mode is scrapped (Seby, 2026-11-27): the archive's Power Mode twins (power_mode "power")
+-- are not registered, and the enchantment orbs (ForgeMaterial1-3) their wins paid go to their
+-- normal fight's win instead. Their rows stay in the data: content.underworld_seals copies their
+-- rule groups as seal rules.
 -- DE128's later changes to the generated rows (content.underworld_revisions) apply first.
 local data = require("content.underworld_revisions").apply(require("content.underworld_data"))
 local text = require("content.underworld_text")
@@ -57,7 +61,7 @@ local OWNED_AVATARS = {
 -- seby's Underworld map art (2026-10-22), one page per tier: tiers 1-4 in daylight and
 -- their dark copies 5-8. It replaces the archive's zone files, so tier 8 is now tier 4's
 -- island instead of the mountain map, and its four battles take the places of the
--- matching tier 4 buttons. Power Mode twins follow their normal battle.
+-- matching tier 4 buttons.
 local MAP_TIERS = 8
 local TIER8_PLACES = {
     BOSS_INVISIBLE = "BOSS_11", BOSS_HAUNTED_PRINCE = "BOSS_12",
@@ -113,6 +117,8 @@ local function install(raid_charge_rule)
             if row.perk == "core:perks/PERK_GRASP_OF_DARKNESS" then
                 if row.frames == 800 then return blackness_grasp.tactic end
                 if row.frames == 700 then return blackness_grasp.power_tactic end
+                -- Faradeya's row keeps the core perk's 600 frames.
+                if row.frames == nil then return blackness_grasp.core_tactic end
             end
         end
         error("Blackness's archived Grasp timing is missing or unsupported")
@@ -194,9 +200,20 @@ local function install(raid_charge_rule)
     local by_template = {}
     -- by_battle[archive battle][archive fight] = { handle, id } for story hooks.
     local by_battle = {}
-    -- Generated Power Mode rows contain only differences from the normal fight.
-    -- Resolve into a fresh table so registering a twin cannot mutate its source.
-    local fight_rows = {}
+    -- The orbs each Power Mode twin's fights paid, by normal battle, fight and reward slot.
+    local orbs = {}
+    for _, zone_spec in ipairs(data.zones) do
+        for _, spec in ipairs(zone_spec.battles) do
+            if spec.power_mode == "power" then
+                for _, row in ipairs(spec.fights) do
+                    local normal = assert(row.inherit, "Power Mode fight without a normal fight in " .. spec.name)
+                    orbs[normal] = orbs[normal] or {}
+                    orbs[normal][row.name] = {}
+                    for index, reward in ipairs(row.rewards or {}) do orbs[normal][row.name][index] = reward.currencies end
+                end
+            end
+        end
+    end
     assert(#data.zones == MAP_TIERS, "Underworld map art expects " .. MAP_TIERS .. " tiers")
     local places = {}
     for _, spec in ipairs(data.zones[4].battles) do places[spec.name] = spec end
@@ -210,113 +227,107 @@ local function install(raid_charge_rule)
             value = words.read(tier == 1 and "ZONE_RAID" or "ZONE_RAID" .. (tier - 1)) }
         zones[tier] = zone
         for _, spec in ipairs(zone_spec.battles) do
-            local battle_id = "uw_" .. lower_id(spec.name)
-            local icons = nil
-            if spec.icon_atlas and OWNED_BUTTONS[spec.icon_atlas] then
-                icons = {
-                    base = sf2.assets.sprite("sprites/underworld/" .. spec.icon_atlas:lower() .. "_base"),
-                    active = sf2.assets.sprite("sprites/underworld/" .. spec.icon_atlas:lower() .. "_active"),
-                    -- Generated from base and active (Tools/Recovery/BuildDE128PressedBattleIcons.py).
-                    pressed = sf2.assets.sprite("sprites/underworld/" .. spec.icon_atlas:lower() .. "_pressed"),
-                }
-            end
-            local description = nil
-            if spec.description then
-                description = text.key(spec.description) .. (spec.description_level and ("{" .. spec.description_level .. "}") or "")
-            end
-            local place = spec
-            if tier == 8 then
-                local normal = spec.name:gsub("_HARDMODE$", "")
-                place = assert(places[TIER8_PLACES[normal]], "No tier 4 place for Underworld battle " .. spec.name)
-            end
-            fight_rows[spec.name] = {}
-            local fight_specs, fight_ids = {}, {}
-            for _, row in ipairs(spec.fights) do
-                local fight_spec = row
-                if row.inherit then
-                    local base = assert(fight_rows[row.inherit] and fight_rows[row.inherit][row.name],
-                        "Missing normal Underworld fight " .. row.inherit .. "/" .. row.name)
-                    fight_spec = {}
-                    for key, value in pairs(base) do fight_spec[key] = value end
-                    for key, value in pairs(row) do
-                        if key ~= "inherit" then fight_spec[key] = value end
-                    end
-                end
-                fight_rows[spec.name][row.name] = fight_spec
-                -- A fight's ID is <battle id>_<name>, so this name keeps the archive's fight IDs.
-                local fight_name = lower_id(fight_spec.name)
-                local prefix = battle_id .. "_" .. fight_name
-                local opponents = {}
-                for index, w in ipairs(fight_spec.warriors) do
-                    local kind = w.template
-                    local tactic = kind == "Boss_Wasp_Young" and wasp_fly.tactic or
-                        (kind == "Boss_Butcher_Young" and butcher_earthquake.tactic or
-                        (kind == "Boss_Hermit_Young" and hermit_storm.tactic or
-                        (kind == "Girl_Drakaina" and war_whirl.tactic or
-                        (kind == "Cyborg_Gatekeeper" and gatekeeper_power_field.tactic or
-                        (kind == "Girl_Blackness" and blackness_tactic(w) or
-                        (kind == "Girl_Saturn" and saturn_tactic(w) or
-                        (kind == "Man_Dandy" and dandy_tactic(w) or
-                        (kind == "Man_Hoaxen" and raid_boss_abilities.hoaxen or
-                        (kind == "Man_Stalker" and hunter_tactic(w) or
-                        (kind == "Man_Berstuuk" and raid_boss_abilities.berstuuk or w.tactic))))))))))
-                    if kind == "Man_Arkhos" then tactic = raid_boss_abilities.arkhos end
-                    if kind == "Man_Tenebris" then tactic = raid_boss_abilities.tenebris end
-                    tactic = teleport_tactic(w) or tactic
-                    -- A DE128 boss tactic's cadence drives the boss's ability icon.
-                    local perks = perk_rows(w.perks)
-                    local pace = boss_abilities.pace_perk_for(tactic)
-                    if pace then
-                        perks = perks or {}
-                        perks[#perks + 1] = pace
-                    end
-                    -- The opponent keeps its archive-era warrior ID (<fight id>_w<position>).
-                    local opponent_id = prefix .. "_w" .. index
-                    opponents[index] = {
-                        id = opponent_id, fighter = template(w.template), tactic = tactic,
-                        avatar = avatar(w.avatar), health_bars = w.health_bars, attributes = w.attributes,
-                        attribute_alignments = w.alignments, perks = perks,
-                        items = item_list(w.items), skeleton = w.skeleton,
+            if spec.power_mode ~= "power" then
+                local battle_id = "uw_" .. lower_id(spec.name)
+                local icons = nil
+                if spec.icon_atlas and OWNED_BUTTONS[spec.icon_atlas] then
+                    icons = {
+                        base = sf2.assets.sprite("sprites/underworld/" .. spec.icon_atlas:lower() .. "_base"),
+                        active = sf2.assets.sprite("sprites/underworld/" .. spec.icon_atlas:lower() .. "_active"),
+                        -- Generated from base and active (Tools/Recovery/BuildDE128PressedBattleIcons.py).
+                        pressed = sf2.assets.sprite("sprites/underworld/" .. spec.icon_atlas:lower() .. "_pressed"),
                     }
-                    by_template[w.template] = by_template[w.template] or {}
-                    table.insert(by_template[w.template], sf2.mod.id .. ":warriors/" .. opponent_id)
                 end
-                local rewards = {}
-                for index, r in ipairs(fight_spec.rewards) do
-                    local reward = { prize_base = r.prize_base, experience = r.experience,
-                        gems = r.gems, currencies = r.currencies }
-                    -- Every Underworld win (the last slot) also drops one random elixir.
-                    if index > 1 and index == #fight_spec.rewards then reward.choices = elixirs.drop end
-                    -- An empty reward is a missing key: the slot still exists and pays nothing.
-                    if next(reward) then rewards[index - 1] = reward end
+                local description = nil
+                if spec.description then
+                    description = text.key(spec.description) .. (spec.description_level and ("{" .. spec.description_level .. "}") or "")
                 end
-                local rules = {}
-                for index, rule in ipairs(fight_spec.rules) do rules[index] = rule_table(rule) end
-                local fight = {
-                    name = fight_name, power = fight_spec.power, rounds = fight_spec.rounds,
-                    round_time = fight_spec.round_time, replays = fight_spec.replays,
-                    health_recovery = fight_spec.health_recovery, opponents = opponents, rules = rules, rewards = rewards,
+                local place = spec
+                if tier == 8 then
+                    place = assert(places[TIER8_PLACES[spec.name]], "No tier 4 place for Underworld battle " .. spec.name)
+                end
+                local fight_specs, fight_ids = {}, {}
+                for _, row in ipairs(spec.fights) do
+                    local fight_spec = row
+                    assert(not row.inherit, "Unexpected inherited Underworld fight in " .. spec.name)
+                    local paid_orbs = orbs[spec.name] and orbs[spec.name][row.name] or {}
+                    -- A fight's ID is <battle id>_<name>, so this name keeps the archive's fight IDs.
+                    local fight_name = lower_id(fight_spec.name)
+                    local prefix = battle_id .. "_" .. fight_name
+                    local opponents = {}
+                    for index, w in ipairs(fight_spec.warriors) do
+                        local kind = w.template
+                        -- Every boss whose ability is a DE128 cast needs its paced tactic: the cast
+                        -- replaces the native move that re-arms the core perk's recharge, so without
+                        -- the pacing perk only the round's opening wait gates it (Seby, 2026-11-27).
+                        local tactic = kind == "Boss_Wasp_Young" and wasp_fly.tactic or
+                            ((kind == "Boss_Butcher_Young" or kind == "Man_Fungus") and butcher_earthquake.tactic or
+                            ((kind == "Boss_Hermit_Young" or kind == "Man_SonOfHeaven") and hermit_storm.tactic or
+                            (kind == "Girl_Drakaina" and war_whirl.tactic or
+                            (kind == "Cyborg_Gatekeeper" and gatekeeper_power_field.tactic or
+                            ((kind == "Girl_Blackness" or kind == "Girl_Faradeya") and blackness_tactic(w) or
+                            (kind == "Girl_Saturn" and saturn_tactic(w) or
+                            (kind == "Man_Dandy" and dandy_tactic(w) or
+                            (kind == "Man_Hoaxen" and raid_boss_abilities.hoaxen or
+                            (kind == "Man_Stalker" and hunter_tactic(w) or
+                            (kind == "Man_Berstuuk" and raid_boss_abilities.berstuuk or w.tactic))))))))))
+                        if kind == "Man_Arkhos" then tactic = raid_boss_abilities.arkhos end
+                        if kind == "Man_Tenebris" then tactic = raid_boss_abilities.tenebris end
+                        tactic = teleport_tactic(w) or tactic
+                        -- A DE128 boss tactic's cadence drives the boss's ability icon.
+                        local perks = perk_rows(w.perks)
+                        local pace = boss_abilities.pace_perk_for(tactic)
+                        if pace then
+                            perks = perks or {}
+                            perks[#perks + 1] = pace
+                        end
+                        -- The opponent keeps its archive-era warrior ID (<fight id>_w<position>).
+                        local opponent_id = prefix .. "_w" .. index
+                        opponents[index] = {
+                            id = opponent_id, fighter = template(w.template), tactic = tactic,
+                            avatar = avatar(w.avatar), health_bars = w.health_bars, attributes = w.attributes,
+                            attribute_alignments = w.alignments, perks = perks,
+                            items = item_list(w.items), skeleton = w.skeleton,
+                        }
+                        by_template[w.template] = by_template[w.template] or {}
+                        table.insert(by_template[w.template], sf2.mod.id .. ":warriors/" .. opponent_id)
+                    end
+                    local rewards = {}
+                    for index, r in ipairs(fight_spec.rewards) do
+                        local reward = { prize_base = r.prize_base, experience = r.experience,
+                            gems = r.gems, currencies = r.currencies or paid_orbs[index] }
+                        -- Every Underworld win (the last slot) also drops one random elixir.
+                        if index > 1 and index == #fight_spec.rewards then reward.choices = elixirs.drop end
+                        -- An empty reward is a missing key: the slot still exists and pays nothing.
+                        if next(reward) then rewards[index - 1] = reward end
+                    end
+                    local rules = {}
+                    for index, rule in ipairs(fight_spec.rules) do rules[index] = rule_table(rule) end
+                    local fight = {
+                        name = fight_name, power = fight_spec.power, rounds = fight_spec.rounds,
+                        round_time = fight_spec.round_time, replays = fight_spec.replays,
+                        health_recovery = fight_spec.health_recovery, opponents = opponents, rules = rules, rewards = rewards,
+                    }
+                    -- A sealed boss's normal fight gets its seals (content.underworld_seals).
+                    seals.apply(spec.name, fight, rule_table)
+                    fight_specs[#fight_specs + 1] = fight
+                    fight_ids[#fight_ids + 1] = { name = fight_spec.name, id = sf2.mod.id .. ":fights/" .. prefix }
+                end
+                local battle = sf2.battles.register {
+                    id = battle_id, page = zone, type = BATTLE_TYPES[spec.type], x = place.x, y = place.y,
+                    alias = text.key(spec.alias), title = text.key(spec.title), description = description,
+                    icon = spec.icon, icon_atlas = (not icons) and spec.icon_atlas or nil, icons = icons,
+                    preview = spec.preview_sprite and sf2.assets.sprite(spec.preview_sprite) or spec.preview,
+                    location = spec.location, music = music(spec.music),
+                    fights = fight_specs,
                 }
-                -- A sealed boss's normal fight gets its seals (content.underworld_seals).
-                seals.apply(spec.name, fight, rule_table)
-                fight_specs[#fight_specs + 1] = fight
-                fight_ids[#fight_ids + 1] = { name = fight_spec.name, id = sf2.mod.id .. ":fights/" .. prefix }
-            end
-            local battle = sf2.battles.register {
-                id = battle_id, page = zone, type = BATTLE_TYPES[spec.type], x = place.x, y = place.y,
-                alias = text.key(spec.alias), title = text.key(spec.title), description = description,
-                icon = spec.icon, icon_atlas = (not icons) and spec.icon_atlas or nil, icons = icons,
-                preview = spec.preview_sprite and sf2.assets.sprite(spec.preview_sprite) or spec.preview,
-                location = spec.location, music = music(spec.music),
-                power_mode = spec.power_mode,
-                fights = fight_specs,
-            }
-            battles[spec.name] = battle
-            by_battle[spec.name] = {}
-            for index, ids in ipairs(fight_ids) do
-                local handle = battle.fights[index]
-                fights[#fights + 1] = handle
-                by_battle[spec.name][ids.name] = { handle = handle, id = ids.id }
+                battles[spec.name] = battle
+                by_battle[spec.name] = {}
+                for index, ids in ipairs(fight_ids) do
+                    local handle = battle.fights[index]
+                    fights[#fights + 1] = handle
+                    by_battle[spec.name][ids.name] = { handle = handle, id = ids.id }
+                end
             end
         end
     end

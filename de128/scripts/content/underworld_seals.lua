@@ -449,7 +449,7 @@ local function end_intermission(fighter, now)
     -- Elixirs drunk in Prepare that last a while start now, with the seal.
     local frames = elixirs.frames
     for _, elixir in ipairs(elixirs.list) do
-        if run.waiting[elixir.effect] then fighter:show_status_icon(elixir.effect, elixir.icon, frames) end
+        if run.waiting[elixir.effect] then fighter:show_status_icon(elixir.effect, elixir.status_icon, frames) end
     end
     if run.waiting.iron_skin then fighter:add_damage_shield("iron_skin", elixirs.iron_skin, frames) end
     if run.waiting.fury then run.fury_until = run.frame + frames end
@@ -509,6 +509,11 @@ end
 -- after the fight.
 local fresh_codex = {}
 
+-- A lost fight's Continue (Seby, 2026-11-27: it only went back to the map): the boss's challenge
+-- screen opens again once the map is up, so the run goes on from the seal held.
+-- content.underworld_story takes it when no story card is waiting (take_continue). Not saved.
+local continue_fight = nil
+
 local function show_results(boss, ended)
     local rules, seal, won = ended.rules, ended.seal, ended.won
     local first = ended.first or 1
@@ -558,6 +563,8 @@ local function show_results(boss, ended)
         victories = victories(boss) + (won and 1 or 0),
         golden = known == meta.codex_size,
         hanko_info = { title = META["menu.wins_title"] },
+        -- Continue and Back both run this; the challenge screen has its own Back.
+        on_continue = not won and function() continue_fight = boss.handle end or nil,
     })
 end
 
@@ -617,9 +624,9 @@ end
 
 -- On the boss: no damage while the fight holds him, his AI held (he starts nothing, whatever his
 -- tactic), the perk effects on him frozen (a Crimson Corruption curse keeps its level and time
--- and deals nothing until the next seal; owner, 2026-11-26), and a glow that pulses and grows as
--- he gathers himself. No move plays: core Standup
--- needs him on the floor, and play_move takes only moves a mod registers.
+-- and deals nothing until the next seal; owner, 2026-11-26), hits and throws passing through him
+-- (Seby, 2026-11-27), and a glow that pulses and grows as he gathers himself. No move plays:
+-- core Standup needs him on the floor, and play_move takes only moves a mod registers.
 local guard = {
     on_tick = function(_, fighter, tick)
         if not run then return end
@@ -628,6 +635,7 @@ local guard = {
                 run.ai_held = false
                 fighter:set_ai_held(false)
                 fighter:set_perk_effects_frozen(false)
+                fighter:set_invulnerable(false)
             end
             if run.glowing then
                 run.glowing = false
@@ -639,6 +647,7 @@ local guard = {
             run.ai_held = true
             fighter:set_ai_held(true)
             fighter:set_perk_effects_frozen(true)
+            fighter:set_invulnerable(true)
         end
         if tick.frame % 6 ~= 0 then return end
         run.glowing = true
@@ -650,7 +659,7 @@ local guard = {
     on_damage_resolving = function(_, fighter)
         if run and run.hold_until then fighter:scale_incoming_damage(0) end
     end,
-    -- Hits do not make him flinch while he gathers himself.
+    -- An attack that ignores invulnerability still lands: it does not make him flinch either.
     on_hit_pre_crit = function(_, fighter, event)
         if run and run.hold_until and event.target == "self" then fighter:set_hit_armored(true) end
     end,
@@ -1003,6 +1012,7 @@ local function install(underworld)
             "Missing sealed Underworld fight " .. battle)
         by_fight[fight.id] = boss
         boss.fight = fight.id
+        boss.handle = fight.handle
         if not stories[battle] then sf2.story.before_fight(fight.handle, menu(battle)) end
     end
     sf2.story.on("battle_result", function(event)
@@ -1020,5 +1030,12 @@ local function install(underworld)
     end)
 end
 
+-- The fight a lost fight's Continue asked for, once; nil if none.
+local function take_continue()
+    local fight = continue_fight
+    continue_fight = nil
+    return fight
+end
+
 return { apply = apply, menu = menu, install = install, guide_pending = guide_pending, intro_finished = intro_finished,
-    force_guide = force_guide }
+    force_guide = force_guide, take_continue = take_continue }

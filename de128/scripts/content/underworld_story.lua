@@ -242,6 +242,10 @@ local function install(underworld)
         end
         local boss, kind = pending_result()
         if not boss then
+            -- A lost sealed fight's Continue: its challenge screen again, from the seal held. The
+            -- map is back on the boss's Underworld page already (Eclipse returns there after a fight).
+            local again = seals.take_continue()
+            if again and sf2.story.start_fight(again) then return end
             try_guide()
             return
         end

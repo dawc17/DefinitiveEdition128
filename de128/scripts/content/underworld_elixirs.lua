@@ -1,14 +1,11 @@
 local sf2 = require("sf2")
 local words = require("content.text")
 
--- Underworld elixirs (owner, 2026-11-18): stackable consumables the shop sells by the piece and
--- every Underworld win drops, one at random (content.underworld adds `drop` to each win). They are
--- drunk in a sealed boss fight's Prepare menu, and content.underworld_seals applies their effects.
--- Prices, the shop level and every number here are placeholders, to be tuned later.
---
--- The shop lists them from level 3, the level the Underworld's first boss (Volcano, BOSS_1) asks
--- for; the Underworld itself opens after Lynx's second fight in Act 1, so they need no shop group.
-local SHOP_LEVEL = 3
+-- Underworld elixirs (owner, 2026-11-18): stackable consumables every Underworld win drops, one at
+-- random (content.underworld adds `drop` to each win), and the challenge screen brews from Seal
+-- Shards (content.underworld_meta). The shop no longer sells them, so shards are worth getting
+-- (Seby, 2026-11-27). They are drunk in a sealed boss fight's Prepare menu, and
+-- content.underworld_seals applies their effects. Every number here is a placeholder.
 local STACK = 9
 
 -- effect: what content.underworld_seals does when the elixir is drunk.
@@ -21,10 +18,14 @@ local STACK = 9
 -- The Explosive Vigor, Star Clarity). Words: de128.uw_seals.elixir.<text>.name, .description and
 -- .short in Eclipse's English text.
 local ELIXIRS = {
-    { id = "healing_elixir", text = "healing", vanilla = "PotionLife", effect = "heal", coins = 300 },
-    { id = "iron_skin_elixir", text = "iron_skin", vanilla = "PotionRock", effect = "iron_skin", coins = 450 },
-    { id = "fury_elixir", text = "fury", vanilla = "PotionBomb", effect = "fury", coins = 450 },
-    { id = "clear_mind_elixir", text = "clear_mind", vanilla = "PotionResistance", effect = "clear_mind", coins = 600 },
+    { id = "healing_elixir", text = "healing", vanilla = "PotionLife", effect = "heal",
+        status = "SkillsEnch01.EnchantmentPotion_Life" },
+    { id = "iron_skin_elixir", text = "iron_skin", vanilla = "PotionRock", effect = "iron_skin",
+        status = "SkillsEnch01.EnchantmentPotion_Rock" },
+    { id = "fury_elixir", text = "fury", vanilla = "PotionBomb", effect = "fury",
+        status = "SkillsEnch02.EnchantmentBloodBomb" },
+    { id = "clear_mind_elixir", text = "clear_mind", vanilla = "PotionResistance", effect = "clear_mind",
+        status = "SkillsEnch02.EnchantmentResistance" },
 }
 local HEAL = 0.3
 local IRON_SKIN = 0.5
@@ -33,6 +34,8 @@ local SECONDS = 10
 
 -- Icons: the game's raid potion pictures (RaidItems3.potion_life, potion_rock, potion_blood_bomb,
 -- potion_resistance) in assets/textures/elixirs, from Tools/Recovery/ImportDE128ElixirIcons.py.
+-- In a fight an elixir's status icon is the game's own picture for that elixir's perk (`status`,
+-- the Image of PERK_ELIXIR_REGENERATION, _ROCK, _TIME_BOMB and _RESISTANCE in the DE perks).
 local candidates = {}
 for index, elixir in ipairs(ELIXIRS) do
     local key = "de128.uw_seals.elixir." .. elixir.text
@@ -40,12 +43,12 @@ for index, elixir in ipairs(ELIXIRS) do
     -- One line for the game's Prepare screen.
     elixir.short = words.read(key .. ".short")
     elixir.icon = sf2.assets.sprite("sprites/elixirs/" .. elixir.id)
+    elixir.status_icon = sf2.assets.sprite("core:ui/skills/" .. elixir.status)
     elixir.item = sf2.items.register {
         category = "consumable", id = elixir.id,
         display_name = words.own("item." .. elixir.id, elixir.vanilla),
         description = words.own("item." .. elixir.id .. ".description", key .. ".description"),
         icon = elixir.icon, stack = STACK,
-        shop = { level = SHOP_LEVEL, price = { coins = elixir.coins } },
     }
     candidates[index] = { item = elixir.item }
 end

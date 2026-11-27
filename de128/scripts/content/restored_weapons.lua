@@ -40,4 +40,11 @@ for _, row in ipairs(definitions) do
     }
     weapons[row[1]] = item
 end
+-- The game's giant_sword_win_stance.bytes is a byte copy of Titan's win clip, so the Giant Sword
+-- struck Titan's full-size pose with a Titan-sized sword (Seby 2026-11-26). Every other
+-- giant_sword_* clip is Titan's scaled by 1/1.3; this is the win clip scaled the same way.
+sf2.moves.patch {
+    move = "Win_GiantSword",
+    animation = { expected = "giant_sword_win_stance.bytes", value = sf2.assets.binary("animations/giant_sword_win_stance") },
+}
 return weapons

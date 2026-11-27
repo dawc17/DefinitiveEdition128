@@ -84,7 +84,7 @@ local cast = sf2.moves.register {
     events = { "key_pressed" },
     when = {
         keys = "raid_charge",
-        not_mod = { "GraspOfDarknessCD", abilities.ready("grasp_of_darkness"), "SilenceIcon" },
+        not_mod = { "GraspOfDarknessCD", abilities.ready("grasp_of_darkness"), abilities.paced("grasp_of_darkness"), "SilenceIcon" },
         controllable = true,
     },
     tactic_when = { distance = { axis = "x", min = 450, from = { pivot = "self" }, to = { node = "pelvis", of = "enemy" } } },
@@ -135,4 +135,7 @@ return { cast = cast, hand_start = hand_start, hand_attack = hand_attack,
     tactic = abilities.pace(sf2.ai.name(register_tactic("blackness_grasp", 800)),
         "grasp_of_darkness", 800, 800, { "de128:moves/blackness_grasp_player" }),
     power_tactic = abilities.pace(sf2.ai.name(register_tactic("blackness_grasp_power", 700)),
-        "grasp_of_darkness", 700, 700, { "de128:moves/blackness_grasp_player" }) }
+        "grasp_of_darkness", 700, 700, { "de128:moves/blackness_grasp_player" }),
+    -- The core perk's own 600 frames (Faradeya's archived row names none).
+    core_tactic = abilities.pace(sf2.ai.name(register_tactic("blackness_grasp_core", 600)),
+        "grasp_of_darkness", 600, 600, { "de128:moves/blackness_grasp_player" }) }

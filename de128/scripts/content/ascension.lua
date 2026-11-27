@@ -71,6 +71,9 @@ for _, name in ipairs {
 } do TEXT[name] = words.get(name) end
 local puppeteer = sf2.assets.sprite("core:ui/users/character_puppeteer")
 local tickets_picture = sf2.assets.sprite("core:ui/users/tickets")
+-- Seby's ticket art (the stack of three, 0.70.0). The single 1.9.38 card that replaced it to sit
+-- at text height in buttons read as the wrong ticket in the shop and lottery (Seby 2026-11-26);
+-- Eclipse's button rows now size any picture to the words.
 local ticket_icon = sf2.assets.sprite("sprites/ascension/ticket")
 
 local ticket = sf2.items.register {
