@@ -70,11 +70,11 @@ for _, name in ipairs {
     "AscWinPrase_1", "AscWinPrase_2", "AscWinPrase_3", "AscWinPrase_4", "Ascension_chest_tooltip",
 } do TEXT[name] = words.get(name) end
 local puppeteer = sf2.assets.sprite("core:ui/users/character_puppeteer")
-local tickets_picture = sf2.assets.sprite("core:ui/users/tickets")
--- Seby's ticket art (the stack of three, 0.70.0). The single 1.9.38 card that replaced it to sit
--- at text height in buttons read as the wrong ticket in the shop and lottery (Seby 2026-11-26);
--- Eclipse's button rows now size any picture to the words.
-local ticket_icon = sf2.assets.sprite("sprites/ascension/ticket")
+-- Two pictures (owner, 2026-11-27): Seby's stack of three tickets (0.70.0) in the shop and the
+-- lottery, which show the item's icon, and the single 1.9.38 card everywhere else: the ticket
+-- check and its buttons (entry_dialog icon) and the "Acquired" cards.
+local ticket_icon = sf2.assets.sprite("sprites/ascension/tickets")
+local ticket_card = sf2.assets.sprite("sprites/ascension/ticket")
 
 local ticket = sf2.items.register {
     category = "consumable", id = "ascension_ticket",
@@ -220,7 +220,8 @@ sf2.modes.register {
     id = "ascension", fights = fights, repeatable = true, reset_on_loss = true,
     entry_item = ticket, entry_count = ENTRY_TICKETS, entry_per = "run",
     -- AscensionCheckTickets: the Puppeteer asks before every run.
-    entry_dialog = { title = key("tutorial_ascention_intro_title"), portrait = puppeteer, text = key("Ascension_chest_tooltip") },
+    entry_dialog = { title = key("tutorial_ascention_intro_title"), portrait = puppeteer, text = key("Ascension_chest_tooltip"),
+        icon = ticket_card },
     on_prepare = function(_, event)
         local draw = number("draws") + 1
         set_number("draws", draw)
@@ -291,7 +292,7 @@ end
 
 local DIALOGS = {
     invited = function()
-        return play({ card(acquired, TAKE, MESSAGE, tickets_picture), card(key("tutorial_ascension_intro2_3"), OK, MESSAGE) },
+        return play({ card(acquired, TAKE, MESSAGE, ticket_card), card(key("tutorial_ascension_intro2_3"), OK, MESSAGE) },
             function() sf2.map.focus(battle) end)
     end,
     -- Asc_immunity_tutorial (first defeat) and Asc_defeat_dialog (every later one).
@@ -303,7 +304,7 @@ local DIALOGS = {
     -- Asc_tutorial_first_fightend_loss: three more tickets after a first loss in fight 1.
     consolation = function()
         if not has("consolation_owed") then return "skip" end
-        if not play({ card(key("tutorial_ascension_immunity_fail_2"), MORE), card(acquired, TAKE, MESSAGE, tickets_picture) }) then
+        if not play({ card(key("tutorial_ascension_immunity_fail_2"), MORE), card(acquired, TAKE, MESSAGE, ticket_card) }) then
             return false
         end
         if sf2.profile.give_item(ticket, ENTRY_TICKETS) then remove("consolation_owed") end
