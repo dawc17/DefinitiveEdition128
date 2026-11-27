@@ -47,4 +47,15 @@ sf2.moves.patch {
     move = "Win_GiantSword",
     animation = { expected = "giant_sword_win_stance.bytes", value = sf2.assets.binary("animations/giant_sword_win_stance") },
 }
+-- The game's giant_sword_super_slash and giant_sword_spinning_slash store the hand's finger
+-- macro nodes far from the hand (MacroNode6_1 up to 442 units off), so the finger drew as a long
+-- pole out to the blade's tip (Seby 2026-11-27). These copies put the 12 hand macro nodes back
+-- where their skeleton weights place them, as every other clip has them; all else is the game's.
+for move, clip in pairs {
+    GiantSwordSuperSlash = "giant_sword_super_slash",
+    ShopGiantSwordSuperSlash = "giant_sword_super_slash",
+    GiantSwordSpinningSlash = "giant_sword_spinning_slash",
+} do
+    sf2.moves.patch { move = move, animation = { expected = clip .. ".bytes", value = sf2.assets.binary("animations/" .. clip) } }
+end
 return weapons
