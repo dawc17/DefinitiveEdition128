@@ -69,8 +69,12 @@ end
 -- (fight 4) the Aztec armor, in both modes. Fury's blueprint takes the regular Shuang Gou, but
 -- every core fight that uses her lists its own items, so only fights relying on the blueprint
 -- (none in core) would show it.
+-- Assassin (fight 1) fights with the Nodachi, as in the owner's file and the archived DExml
+-- (Man_Z7_Assasin); the game gives him the Super Big Sword. This list was diffed against DExml,
+-- which already had the Nodachi, so the change was missed until Seby's note (2026-11-27).
 local fighter_items = {
     { "girl_shuang_gou", "core:items/weapon/WEAPON_CEREMONIAL_SHUANG_GOU", "core:items/weapon/WEAPON_SHUANG_GOU" },
+    { "man_z7_assasin", "core:items/weapon/WEAPON_SUPER_BIG_SWORD", "core:items/weapon/WEAPON_NODACHI" },
     { "man_z7_master", "core:items/weapon/WEAPON_SUPER_COMPOSITE_SWORD", "core:items/weapon/WEAPON_SWORD_SHADOW_LORD_25" },
     { "man_z7_corsair", "core:items/armor/ARMOR_BARBARIAN", "core:items/armor/ARMOR_AZTEC_24" },
 }

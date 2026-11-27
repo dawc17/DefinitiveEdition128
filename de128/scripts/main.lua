@@ -67,6 +67,8 @@ require("content.difficulty")
 
 -- The mythical set enchantments' charge in the fight meter.
 require("content.mythical_meters")
+-- Time Shift's slow also stops the slowed fighter's ranged throws, magic and boss abilities.
+require("content.time_shift")
 -- Sensei story: guard templates and RaidCharge availability are synthesized from
 -- archive evidence (see sensei_guard_templates.lua, sensei_raid_charge_state.lua).
 require("content.sensei_story").install_default()

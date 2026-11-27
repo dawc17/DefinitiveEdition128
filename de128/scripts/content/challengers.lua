@@ -15,6 +15,9 @@ local CHALLENGERS = {
         perk = "PERK_ITEM_SPECIAL_OVERHEAT_WEAPON",
         weapon = "WEAPON_NUNCHAKU", drop = "Trickster_drop", drop_image = "drop_nunchaku_new",
         grant = { perk = "PERK_ITEM_SPECIAL_OVERHEAT_WEAPON", chance = 0.3 },
+        -- The game files this weapon under the CLANS shop group, which nothing unlocks, so the shop
+        -- never listed the granted nunchaku (the other six drops are in ZONE_ groups the story opens).
+        listed_once_owned = true,
     },
     {
         key = "hawk", zone = "zone_2", battle = "challenger_hawk", x = 10, y = 145,
@@ -140,6 +143,8 @@ local function install(raid_charge_rule)
         -- DropWeapon_<Name>: the first win grants the weapon at the player's level with
         -- the archived enchantment. Native ownership filtering skips an owned weapon.
         local weapon = sf2.items.get("core:items/weapon/" .. c.weapon)
+        -- Off sale, and listed in the shop once owned whatever its shop group.
+        if c.listed_once_owned then sf2.items.patch { item = weapon, visibility = "force_hidden" } end
         local grant_perk = sf2.perks.get("core:perks/" .. c.grant.perk)
         local grant = c.grant
         local victory = {

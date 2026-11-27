@@ -42,8 +42,9 @@ end
 
 local function revise_prince(data)
     local _, _, battle = find_battle(data, PRINCE_BATTLE)
-    -- The owner's 2026-11 preview: the Sensei story's Act 6 picture (sprites/sensei/act6).
-    battle.preview_sprite = "sprites/sensei/act6"
+    -- The owner's 2026-11 preview, first drawn for the Sensei story's Act 6. That act now shows
+    -- Seby's own picture (2026-11-27, sprites/sensei/act6), so the Prince keeps this one here.
+    battle.preview_sprite = "sprites/underworld/preview_prince"
     for _, fight in ipairs(battle.fights) do
         for position, row in ipairs(fight.warriors) do
             if row.template == PRINCE then
