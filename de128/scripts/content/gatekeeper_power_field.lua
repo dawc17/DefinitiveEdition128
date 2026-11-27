@@ -40,6 +40,13 @@ local surge = sf2.moves.register {
         ignores_invulnerable = { "Evade", "Recovery", "Dash" },
     } },
     on = {
+        -- Whoever the field hits shows electricity (Seby, 2026-11-24: none showed). The game's own
+        -- reaction, a fall (ElectrocutionPowerfieldHit), stays; the sparks play from the surge at
+        -- double speed so they finish before it deletes itself, which would cut them off.
+        hit = { effect = {
+            name = "PowerFieldSparks", core_sequence = "mgc_effect_shocker", scale = 1.68, time_scale = 2,
+            looped = false, position = { node = "pelvis", of = "enemy", y = 40 }, follow = true,
+        } },
         finish = { delete_actor = "self" },
     },
     only_for = { weapon = "MagicFireAura", rig = "SkeletonMagic" },
