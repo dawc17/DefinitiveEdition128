@@ -57,8 +57,12 @@ sf2.battles.on_preview(function(battle)
     local titan = TITAN[battle.id]
     if titan == nil or battle.fight == nil then return nil end
     if battle.index >= 1 and battle.index <= 5 then return BODYGUARDS[battle.index] end
-    -- The story fight meets May once; the Eclipse twin meets her before every Titan win.
+    -- The story fight meets May once; the Eclipse twin meets her before every Titan win, as the
+    -- game's quest sends the player (Zone7FightWithMay_EclipseMode): until her wins pass Titan's,
+    -- or she was beaten since Titan's last Eclipse win (EclipseMayBeaten, Eclipse's fix for saves
+    -- whose counts drifted and sent the player back to May forever).
     local titan_wins = titan.replayable and sf2.profile.fight(battle.fight).wins or 0
+    if titan.replayable and sf2.story.variable("EclipseMayBeaten") == "1" then return nil end
     if sf2.profile.fight(titan.may).wins <= titan_wins then return MAY end
     return nil
 end)
